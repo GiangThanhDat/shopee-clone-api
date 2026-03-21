@@ -22,6 +22,9 @@ export class OrderDetailEntity {
   @Column({ type: 'double precision' })
   price: number;
 
+  @Column({ type: 'bigint' })
+  quantity: number;
+
   @Column({ name: 'discount_percent', type: 'bigint' })
   discountPercent: number;
 

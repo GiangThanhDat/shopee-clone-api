@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../domain/user.entity';
-import { IUsersRepository } from '../../auth/application/interfaces/users-repository.interface';
+import type { IUsersRepository } from '../application/interfaces/users-repository.interface';
 
 @Injectable()
 export class UsersRepository implements IUsersRepository {
@@ -26,5 +26,13 @@ export class UsersRepository implements IUsersRepository {
   async save(user: Partial<UserEntity>): Promise<UserEntity> {
     const entity = this.repository.create(user);
     return this.repository.save(entity);
+  }
+
+  async update(
+    id: number,
+    data: Partial<UserEntity>,
+  ): Promise<UserEntity | null> {
+    await this.repository.update(id, data);
+    return this.findById(id);
   }
 }
