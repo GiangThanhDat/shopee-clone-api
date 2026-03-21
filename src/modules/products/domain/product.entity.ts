@@ -22,16 +22,24 @@ export class ProductEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   description: string | null;
 
-  @OneToMany(() => ProductOptionEntity, (option) => option.product)
+  @OneToMany(() => ProductOptionEntity, (option) => option.product, {
+    cascade: ['insert'],
+  })
   options: ProductOptionEntity[];
 
-  @OneToMany(() => ProductSkuEntity, (sku) => sku.product)
+  @OneToMany(() => ProductSkuEntity, (sku) => sku.product, {
+    cascade: ['insert'],
+  })
   skus: ProductSkuEntity[];
 
-  @OneToMany(() => ProductMediaEntity, (media) => media.product)
+  @OneToMany(() => ProductMediaEntity, (media) => media.product, {
+    cascade: ['insert'],
+  })
   productMedia: ProductMediaEntity[];
 
-  @OneToMany(() => ProductDetailEntity, (detail) => detail.product)
+  @OneToMany(() => ProductDetailEntity, (detail) => detail.product, {
+    cascade: ['insert'],
+  })
   details: ProductDetailEntity[];
 
   @CreateDateColumn({ name: 'created_at' })

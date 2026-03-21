@@ -28,11 +28,16 @@ export class ProductSkuEntity {
   @Column({ name: 'thumb_url', type: 'varchar', length: 255 })
   thumbUrl: string;
 
+  @Column({ name: 'product_id', type: 'bigint' })
+  productId: number;
+
   @ManyToOne(() => ProductEntity, (product) => product.skus)
   @JoinColumn({ name: 'product_id' })
   product: ProductEntity;
 
-  @OneToMany(() => SkuValueEntity, (skuValue) => skuValue.sku)
+  @OneToMany(() => SkuValueEntity, (skuValue) => skuValue.sku, {
+    cascade: ['insert'],
+  })
   skuValues: SkuValueEntity[];
 
   @CreateDateColumn({ name: 'created_at' })

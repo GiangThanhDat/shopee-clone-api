@@ -19,11 +19,16 @@ export class ProductOptionEntity {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
+  @Column({ name: 'product_id', type: 'bigint' })
+  productId: number;
+
   @ManyToOne(() => ProductEntity, (product) => product.options)
   @JoinColumn({ name: 'product_id' })
   product: ProductEntity;
 
-  @OneToMany(() => ProductOptionValueEntity, (value) => value.productOption)
+  @OneToMany(() => ProductOptionValueEntity, (value) => value.productOption, {
+    cascade: ['insert'],
+  })
   values: ProductOptionValueEntity[];
 
   @CreateDateColumn({ name: 'created_at' })

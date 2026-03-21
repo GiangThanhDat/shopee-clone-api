@@ -1,6 +1,7 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
+  Column,
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
@@ -14,9 +15,15 @@ export class ProductMediaEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id: number;
 
+  @Column({ name: 'product_id', type: 'bigint' })
+  productId: number;
+
   @ManyToOne(() => ProductEntity, (product) => product.productMedia)
   @JoinColumn({ name: 'product_id' })
   product: ProductEntity;
+
+  @Column({ name: 'media_id', type: 'bigint' })
+  mediaId: number;
 
   @ManyToOne(() => MediaEntity)
   @JoinColumn({ name: 'media_id' })

@@ -20,6 +20,9 @@ export class ProductOptionValueEntity {
   @Column({ name: 'image_url', type: 'varchar', length: 255 })
   imageUrl: string;
 
+  @Column({ name: 'product_option_id', type: 'bigint' })
+  productOptionId: number;
+
   @ManyToOne(() => ProductOptionEntity, (option) => option.values)
   @JoinColumn({ name: 'product_option_id' })
   productOption: ProductOptionEntity;
