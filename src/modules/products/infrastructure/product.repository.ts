@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
+import { applyPagination } from '../../../common/utils/pagination';
 import { ProductEntity } from '../domain/product.entity';
 import {
   IProductRepository,
@@ -19,7 +20,7 @@ export class ProductRepository implements IProductRepository {
     this.applySearchFilter(queryBuilder, query.search);
     this.applyPriceFilter(queryBuilder, query.minPrice, query.maxPrice);
     this.applySorting(queryBuilder, query.sortBy, query.sortOrder);
-    this.applyPagination(queryBuilder, query.page, query.limit);
+    applyPagination(queryBuilder, query.page, query.limit);
     return queryBuilder.getManyAndCount();
   }
 
@@ -109,14 +110,5 @@ export class ProductRepository implements IProductRepository {
       .leftJoin('product.skus', 'priceSku')
       .groupBy('product.id')
       .orderBy('min_price', order);
-  }
-
-  private applyPagination(
-    queryBuilder: SelectQueryBuilder<ProductEntity>,
-    page: number,
-    limit: number,
-  ): void {
-    const offset = (page - 1) * limit;
-    queryBuilder.skip(offset).take(limit);
   }
 }

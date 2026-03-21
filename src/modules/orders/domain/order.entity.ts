@@ -25,7 +25,7 @@ export class OrderEntity {
   @Column({ name: 'delivery_address', type: 'varchar', length: 255 })
   deliveryAddress: string;
 
-  @Column({ name: 'order_status', type: 'bigint' })
+  @Column({ name: 'order_status', type: 'bigint', default: 0 })
   orderStatus: number;
 
   @Column({ name: 'ordered_at', type: 'timestamp', nullable: true })
@@ -39,6 +39,9 @@ export class OrderEntity {
 
   @Column({ name: 'completed_at', type: 'timestamp', nullable: true })
   completedAt: Date | null;
+
+  @Column({ name: 'user_id', type: 'bigint' })
+  userId: number;
 
   @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'user_id' })

@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { PaginationMeta } from '../../../common/interfaces/api-response.interface';
+import { buildPaginationMeta } from '../../../common/utils/pagination';
 import { ProductEntity } from '../domain/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductFilterDto } from './dto/product-filter.dto';
@@ -22,7 +22,7 @@ export class ProductService {
       page,
       limit,
     });
-    const pagination = this.buildPaginationMeta(totalItems, page, limit);
+    const pagination = buildPaginationMeta(totalItems, page, limit);
     return { products, metadata: { pagination } };
   }
 
@@ -54,18 +54,5 @@ export class ProductService {
   async remove(id: number): Promise<void> {
     await this.findById(id);
     await this.productRepository.remove(id);
-  }
-
-  private buildPaginationMeta(
-    totalItems: number,
-    page: number,
-    limit: number,
-  ): PaginationMeta {
-    return {
-      currentPage: page,
-      itemsPerPage: limit,
-      totalItems,
-      totalPages: Math.ceil(totalItems / limit),
-    };
   }
 }

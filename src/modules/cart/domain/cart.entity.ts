@@ -18,6 +18,12 @@ export class CartEntity {
   @Column({ type: 'bigint' })
   quantity: number;
 
+  @Column({ name: 'user_id', type: 'bigint' })
+  userId: number;
+
+  @Column({ name: 'sku_id', type: 'bigint' })
+  skuId: number;
+
   @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;

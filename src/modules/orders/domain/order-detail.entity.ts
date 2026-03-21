@@ -25,8 +25,20 @@ export class OrderDetailEntity {
   @Column({ type: 'bigint' })
   quantity: number;
 
-  @Column({ name: 'discount_percent', type: 'bigint' })
+  @Column({ name: 'discount_percent', type: 'bigint', default: 0 })
   discountPercent: number;
+
+  @Column({ type: 'double precision', default: 0 })
+  subtotal: number;
+
+  @Column({ name: 'order_id', type: 'bigint' })
+  orderId: number;
+
+  @Column({ name: 'user_id', type: 'bigint' })
+  userId: number;
+
+  @Column({ name: 'sku_id', type: 'bigint' })
+  skuId: number;
 
   @ManyToOne(() => OrderEntity, (order) => order.details)
   @JoinColumn({ name: 'order_id' })
