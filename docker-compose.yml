@@ -1,0 +1,59 @@
+services:
+  app:
+    build:
+      context: .
+      target: development
+    container_name: shopee-clone-api
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-shopee_clone}
+      JWT_SECRET: ${JWT_SECRET:-supersecretkey}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-refreshsecretkey}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: yarn start:dev
+    networks:
+      - shopee-net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: shopee-clone-db
+    ports:
+      - "${DB_PORT_EXPOSED:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-shopee_clone}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-shopee_clone}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shopee-net
+
+volumes:
+  postgres_data:
+
+networks:
+  shopee-net:
+    driver: bridge
