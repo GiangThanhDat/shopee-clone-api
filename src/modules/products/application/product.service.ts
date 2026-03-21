@@ -35,7 +35,8 @@ export class ProductService {
   }
 
   async create(dto: CreateProductDto): Promise<{ product: ProductEntity }> {
-    const product = await this.productRepository.create(dto);
+    const { name, description } = dto;
+    const product = await this.productRepository.create({ name, description });
     return { product };
   }
 
@@ -44,7 +45,11 @@ export class ProductService {
     dto: UpdateProductDto,
   ): Promise<{ product: ProductEntity }> {
     await this.findById(id);
-    const updated = await this.productRepository.update(id, dto);
+    const { name, description } = dto;
+    const updated = await this.productRepository.update(id, {
+      name,
+      description,
+    });
     if (!updated) {
       throw new NotFoundException(`Product with id ${id} not found`);
     }
