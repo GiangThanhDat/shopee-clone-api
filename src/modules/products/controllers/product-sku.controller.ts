@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Post,
   Patch,
   Delete,
@@ -17,16 +18,39 @@ import {
 } from '@nestjs/swagger';
 import { ErrorResponseDto } from '../../../common/dto/api-response.dto';
 import { ResponseMessage } from '../../../common/decorators/response-message.decorator';
+import { Public } from '../../../common/decorators/public.decorator';
 import { ProductSkuService } from '../application/product-sku.service';
 import { CreateProductSkuDto } from '../application/dto/create-product-sku.dto';
 import { UpdateProductSkuDto } from '../application/dto/update-product-sku.dto';
-import { ProductSkuDataDto } from '../application/dto/sub-entity-response.dto';
+import {
+  ProductSkuDataDto,
+  ProductSkuListDataDto,
+} from '../application/dto/sub-entity-response.dto';
 
 @ApiTags('Product SKUs')
 @ApiBearerAuth()
 @Controller('products/:productId/skus')
 export class ProductSkuController {
   constructor(private readonly skuService: ProductSkuService) {}
+
+  @Get()
+  @Public()
+  @ApiOperation({ summary: 'List product SKUs' })
+  @ApiResponse({ status: 200, type: ProductSkuListDataDto })
+  @ResponseMessage('SKUs retrieved successfully')
+  findAll(@Param('productId', ParseIntPipe) productId: number) {
+    return this.skuService.findByProductId(productId);
+  }
+
+  @Get(':skuId')
+  @Public()
+  @ApiOperation({ summary: 'Get SKU detail' })
+  @ApiResponse({ status: 200, type: ProductSkuDataDto })
+  @ApiResponse({ status: 404, type: ErrorResponseDto })
+  @ResponseMessage('SKU retrieved successfully')
+  findOne(@Param('skuId', ParseIntPipe) skuId: number) {
+    return this.skuService.findById(skuId);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create product SKU' })

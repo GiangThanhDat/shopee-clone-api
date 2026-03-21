@@ -14,6 +14,21 @@ export class ProductMediaService {
     private readonly mediaRepository: IMediaRepository,
   ) {}
 
+  async findByProductId(productId: number) {
+    const productMedia =
+      await this.productMediaRepository.findByProductId(productId);
+    return { productMedia };
+  }
+
+  async findById(productMediaId: number) {
+    const productMedia =
+      await this.productMediaRepository.findById(productMediaId);
+    if (!productMedia) {
+      throw new NotFoundException(`Product media ${productMediaId} not found`);
+    }
+    return { productMedia };
+  }
+
   async addMedia(productId: number, dto: CreateProductMediaDto) {
     const media = await this.mediaRepository.save({
       url: dto.url,

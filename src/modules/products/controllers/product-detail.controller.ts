@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Post,
   Patch,
   Delete,
@@ -17,16 +18,39 @@ import {
 } from '@nestjs/swagger';
 import { ErrorResponseDto } from '../../../common/dto/api-response.dto';
 import { ResponseMessage } from '../../../common/decorators/response-message.decorator';
+import { Public } from '../../../common/decorators/public.decorator';
 import { ProductDetailService } from '../application/product-detail.service';
 import { CreateProductDetailDto } from '../application/dto/create-product-detail.dto';
 import { UpdateProductDetailDto } from '../application/dto/update-product-detail.dto';
-import { ProductDetailDataDto } from '../application/dto/sub-entity-response.dto';
+import {
+  ProductDetailDataDto,
+  ProductDetailListDataDto,
+} from '../application/dto/sub-entity-response.dto';
 
 @ApiTags('Product Details')
 @ApiBearerAuth()
 @Controller('products/:productId/details')
 export class ProductDetailController {
   constructor(private readonly detailService: ProductDetailService) {}
+
+  @Get()
+  @Public()
+  @ApiOperation({ summary: 'List product specifications' })
+  @ApiResponse({ status: 200, type: ProductDetailListDataDto })
+  @ResponseMessage('Details retrieved successfully')
+  findAll(@Param('productId', ParseIntPipe) productId: number) {
+    return this.detailService.findByProductId(productId);
+  }
+
+  @Get(':detailId')
+  @Public()
+  @ApiOperation({ summary: 'Get product specification detail' })
+  @ApiResponse({ status: 200, type: ProductDetailDataDto })
+  @ApiResponse({ status: 404, type: ErrorResponseDto })
+  @ResponseMessage('Detail retrieved successfully')
+  findOne(@Param('detailId', ParseIntPipe) detailId: number) {
+    return this.detailService.findById(detailId);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Add specification to product' })

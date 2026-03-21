@@ -15,6 +15,19 @@ export class ProductDetailService {
     private readonly specRepository: IProductSpecRepository,
   ) {}
 
+  async findByProductId(productId: number) {
+    const details = await this.detailRepository.findByProductId(productId);
+    return { details };
+  }
+
+  async findById(detailId: number) {
+    const detail = await this.detailRepository.findById(detailId);
+    if (!detail) {
+      throw new NotFoundException(`Detail ${detailId} not found`);
+    }
+    return { detail };
+  }
+
   async addDetail(productId: number, dto: CreateProductDetailDto) {
     const spec = await this.specRepository.findOrCreate(
       dto.specName,

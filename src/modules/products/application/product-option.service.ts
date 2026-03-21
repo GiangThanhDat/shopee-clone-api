@@ -17,6 +17,16 @@ export class ProductOptionService {
     private readonly valueRepository: IOptionValueRepository,
   ) {}
 
+  async findByProductId(productId: number) {
+    const options = await this.optionRepository.findByProductId(productId);
+    return { options };
+  }
+
+  async findById(optionId: number) {
+    const option = await this.findOptionOrFail(optionId);
+    return { option };
+  }
+
   async createOption(productId: number, dto: CreateProductOptionDto) {
     const option = await this.optionRepository.save({
       productId,

@@ -31,3 +31,23 @@ export class OptionValueDataDto {
   @ApiProperty({ type: OptionValueResponse })
   value: OptionValueResponse;
 }
+
+export class ProductOptionListDataDto {
+  @ApiProperty({ type: [ProductOptionResponse] })
+  options: ProductOptionResponse[];
+}
+
+export class ProductSkuListDataDto {
+  @ApiProperty({ type: [ProductSkuResponse] })
+  skus: ProductSkuResponse[];
+}
+
+export class ProductMediaListDataDto {
+  @ApiProperty({ type: [ProductMediaResponse] })
+  productMedia: ProductMediaResponse[];
+}
+
+export class ProductDetailListDataDto {
+  @ApiProperty({ type: [ProductDetailResponse] })
+  details: ProductDetailResponse[];
+}

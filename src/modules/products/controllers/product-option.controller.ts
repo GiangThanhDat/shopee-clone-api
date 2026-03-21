@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Post,
   Patch,
   Delete,
@@ -22,8 +23,10 @@ import { CreateProductOptionDto } from '../application/dto/create-product-option
 import { UpdateProductOptionDto } from '../application/dto/update-product-option.dto';
 import { CreateOptionValueDto } from '../application/dto/create-option-value.dto';
 import { UpdateOptionValueDto } from '../application/dto/update-option-value.dto';
+import { Public } from '../../../common/decorators/public.decorator';
 import {
   ProductOptionDataDto,
+  ProductOptionListDataDto,
   OptionValueDataDto,
 } from '../application/dto/sub-entity-response.dto';
 
@@ -32,6 +35,25 @@ import {
 @Controller('products/:productId/options')
 export class ProductOptionController {
   constructor(private readonly optionService: ProductOptionService) {}
+
+  @Get()
+  @Public()
+  @ApiOperation({ summary: 'List product options' })
+  @ApiResponse({ status: 200, type: ProductOptionListDataDto })
+  @ResponseMessage('Options retrieved successfully')
+  findAll(@Param('productId', ParseIntPipe) productId: number) {
+    return this.optionService.findByProductId(productId);
+  }
+
+  @Get(':optionId')
+  @Public()
+  @ApiOperation({ summary: 'Get product option detail' })
+  @ApiResponse({ status: 200, type: ProductOptionDataDto })
+  @ApiResponse({ status: 404, type: ErrorResponseDto })
+  @ResponseMessage('Option retrieved successfully')
+  findOne(@Param('optionId', ParseIntPipe) optionId: number) {
+    return this.optionService.findById(optionId);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create product option' })

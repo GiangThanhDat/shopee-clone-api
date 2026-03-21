@@ -20,6 +20,19 @@ export class ProductSkuService {
     private readonly valueRepository: IOptionValueRepository,
   ) {}
 
+  async findByProductId(productId: number) {
+    const skus = await this.skuRepository.findByProductId(productId);
+    return { skus };
+  }
+
+  async findById(skuId: number) {
+    const sku = await this.skuRepository.findById(skuId);
+    if (!sku) {
+      throw new NotFoundException(`SKU ${skuId} not found`);
+    }
+    return { sku };
+  }
+
   async createSku(productId: number, dto: CreateProductSkuDto) {
     await this.validateOptionValues(dto.optionValueIds);
     const skuValues = dto.optionValueIds.map((id) => ({
