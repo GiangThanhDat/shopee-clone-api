@@ -1,0 +1,62 @@
+import {
+  Controller,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  ParseIntPipe,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { ErrorResponseDto } from '../../../common/dto/api-response.dto';
+import { ResponseMessage } from '../../../common/decorators/response-message.decorator';
+import { ProductDetailService } from '../application/product-detail.service';
+import { CreateProductDetailDto } from '../application/dto/create-product-detail.dto';
+import { UpdateProductDetailDto } from '../application/dto/update-product-detail.dto';
+import { ProductDetailDataDto } from '../application/dto/sub-entity-response.dto';
+
+@ApiTags('Product Details')
+@ApiBearerAuth()
+@Controller('products/:productId/details')
+export class ProductDetailController {
+  constructor(private readonly detailService: ProductDetailService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Add specification to product' })
+  @ApiResponse({ status: 201, type: ProductDetailDataDto })
+  @ResponseMessage('Detail added successfully')
+  create(
+    @Param('productId', ParseIntPipe) productId: number,
+    @Body() dto: CreateProductDetailDto,
+  ) {
+    return this.detailService.addDetail(productId, dto);
+  }
+
+  @Patch(':detailId')
+  @ApiOperation({ summary: 'Update product specification' })
+  @ApiResponse({ status: 200, type: ProductDetailDataDto })
+  @ApiResponse({ status: 404, type: ErrorResponseDto })
+  @ResponseMessage('Detail updated successfully')
+  update(
+    @Param('detailId', ParseIntPipe) detailId: number,
+    @Body() dto: UpdateProductDetailDto,
+  ) {
+    return this.detailService.updateDetail(detailId, dto);
+  }
+
+  @Delete(':detailId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Remove product specification' })
+  @ApiResponse({ status: 204 })
+  @ApiResponse({ status: 404, type: ErrorResponseDto })
+  remove(@Param('detailId', ParseIntPipe) detailId: number) {
+    return this.detailService.removeDetail(detailId);
+  }
+}
