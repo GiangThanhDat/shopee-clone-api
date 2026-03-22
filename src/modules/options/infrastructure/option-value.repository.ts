@@ -30,6 +30,13 @@ export class OptionValueRepository implements IOptionValueRepository {
     return this.repository.save(entity);
   }
 
+  async saveMany(
+    values: Partial<OptionValueEntity>[],
+  ): Promise<OptionValueEntity[]> {
+    console.log('[values]:', values);
+    return this.repository.save(values);
+  }
+
   async update(
     id: number,
     data: Partial<OptionValueEntity>,
@@ -39,6 +46,13 @@ export class OptionValueRepository implements IOptionValueRepository {
   }
 
   async remove(id: number): Promise<void> {
-    await this.repository.delete(id);
+    await this.repository.softDelete(id);
+  }
+
+  async softRemoveByIds(ids: number[]): Promise<void> {
+    if (ids.length === 0) {
+      return;
+    }
+    await this.repository.softDelete(ids);
   }
 }

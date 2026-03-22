@@ -1,3 +1,4 @@
+import { DeepPartial } from 'typeorm';
 import { ProductEntity } from '../../domain/product.entity';
 
 export const PRODUCT_REPOSITORY = Symbol('PRODUCT_REPOSITORY');
@@ -5,10 +6,10 @@ export const PRODUCT_REPOSITORY = Symbol('PRODUCT_REPOSITORY');
 export interface IProductRepository {
   findAll(query: ProductFilterQuery): Promise<[ProductEntity[], number]>;
   findById(id: number): Promise<ProductEntity | null>;
-  create(product: Partial<ProductEntity>): Promise<ProductEntity>;
+  create(product: DeepPartial<ProductEntity>): Promise<ProductEntity>;
   update(
     id: number,
-    product: Partial<ProductEntity>,
+    product: DeepPartial<ProductEntity>,
   ): Promise<ProductEntity | null>;
   remove(id: number): Promise<void>;
 }

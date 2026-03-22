@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, In, Repository } from 'typeorm';
 import { ProductSkuEntity } from '../domain/product-sku.entity';
 import { SkuValueEntity } from '../domain/sku-value.entity';
 import type { IProductSkuRepository } from '../application/interfaces/product-sku-repository.interface';
@@ -28,9 +28,8 @@ export class ProductSkuRepository implements IProductSkuRepository {
     });
   }
 
-  async save(sku: Partial<ProductSkuEntity>): Promise<ProductSkuEntity> {
-    const entity = this.repository.create(sku);
-    return this.repository.save(entity);
+  async save(sku: DeepPartial<ProductSkuEntity>): Promise<ProductSkuEntity> {
+    return this.repository.save(sku);
   }
 
   async saveWithValues(
@@ -56,5 +55,12 @@ export class ProductSkuRepository implements IProductSkuRepository {
   async remove(id: number): Promise<void> {
     await this.skuValueRepository.delete({ skuId: id });
     await this.repository.delete(id);
+  }
+
+  async softRemoveByIds(ids: number[]): Promise<void> {
+    if (ids.length === 0) {
+      return;
+    }
+    await this.repository.softDelete({ id: In(ids) });
   }
 }

@@ -7,8 +7,6 @@ import {
   Param,
   Body,
   ParseIntPipe,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -77,10 +75,10 @@ export class ProductSkuController {
   }
 
   @Delete(':skuId')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete product SKU' })
-  @ApiResponse({ status: 204 })
+  @ApiResponse({ status: 200, type: ProductSkuDataDto })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
+  @ResponseMessage('SKU deleted successfully')
   remove(@Param('skuId', ParseIntPipe) skuId: number) {
     return this.skuService.removeSku(skuId);
   }

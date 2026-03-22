@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, In, Repository } from 'typeorm';
 import { ProductMediaEntity } from '../domain/product-media.entity';
 import type { IProductMediaRepository } from '../application/interfaces/product-media-repository.interface';
 
@@ -25,12 +25,20 @@ export class ProductMediaRepository implements IProductMediaRepository {
     });
   }
 
-  async save(media: Partial<ProductMediaEntity>): Promise<ProductMediaEntity> {
-    const entity = this.repository.create(media);
-    return this.repository.save(entity);
+  async save(
+    media: DeepPartial<ProductMediaEntity>,
+  ): Promise<ProductMediaEntity> {
+    return this.repository.save(media);
   }
 
   async remove(id: number): Promise<void> {
     await this.repository.delete(id);
+  }
+
+  async softRemoveByIds(ids: number[]): Promise<void> {
+    if (ids.length === 0) {
+      return;
+    }
+    await this.repository.softDelete({ id: In(ids) });
   }
 }

@@ -1,10 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsString,
-  IsNotEmpty,
   IsInt,
+  IsNotEmpty,
   IsOptional,
   IsPositive,
+  IsString,
   MaxLength,
   ValidateIf,
 } from 'class-validator';
@@ -12,7 +12,16 @@ import {
 export class CreateProductDetailDto {
   @ApiPropertyOptional({
     example: 1,
-    description: 'Existing spec ID (skip creation, link directly)',
+    description: 'Existing ProductDetail ID (update existing link)',
+  })
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  id?: number;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Existing Spec ID (link to existing spec)',
   })
   @IsOptional()
   @IsInt()

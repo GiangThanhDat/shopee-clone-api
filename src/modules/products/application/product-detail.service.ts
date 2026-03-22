@@ -41,10 +41,7 @@ export class ProductDetailService {
   }
 
   async updateDetail(detailId: number, dto: UpdateProductDetailDto) {
-    const existing = await this.detailRepository.findById(detailId);
-    if (!existing) {
-      throw new NotFoundException(`Detail ${detailId} not found`);
-    }
+    const { detail: existing } = await this.findById(detailId);
     if (!dto.specName && !dto.specValue) {
       return { detail: existing };
     }
@@ -54,17 +51,12 @@ export class ProductDetailService {
     const updated = await this.detailRepository.update(detailId, {
       fieldId: spec.id,
     });
-    if (!updated) {
-      throw new NotFoundException(`Detail ${detailId} not found`);
-    }
     return { detail: updated };
   }
 
-  async removeDetail(detailId: number): Promise<void> {
-    const detail = await this.detailRepository.findById(detailId);
-    if (!detail) {
-      throw new NotFoundException(`Detail ${detailId} not found`);
-    }
+  async removeDetail(detailId: number) {
+    const { detail } = await this.findById(detailId);
     await this.detailRepository.remove(detailId);
+    return { detail };
   }
 }

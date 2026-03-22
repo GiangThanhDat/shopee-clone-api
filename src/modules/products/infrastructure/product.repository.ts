@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { DeepPartial, Repository, SelectQueryBuilder } from 'typeorm';
 import { applyPagination } from '../../../common/utils/pagination';
 import { ProductEntity } from '../domain/product.entity';
 import {
@@ -39,14 +39,14 @@ export class ProductRepository implements IProductRepository {
     });
   }
 
-  async create(product: Partial<ProductEntity>): Promise<ProductEntity> {
+  async create(product: DeepPartial<ProductEntity>): Promise<ProductEntity> {
     const entity = this.repository.create(product);
     return this.repository.save(entity);
   }
 
   async update(
     id: number,
-    product: Partial<ProductEntity>,
+    product: DeepPartial<ProductEntity>,
   ): Promise<ProductEntity | null> {
     await this.repository.update(id, product);
     return this.findById(id);

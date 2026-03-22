@@ -14,7 +14,16 @@ import {
 export class CreateProductMediaDto {
   @ApiPropertyOptional({
     example: 1,
-    description: 'Existing media ID (skip creation, link directly)',
+    description: 'Existing ProductMedia ID (update existing link)',
+  })
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  id?: number;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Existing Media ID (link to existing media)',
   })
   @IsOptional()
   @IsInt()

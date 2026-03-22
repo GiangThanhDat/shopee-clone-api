@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, In, Repository } from 'typeorm';
 import { ProductDetailEntity } from '../domain/product-detail.entity';
 import type { IProductDetailRepository } from '../application/interfaces/product-detail-repository.interface';
 
@@ -26,10 +26,9 @@ export class ProductDetailRepository implements IProductDetailRepository {
   }
 
   async save(
-    detail: Partial<ProductDetailEntity>,
+    detail: DeepPartial<ProductDetailEntity>,
   ): Promise<ProductDetailEntity> {
-    const entity = this.repository.create(detail);
-    return this.repository.save(entity);
+    return this.repository.save(detail);
   }
 
   async update(
@@ -42,5 +41,12 @@ export class ProductDetailRepository implements IProductDetailRepository {
 
   async remove(id: number): Promise<void> {
     await this.repository.delete(id);
+  }
+
+  async softRemoveByIds(ids: number[]): Promise<void> {
+    if (ids.length === 0) {
+      return;
+    }
+    await this.repository.softDelete({ id: In(ids) });
   }
 }

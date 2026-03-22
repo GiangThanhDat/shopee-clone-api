@@ -22,17 +22,17 @@ export class ProductEntity {
   description: string | null;
 
   @OneToMany(() => ProductSkuEntity, (sku) => sku.product, {
-    cascade: ['insert'],
+    cascade: ['insert', 'update'],
   })
   skus: ProductSkuEntity[];
 
   @OneToMany(() => ProductMediaEntity, (media) => media.product, {
-    cascade: ['insert'],
+    cascade: ['insert', 'update'],
   })
   productMedia: ProductMediaEntity[];
 
   @OneToMany(() => ProductDetailEntity, (detail) => detail.product, {
-    cascade: ['insert'],
+    cascade: ['insert', 'update'],
   })
   details: ProductDetailEntity[];
 

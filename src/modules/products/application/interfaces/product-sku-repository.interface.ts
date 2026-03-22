@@ -1,3 +1,4 @@
+import { DeepPartial } from 'typeorm';
 import { ProductSkuEntity } from '../../domain/product-sku.entity';
 import { SkuValueEntity } from '../../domain/sku-value.entity';
 
@@ -6,7 +7,7 @@ export const PRODUCT_SKU_REPOSITORY = Symbol('PRODUCT_SKU_REPOSITORY');
 export interface IProductSkuRepository {
   findByProductId(productId: number): Promise<ProductSkuEntity[]>;
   findById(id: number): Promise<ProductSkuEntity | null>;
-  save(sku: Partial<ProductSkuEntity>): Promise<ProductSkuEntity>;
+  save(sku: DeepPartial<ProductSkuEntity>): Promise<ProductSkuEntity>;
   saveWithValues(
     sku: Partial<ProductSkuEntity>,
     values: Partial<SkuValueEntity>[],
@@ -16,4 +17,5 @@ export interface IProductSkuRepository {
     data: Partial<ProductSkuEntity>,
   ): Promise<ProductSkuEntity | null>;
   remove(id: number): Promise<void>;
+  softRemoveByIds(ids: number[]): Promise<void>;
 }

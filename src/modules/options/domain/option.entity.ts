@@ -17,7 +17,7 @@ export class OptionEntity {
   name: string;
 
   @OneToMany(() => OptionValueEntity, (value) => value.option, {
-    cascade: ['insert'],
+    cascade: ['insert', 'update'],
   })
   values: OptionValueEntity[];
 

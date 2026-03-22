@@ -6,6 +6,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { OptionEntity } from './option.entity';
 
@@ -17,7 +18,7 @@ export class OptionValueEntity {
   @Column({ type: 'varchar', length: 255 })
   value: string;
 
-  @Column({ name: 'image_url', type: 'varchar', length: 255 })
+  @Column({ name: 'image_url', type: 'varchar', length: 255, nullable: true })
   imageUrl: string;
 
   @Column({ name: 'option_id', type: 'bigint' })
@@ -32,4 +33,7 @@ export class OptionValueEntity {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt: Date | null;
 }

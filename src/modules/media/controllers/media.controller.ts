@@ -6,8 +6,6 @@ import {
   Param,
   Body,
   ParseIntPipe,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -59,10 +57,10 @@ export class MediaController {
   }
 
   @Delete(':mediaId')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete media' })
-  @ApiResponse({ status: 204 })
+  @ApiResponse({ status: 200, type: MediaDataDto })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
+  @ResponseMessage('Media deleted successfully')
   remove(@Param('mediaId', ParseIntPipe) mediaId: number) {
     return this.mediaService.remove(mediaId);
   }

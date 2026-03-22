@@ -3,8 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -131,9 +129,12 @@ export class ProductController {
 
   @Delete(':id')
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete a product' })
-  @ApiResponse({ status: 200, description: 'Product deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product deleted successfully',
+    type: ProductSingleDataDto,
+  })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
@@ -145,10 +146,7 @@ export class ProductController {
     type: ErrorResponseDto,
   })
   @ResponseMessage('Product deleted successfully')
-  async remove(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<Record<string, never>> {
-    await this.productService.remove(id);
-    return {};
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return this.productService.remove(id);
   }
 }

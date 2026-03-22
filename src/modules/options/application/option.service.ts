@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { OptionEntity } from '../domain/option.entity';
+import { OptionEntity } from '../domain/option.entity';
 import type { IOptionRepository } from './interfaces/option-repository.interface';
 import { OPTION_REPOSITORY } from './interfaces/option-repository.interface';
 import type { IOptionValueRepository } from './interfaces/option-value-repository.interface';
@@ -24,7 +24,10 @@ export class OptionService {
   }
 
   async findById(optionId: number) {
-    const option = await this.findOptionOrFail(optionId);
+    const option = await this.optionRepository.findById(optionId);
+    if (!option) {
+      throw new NotFoundException(`Option ${optionId} not found`);
+    }
     return { option };
   }
 
@@ -38,20 +41,55 @@ export class OptionService {
   }
 
   async updateOption(optionId: number, dto: UpdateOptionDto) {
-    await this.findOptionOrFail(optionId);
-    const option = await this.optionRepository.update(optionId, {
-      name: dto.name,
-    });
+    const { option: existing } = await this.findById(optionId);
+
+    if (dto.name) {
+      await this.optionRepository.update(optionId, { name: dto.name });
+    }
+
+    if (dto.values) {
+      await this.syncValues(existing, dto.values);
+    }
+
+    const option = await this.optionRepository.findById(optionId);
     return { option };
   }
 
-  async removeOption(optionId: number): Promise<void> {
-    await this.findOptionOrFail(optionId);
+  private async syncValues(
+    existing: OptionEntity,
+    incomingValues: CreateOptionValueDto[],
+  ) {
+    const existingIds = existing.values.map((v) => Number(v.id));
+    const incomingIds = incomingValues
+      .filter((v) => v.id)
+      .map((v) => Number(v.id));
+    const idsToRemove = existingIds.filter((id) => !incomingIds.includes(id));
+
+    await this.valueRepository.softRemoveByIds(idsToRemove);
+    for (const v of incomingValues) {
+      if (v.id) {
+        await this.valueRepository.update(Number(v.id), {
+          value: v.value,
+          imageUrl: v.imageUrl,
+        });
+        continue;
+      }
+      await this.valueRepository.save({
+        value: v.value,
+        imageUrl: v.imageUrl,
+        optionId: Number(existing.id),
+      });
+    }
+  }
+
+  async removeOption(optionId: number) {
+    const { option } = await this.findById(optionId);
     await this.optionRepository.remove(optionId);
+    return { option };
   }
 
   async createValue(optionId: number, dto: CreateOptionValueDto) {
-    await this.findOptionOrFail(optionId);
+    await this.findById(optionId);
     const value = await this.valueRepository.save({
       optionId,
       ...dto,
@@ -59,27 +97,23 @@ export class OptionService {
     return { value };
   }
 
-  async updateValue(valueId: number, dto: UpdateOptionValueDto) {
-    const value = await this.valueRepository.update(valueId, dto);
+  async findValueById(valueId: number) {
+    const value = await this.valueRepository.findById(valueId);
     if (!value) {
       throw new NotFoundException(`Option value ${valueId} not found`);
     }
     return { value };
   }
 
-  async removeValue(valueId: number): Promise<void> {
-    const value = await this.valueRepository.findById(valueId);
-    if (!value) {
-      throw new NotFoundException(`Option value ${valueId} not found`);
-    }
-    await this.valueRepository.remove(valueId);
+  async updateValue(valueId: number, dto: UpdateOptionValueDto) {
+    await this.findValueById(valueId);
+    const value = await this.valueRepository.update(valueId, dto);
+    return { value };
   }
 
-  private async findOptionOrFail(optionId: number) {
-    const option = await this.optionRepository.findById(optionId);
-    if (!option) {
-      throw new NotFoundException(`Option ${optionId} not found`);
-    }
-    return option;
+  async removeValue(valueId: number) {
+    const { value } = await this.findValueById(valueId);
+    await this.valueRepository.remove(valueId);
+    return { value };
   }
 }

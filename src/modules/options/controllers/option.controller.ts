@@ -7,8 +7,6 @@ import {
   Param,
   Body,
   ParseIntPipe,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -76,10 +74,10 @@ export class OptionController {
   }
 
   @Delete(':optionId')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete option' })
-  @ApiResponse({ status: 204 })
+  @ApiResponse({ status: 200, type: OptionDataDto })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
+  @ResponseMessage('Option deleted successfully')
   remove(@Param('optionId', ParseIntPipe) optionId: number) {
     return this.optionService.removeOption(optionId);
   }
@@ -109,10 +107,10 @@ export class OptionController {
   }
 
   @Delete(':optionId/values/:valueId')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete option value' })
-  @ApiResponse({ status: 204 })
+  @ApiResponse({ status: 200, type: OptionValueDataDto })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
+  @ResponseMessage('Option value deleted successfully')
   removeValue(@Param('valueId', ParseIntPipe) valueId: number) {
     return this.optionService.removeValue(valueId);
   }

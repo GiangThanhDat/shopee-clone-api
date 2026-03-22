@@ -7,8 +7,6 @@ import {
   Param,
   Body,
   ParseIntPipe,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -104,9 +102,12 @@ export class CartController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Remove item from cart' })
-  @ApiResponse({ status: 200, description: 'Cart item removed' })
+  @ApiResponse({
+    status: 200,
+    description: 'Cart item removed',
+    type: CartItemDataDto,
+  })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
@@ -121,25 +122,24 @@ export class CartController {
   async removeItem(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser('userId') userId: number,
-  ): Promise<Record<string, never>> {
-    await this.cartService.removeItem(id, userId);
-    return {};
+  ) {
+    return this.cartService.removeItem(id, userId);
   }
 
   @Delete()
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Clear all items from cart' })
-  @ApiResponse({ status: 200, description: 'Cart cleared' })
+  @ApiResponse({
+    status: 200,
+    description: 'Cart cleared',
+    type: CartListDataDto,
+  })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
     type: ErrorResponseDto,
   })
   @ResponseMessage('Cart cleared')
-  async clearCart(
-    @CurrentUser('userId') userId: number,
-  ): Promise<Record<string, never>> {
-    await this.cartService.clearCart(userId);
-    return {};
+  async clearCart(@CurrentUser('userId') userId: number) {
+    return this.cartService.clearCart(userId);
   }
 }

@@ -42,12 +42,9 @@ export class ProductMediaService {
     return { productMedia };
   }
 
-  async removeMedia(productMediaId: number): Promise<void> {
-    const productMedia =
-      await this.productMediaRepository.findById(productMediaId);
-    if (!productMedia) {
-      throw new NotFoundException(`Product media ${productMediaId} not found`);
-    }
+  async removeMedia(productMediaId: number) {
+    const { productMedia } = await this.findById(productMediaId);
     await this.productMediaRepository.remove(productMediaId);
+    return { productMedia };
   }
 }

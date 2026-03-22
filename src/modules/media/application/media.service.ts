@@ -16,7 +16,10 @@ export class MediaService {
   }
 
   async findById(mediaId: number) {
-    const media = await this.findMediaOrFail(mediaId);
+    const media = await this.mediaRepository.findById(mediaId);
+    if (!media) {
+      throw new NotFoundException(`Media ${mediaId} not found`);
+    }
     return { media };
   }
 
@@ -25,16 +28,9 @@ export class MediaService {
     return { media };
   }
 
-  async remove(mediaId: number): Promise<void> {
-    await this.findMediaOrFail(mediaId);
+  async remove(mediaId: number) {
+    const { media } = await this.findById(mediaId);
     await this.mediaRepository.remove(mediaId);
-  }
-
-  private async findMediaOrFail(mediaId: number) {
-    const media = await this.mediaRepository.findById(mediaId);
-    if (!media) {
-      throw new NotFoundException(`Media ${mediaId} not found`);
-    }
-    return media;
+    return { media };
   }
 }

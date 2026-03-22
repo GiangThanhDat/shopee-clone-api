@@ -50,13 +50,16 @@ export class CartService {
     return { item: updated };
   }
 
-  async removeItem(id: number, userId: number): Promise<void> {
-    await this.findOwnedItem(id, userId);
+  async removeItem(id: number, userId: number) {
+    const item = await this.findOwnedItem(id, userId);
     await this.cartRepository.remove(id);
+    return { item };
   }
 
-  async clearCart(userId: number): Promise<void> {
+  async clearCart(userId: number) {
+    const items = await this.cartRepository.findByUserId(userId);
     await this.cartRepository.clearByUserId(userId);
+    return { items };
   }
 
   private async findOwnedItem(id: number, userId: number) {

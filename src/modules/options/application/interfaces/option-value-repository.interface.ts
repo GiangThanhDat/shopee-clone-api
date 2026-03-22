@@ -7,9 +7,11 @@ export interface IOptionValueRepository {
   findById(id: number): Promise<OptionValueEntity | null>;
   findByIds(ids: number[]): Promise<OptionValueEntity[]>;
   save(value: Partial<OptionValueEntity>): Promise<OptionValueEntity>;
+  saveMany(values: Partial<OptionValueEntity>[]): Promise<OptionValueEntity[]>;
   update(
     id: number,
     data: Partial<OptionValueEntity>,
   ): Promise<OptionValueEntity | null>;
   remove(id: number): Promise<void>;
+  softRemoveByIds(ids: number[]): Promise<void>;
 }

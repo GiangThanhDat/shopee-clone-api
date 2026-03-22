@@ -7,8 +7,6 @@ import {
   Param,
   Body,
   ParseIntPipe,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -76,10 +74,10 @@ export class ProductDetailController {
   }
 
   @Delete(':detailId')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove product specification' })
-  @ApiResponse({ status: 204 })
+  @ApiResponse({ status: 200, type: ProductDetailDataDto })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
+  @ResponseMessage('Detail deleted successfully')
   remove(@Param('detailId', ParseIntPipe) detailId: number) {
     return this.detailService.removeDetail(detailId);
   }

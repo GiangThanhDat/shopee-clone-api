@@ -52,19 +52,15 @@ export class ProductSkuService {
   }
 
   async updateSku(skuId: number, dto: UpdateProductSkuDto) {
-    const sku = await this.skuRepository.update(skuId, dto);
-    if (!sku) {
-      throw new NotFoundException(`SKU ${skuId} not found`);
-    }
+    const { sku: existing } = await this.findById(skuId);
+    const sku = await this.skuRepository.update(existing.id, dto);
     return { sku };
   }
 
-  async removeSku(skuId: number): Promise<void> {
-    const sku = await this.skuRepository.findById(skuId);
-    if (!sku) {
-      throw new NotFoundException(`SKU ${skuId} not found`);
-    }
+  async removeSku(skuId: number) {
+    const { sku } = await this.findById(skuId);
     await this.skuRepository.remove(skuId);
+    return { sku };
   }
 
   private async validateOptionValues(ids: number[]): Promise<void> {
