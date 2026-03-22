@@ -14,8 +14,3 @@ export class ProductListDataDto {
   @ApiPropertyOptional({ type: ProductListMetadataDto })
   metadata?: ProductListMetadataDto;
 }
-
-export class ProductDetailDataDto {
-  @ApiProperty({ type: ProductResponse })
-  product: ProductResponse;
-}

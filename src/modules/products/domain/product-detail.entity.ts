@@ -25,7 +25,7 @@ export class ProductDetailEntity {
   @Column({ name: 'field_id', type: 'bigint' })
   fieldId: number;
 
-  @ManyToOne(() => ProductSpecEntity)
+  @ManyToOne(() => ProductSpecEntity, { cascade: ['insert'] })
   @JoinColumn({ name: 'field_id' })
   spec: ProductSpecEntity;
 

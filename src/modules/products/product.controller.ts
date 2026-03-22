@@ -1,33 +1,34 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
   Body,
-  Query,
-  ParseIntPipe,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
 import {
-  ApiTags,
+  ApiBearerAuth,
   ApiOperation,
   ApiResponse,
-  ApiBearerAuth,
+  ApiTags,
 } from '@nestjs/swagger';
-import { ErrorResponseDto } from '../../common/dto/api-response.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { ResponseMessage } from '../../common/decorators/response-message.decorator';
-import { ProductService } from './application/product.service';
-import { ProductFilterDto } from './application/dto/product-filter.dto';
+import { ErrorResponseDto } from '../../common/dto/api-response.dto';
 import { CreateProductDto } from './application/dto/create-product.dto';
-import { UpdateProductDto } from './application/dto/update-product.dto';
+import { ProductFilterDto } from './application/dto/product-filter.dto';
+import { ProductListDataDto } from './application/dto/product-list-response.dto';
 import {
-  ProductListDataDto,
-  ProductDetailDataDto,
-} from './application/dto/product-list-response.dto';
+  ProductResponse,
+  ProductSingleDataDto,
+} from './application/dto/product-response.dto';
+import { UpdateProductDto } from './application/dto/update-product.dto';
+import { ProductService } from './application/product.service';
 
 @ApiTags('Products')
 @Controller('products')
@@ -60,7 +61,7 @@ export class ProductController {
   @ApiResponse({
     status: 200,
     description: 'Product retrieved successfully',
-    type: ProductDetailDataDto,
+    type: ProductResponse,
   })
   @ApiResponse({
     status: 404,
@@ -70,7 +71,7 @@ export class ProductController {
   @ResponseMessage('Product retrieved successfully')
   async findById(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ProductDetailDataDto> {
+  ): Promise<{ product: ProductResponse }> {
     return this.productService.findById(id);
   }
 
@@ -80,7 +81,7 @@ export class ProductController {
   @ApiResponse({
     status: 201,
     description: 'Product created successfully',
-    type: ProductDetailDataDto,
+    type: ProductSingleDataDto,
   })
   @ApiResponse({
     status: 400,
@@ -93,7 +94,7 @@ export class ProductController {
     type: ErrorResponseDto,
   })
   @ResponseMessage('Product created successfully')
-  async create(@Body() dto: CreateProductDto): Promise<ProductDetailDataDto> {
+  async create(@Body() dto: CreateProductDto): Promise<ProductSingleDataDto> {
     return this.productService.create(dto);
   }
 
@@ -103,7 +104,7 @@ export class ProductController {
   @ApiResponse({
     status: 200,
     description: 'Product updated successfully',
-    type: ProductDetailDataDto,
+    type: ProductSingleDataDto,
   })
   @ApiResponse({
     status: 400,
@@ -124,7 +125,7 @@ export class ProductController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateProductDto,
-  ): Promise<ProductDetailDataDto> {
+  ): Promise<ProductSingleDataDto> {
     return this.productService.update(id, dto);
   }
 

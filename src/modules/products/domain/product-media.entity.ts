@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ProductEntity } from './product.entity';
-import { MediaEntity } from './media.entity';
+import { MediaEntity } from '../../media/domain/media.entity';
 
 @Entity('product_media')
 export class ProductMediaEntity {
@@ -25,7 +25,7 @@ export class ProductMediaEntity {
   @Column({ name: 'media_id', type: 'bigint' })
   mediaId: number;
 
-  @ManyToOne(() => MediaEntity)
+  @ManyToOne(() => MediaEntity, { cascade: ['insert'] })
   @JoinColumn({ name: 'media_id' })
   media: MediaEntity;
 

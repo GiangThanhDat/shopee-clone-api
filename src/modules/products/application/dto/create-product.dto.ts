@@ -8,7 +8,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateProductOptionWithValuesDto } from './create-product-option.dto';
 import { CreateProductSkuDto } from './create-product-sku.dto';
 import { CreateProductMediaDto } from './create-product-media.dto';
 import { CreateProductDetailDto } from './create-product-detail.dto';
@@ -33,16 +32,6 @@ export class CreateProductDto {
   @IsString()
   @MaxLength(255)
   description?: string;
-
-  @ApiPropertyOptional({
-    type: [CreateProductOptionWithValuesDto],
-    description: 'Product options with values',
-  })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateProductOptionWithValuesDto)
-  options?: CreateProductOptionWithValuesDto[];
 
   @ApiPropertyOptional({
     type: [CreateProductSkuDto],

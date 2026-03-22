@@ -1,18 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
-export class MediaResponse {
-  @ApiProperty({ example: 1 })
-  id: number;
-
-  @ApiProperty({ example: 'https://cdn.example.com/image.jpg' })
-  url: string;
-
-  @ApiProperty({ example: 204800 })
-  size: number;
-
-  @ApiProperty({ example: 'image.jpg' })
-  fileName: string;
-}
+import { OptionValueResponse } from '../../../options/application/dto/option-response.dto';
+import { MediaResponse } from '../../../media/application/dto/media-response.dto';
 
 export class ProductMediaResponse {
   @ApiProperty({ example: 1 })
@@ -20,28 +8,6 @@ export class ProductMediaResponse {
 
   @ApiProperty({ type: MediaResponse })
   media: MediaResponse;
-}
-
-export class OptionValueResponse {
-  @ApiProperty({ example: 1 })
-  id: number;
-
-  @ApiProperty({ example: 'Red' })
-  value: string;
-
-  @ApiProperty({ example: 'https://cdn.example.com/red.jpg' })
-  imageUrl: string;
-}
-
-export class ProductOptionResponse {
-  @ApiProperty({ example: 1 })
-  id: number;
-
-  @ApiProperty({ example: 'Color' })
-  name: string;
-
-  @ApiProperty({ type: [OptionValueResponse] })
-  values: OptionValueResponse[];
 }
 
 export class SkuValueResponse {
@@ -103,9 +69,6 @@ export class ProductResponse {
   })
   description: string | null;
 
-  @ApiProperty({ type: [ProductOptionResponse] })
-  options: ProductOptionResponse[];
-
   @ApiProperty({ type: [ProductSkuResponse] })
   skus: ProductSkuResponse[];
 
@@ -120,4 +83,9 @@ export class ProductResponse {
 
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
   updatedAt: Date;
+}
+
+export class ProductSingleDataDto {
+  @ApiProperty({ type: ProductResponse })
+  product: ProductResponse;
 }

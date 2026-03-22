@@ -6,7 +6,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ProductOptionEntity } from './product-option.entity';
 import { ProductSkuEntity } from './product-sku.entity';
 import { ProductMediaEntity } from './product-media.entity';
 import { ProductDetailEntity } from './product-detail.entity';
@@ -21,11 +20,6 @@ export class ProductEntity {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   description: string | null;
-
-  @OneToMany(() => ProductOptionEntity, (option) => option.product, {
-    cascade: ['insert'],
-  })
-  options: ProductOptionEntity[];
 
   @OneToMany(() => ProductSkuEntity, (sku) => sku.product, {
     cascade: ['insert'],

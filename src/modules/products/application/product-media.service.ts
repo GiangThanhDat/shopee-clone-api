@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { IProductMediaRepository } from './interfaces/product-media-repository.interface';
 import { PRODUCT_MEDIA_REPOSITORY } from './interfaces/product-media-repository.interface';
-import type { IMediaRepository } from './interfaces/media-repository.interface';
-import { MEDIA_REPOSITORY } from './interfaces/media-repository.interface';
+import type { IMediaRepository } from '../../media/application/interfaces/media-repository.interface';
+import { MEDIA_REPOSITORY } from '../../media/application/interfaces/media-repository.interface';
 import { CreateProductMediaDto } from './dto/create-product-media.dto';
 
 @Injectable()

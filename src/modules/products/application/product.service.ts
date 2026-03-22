@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  PreconditionFailedException,
+} from '@nestjs/common';
 import { buildPaginationMeta } from '../../../common/utils/pagination';
 import { ProductEntity } from '../domain/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -6,12 +11,14 @@ import { ProductFilterDto } from './dto/product-filter.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import type { IProductRepository } from './interfaces/product-repository.interface';
 import { PRODUCT_REPOSITORY } from './interfaces/product-repository.interface';
+import { ProductOrchestrator } from './product-orchestrator.service';
 
 @Injectable()
 export class ProductService {
   constructor(
     @Inject(PRODUCT_REPOSITORY)
     private readonly productRepository: IProductRepository,
+    private readonly orchestrator: ProductOrchestrator,
   ) {}
 
   async findAll(filterDto: ProductFilterDto) {
@@ -35,8 +42,10 @@ export class ProductService {
   }
 
   async create(dto: CreateProductDto): Promise<{ product: ProductEntity }> {
-    const { name, description } = dto;
-    const product = await this.productRepository.create({ name, description });
+    const product = await this.orchestrator.create(dto);
+    if (!product) {
+      throw new PreconditionFailedException();
+    }
     return { product };
   }
 
@@ -45,15 +54,11 @@ export class ProductService {
     dto: UpdateProductDto,
   ): Promise<{ product: ProductEntity }> {
     await this.findById(id);
-    const { name, description } = dto;
-    const updated = await this.productRepository.update(id, {
-      name,
-      description,
-    });
-    if (!updated) {
-      throw new NotFoundException(`Product with id ${id} not found`);
+    const product = await this.orchestrator.update(id, dto);
+    if (!product) {
+      throw new PreconditionFailedException();
     }
-    return { product: updated };
+    return { product };
   }
 
   async remove(id: number): Promise<void> {

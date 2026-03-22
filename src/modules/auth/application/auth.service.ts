@@ -118,6 +118,6 @@ export class AuthService {
   }
 
   private generateAccessToken(userId: number, email: string): string {
-    return this.jwtService.sign({ sub: userId, email }, { expiresIn: '15m' });
+    return this.jwtService.sign({ sub: userId, email }, { expiresIn: '1h' });
   }
 }

@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProductsModule } from './modules/products/products.module';
+import { OptionsModule } from './modules/options/options.module';
+import { MediaModule } from './modules/media/media.module';
 import { CartModule } from './modules/cart/cart.module';
 import { OrdersModule } from './modules/orders/orders.module';
 
@@ -30,6 +32,8 @@ import { OrdersModule } from './modules/orders/orders.module';
     UsersModule,
     AuthModule,
     ProductsModule,
+    OptionsModule,
+    MediaModule,
     CartModule,
     OrdersModule,
   ],

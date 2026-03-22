@@ -18,37 +18,37 @@ import {
 } from '@nestjs/swagger';
 import { ErrorResponseDto } from '../../../common/dto/api-response.dto';
 import { ResponseMessage } from '../../../common/decorators/response-message.decorator';
-import { ProductOptionService } from '../application/product-option.service';
-import { CreateProductOptionDto } from '../application/dto/create-product-option.dto';
-import { UpdateProductOptionDto } from '../application/dto/update-product-option.dto';
+import { Public } from '../../../common/decorators/public.decorator';
+import { OptionService } from '../application/option.service';
+import { CreateOptionDto } from '../application/dto/create-option.dto';
+import { UpdateOptionDto } from '../application/dto/update-option.dto';
 import { CreateOptionValueDto } from '../application/dto/create-option-value.dto';
 import { UpdateOptionValueDto } from '../application/dto/update-option-value.dto';
-import { Public } from '../../../common/decorators/public.decorator';
 import {
-  ProductOptionDataDto,
-  ProductOptionListDataDto,
+  OptionDataDto,
+  OptionListDataDto,
   OptionValueDataDto,
-} from '../application/dto/sub-entity-response.dto';
+} from '../application/dto/option-response.dto';
 
-@ApiTags('Product Options')
+@ApiTags('Options')
 @ApiBearerAuth()
-@Controller('products/:productId/options')
-export class ProductOptionController {
-  constructor(private readonly optionService: ProductOptionService) {}
+@Controller('options')
+export class OptionController {
+  constructor(private readonly optionService: OptionService) {}
 
   @Get()
   @Public()
-  @ApiOperation({ summary: 'List product options' })
-  @ApiResponse({ status: 200, type: ProductOptionListDataDto })
+  @ApiOperation({ summary: 'List all options' })
+  @ApiResponse({ status: 200, type: OptionListDataDto })
   @ResponseMessage('Options retrieved successfully')
-  findAll(@Param('productId', ParseIntPipe) productId: number) {
-    return this.optionService.findByProductId(productId);
+  findAll() {
+    return this.optionService.findAll();
   }
 
   @Get(':optionId')
   @Public()
-  @ApiOperation({ summary: 'Get product option detail' })
-  @ApiResponse({ status: 200, type: ProductOptionDataDto })
+  @ApiOperation({ summary: 'Get option detail' })
+  @ApiResponse({ status: 200, type: OptionDataDto })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Option retrieved successfully')
   findOne(@Param('optionId', ParseIntPipe) optionId: number) {
@@ -56,32 +56,28 @@ export class ProductOptionController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create product option' })
-  @ApiResponse({ status: 201, type: ProductOptionDataDto })
-  @ApiResponse({ status: 404, type: ErrorResponseDto })
+  @ApiOperation({ summary: 'Create option' })
+  @ApiResponse({ status: 201, type: OptionDataDto })
   @ResponseMessage('Option created successfully')
-  create(
-    @Param('productId', ParseIntPipe) productId: number,
-    @Body() dto: CreateProductOptionDto,
-  ) {
-    return this.optionService.createOption(productId, dto);
+  create(@Body() dto: CreateOptionDto) {
+    return this.optionService.createOption(dto);
   }
 
   @Patch(':optionId')
-  @ApiOperation({ summary: 'Update product option' })
-  @ApiResponse({ status: 200, type: ProductOptionDataDto })
+  @ApiOperation({ summary: 'Update option' })
+  @ApiResponse({ status: 200, type: OptionDataDto })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Option updated successfully')
   update(
     @Param('optionId', ParseIntPipe) optionId: number,
-    @Body() dto: UpdateProductOptionDto,
+    @Body() dto: UpdateOptionDto,
   ) {
     return this.optionService.updateOption(optionId, dto);
   }
 
   @Delete(':optionId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete product option' })
+  @ApiOperation({ summary: 'Delete option' })
   @ApiResponse({ status: 204 })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   remove(@Param('optionId', ParseIntPipe) optionId: number) {

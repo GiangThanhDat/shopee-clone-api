@@ -1,24 +1,25 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { IProductOptionRepository } from './interfaces/product-option-repository.interface';
-import { PRODUCT_OPTION_REPOSITORY } from './interfaces/product-option-repository.interface';
+import type { OptionEntity } from '../domain/option.entity';
+import type { IOptionRepository } from './interfaces/option-repository.interface';
+import { OPTION_REPOSITORY } from './interfaces/option-repository.interface';
 import type { IOptionValueRepository } from './interfaces/option-value-repository.interface';
 import { OPTION_VALUE_REPOSITORY } from './interfaces/option-value-repository.interface';
-import { CreateProductOptionDto } from './dto/create-product-option.dto';
-import { UpdateProductOptionDto } from './dto/update-product-option.dto';
+import { CreateOptionDto } from './dto/create-option.dto';
+import { UpdateOptionDto } from './dto/update-option.dto';
 import { CreateOptionValueDto } from './dto/create-option-value.dto';
 import { UpdateOptionValueDto } from './dto/update-option-value.dto';
 
 @Injectable()
-export class ProductOptionService {
+export class OptionService {
   constructor(
-    @Inject(PRODUCT_OPTION_REPOSITORY)
-    private readonly optionRepository: IProductOptionRepository,
+    @Inject(OPTION_REPOSITORY)
+    private readonly optionRepository: IOptionRepository,
     @Inject(OPTION_VALUE_REPOSITORY)
     private readonly valueRepository: IOptionValueRepository,
   ) {}
 
-  async findByProductId(productId: number) {
-    const options = await this.optionRepository.findByProductId(productId);
+  async findAll() {
+    const options = await this.optionRepository.findAll();
     return { options };
   }
 
@@ -27,19 +28,20 @@ export class ProductOptionService {
     return { option };
   }
 
-  async createOption(productId: number, dto: CreateProductOptionDto) {
+  async createOption(dto: CreateOptionDto) {
+    const values = dto.values as unknown as OptionEntity['values'];
     const option = await this.optionRepository.save({
-      productId,
       name: dto.name,
+      values,
     });
     return { option };
   }
 
-  async updateOption(optionId: number, dto: UpdateProductOptionDto) {
-    const option = await this.optionRepository.update(optionId, dto);
-    if (!option) {
-      throw new NotFoundException(`Option ${optionId} not found`);
-    }
+  async updateOption(optionId: number, dto: UpdateOptionDto) {
+    await this.findOptionOrFail(optionId);
+    const option = await this.optionRepository.update(optionId, {
+      name: dto.name,
+    });
     return { option };
   }
 
@@ -51,7 +53,7 @@ export class ProductOptionService {
   async createValue(optionId: number, dto: CreateOptionValueDto) {
     await this.findOptionOrFail(optionId);
     const value = await this.valueRepository.save({
-      productOptionId: optionId,
+      optionId,
       ...dto,
     });
     return { value };

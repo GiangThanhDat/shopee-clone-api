@@ -1,41 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { ProductOptionValueEntity } from '../domain/product-option-value.entity';
+import { OptionValueEntity } from '../domain/option-value.entity';
 import type { IOptionValueRepository } from '../application/interfaces/option-value-repository.interface';
 
 @Injectable()
 export class OptionValueRepository implements IOptionValueRepository {
   constructor(
-    @InjectRepository(ProductOptionValueEntity)
-    private readonly repository: Repository<ProductOptionValueEntity>,
+    @InjectRepository(OptionValueEntity)
+    private readonly repository: Repository<OptionValueEntity>,
   ) {}
 
-  async findByOptionId(optionId: number): Promise<ProductOptionValueEntity[]> {
+  async findByOptionId(optionId: number): Promise<OptionValueEntity[]> {
     return this.repository.find({
-      where: { productOptionId: optionId },
+      where: { optionId },
     });
   }
 
-  async findById(id: number): Promise<ProductOptionValueEntity | null> {
+  async findById(id: number): Promise<OptionValueEntity | null> {
     return this.repository.findOne({ where: { id } });
   }
 
-  async findByIds(ids: number[]): Promise<ProductOptionValueEntity[]> {
+  async findByIds(ids: number[]): Promise<OptionValueEntity[]> {
     return this.repository.findBy({ id: In(ids) });
   }
 
-  async save(
-    value: Partial<ProductOptionValueEntity>,
-  ): Promise<ProductOptionValueEntity> {
+  async save(value: Partial<OptionValueEntity>): Promise<OptionValueEntity> {
     const entity = this.repository.create(value);
     return this.repository.save(entity);
   }
 
   async update(
     id: number,
-    data: Partial<ProductOptionValueEntity>,
-  ): Promise<ProductOptionValueEntity | null> {
+    data: Partial<OptionValueEntity>,
+  ): Promise<OptionValueEntity | null> {
     await this.repository.update(id, data);
     return this.findById(id);
   }

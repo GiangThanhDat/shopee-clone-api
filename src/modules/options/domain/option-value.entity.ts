@@ -7,10 +7,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ProductOptionEntity } from './product-option.entity';
+import { OptionEntity } from './option.entity';
 
-@Entity('product_option_values')
-export class ProductOptionValueEntity {
+@Entity('option_values')
+export class OptionValueEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id: number;
 
@@ -20,12 +20,12 @@ export class ProductOptionValueEntity {
   @Column({ name: 'image_url', type: 'varchar', length: 255 })
   imageUrl: string;
 
-  @Column({ name: 'product_option_id', type: 'bigint' })
-  productOptionId: number;
+  @Column({ name: 'option_id', type: 'bigint' })
+  optionId: number;
 
-  @ManyToOne(() => ProductOptionEntity, (option) => option.values)
-  @JoinColumn({ name: 'product_option_id' })
-  productOption: ProductOptionEntity;
+  @ManyToOne(() => OptionEntity, (option) => option.values)
+  @JoinColumn({ name: 'option_id' })
+  option: OptionEntity;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

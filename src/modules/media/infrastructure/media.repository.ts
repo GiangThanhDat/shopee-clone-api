@@ -11,6 +11,10 @@ export class MediaRepository implements IMediaRepository {
     private readonly repository: Repository<MediaEntity>,
   ) {}
 
+  async findAll(): Promise<MediaEntity[]> {
+    return this.repository.find();
+  }
+
   async findById(id: number): Promise<MediaEntity | null> {
     return this.repository.findOne({ where: { id } });
   }
@@ -18,5 +22,9 @@ export class MediaRepository implements IMediaRepository {
   async save(media: Partial<MediaEntity>): Promise<MediaEntity> {
     const entity = this.repository.create(media);
     return this.repository.save(entity);
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.repository.delete(id);
   }
 }

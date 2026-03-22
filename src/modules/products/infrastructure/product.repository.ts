@@ -28,8 +28,6 @@ export class ProductRepository implements IProductRepository {
     return this.repository.findOne({
       where: { id },
       relations: [
-        'options',
-        'options.values',
         'skus',
         'skus.skuValues',
         'skus.skuValues.optionValue',

@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ProductSkuEntity } from './product-sku.entity';
-import { ProductOptionValueEntity } from './product-option-value.entity';
+import { OptionValueEntity } from '../../options/domain/option-value.entity';
 
 @Entity('sku_values')
 export class SkuValueEntity {
@@ -25,9 +25,9 @@ export class SkuValueEntity {
   @Column({ name: 'option_value_id', type: 'bigint' })
   optionValueId: number;
 
-  @ManyToOne(() => ProductOptionValueEntity)
+  @ManyToOne(() => OptionValueEntity)
   @JoinColumn({ name: 'option_value_id' })
-  optionValue: ProductOptionValueEntity;
+  optionValue: OptionValueEntity;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

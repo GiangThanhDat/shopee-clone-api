@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import type { IProductSkuRepository } from './interfaces/product-sku-repository.interface';
 import { PRODUCT_SKU_REPOSITORY } from './interfaces/product-sku-repository.interface';
-import type { IOptionValueRepository } from './interfaces/option-value-repository.interface';
-import { OPTION_VALUE_REPOSITORY } from './interfaces/option-value-repository.interface';
+import type { IOptionValueRepository } from '../../options/application/interfaces/option-value-repository.interface';
+import { OPTION_VALUE_REPOSITORY } from '../../options/application/interfaces/option-value-repository.interface';
 import { CreateProductSkuDto } from './dto/create-product-sku.dto';
 import { UpdateProductSkuDto } from './dto/update-product-sku.dto';
 
