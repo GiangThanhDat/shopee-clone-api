@@ -7,6 +7,10 @@ export interface IProductMediaRepository {
   findByProductId(productId: number): Promise<ProductMediaEntity[]>;
   findById(id: number): Promise<ProductMediaEntity | null>;
   save(media: DeepPartial<ProductMediaEntity>): Promise<ProductMediaEntity>;
+  update(
+    id: number,
+    data: DeepPartial<ProductMediaEntity>,
+  ): Promise<ProductMediaEntity | null>;
   remove(id: number): Promise<void>;
   softRemoveByIds(ids: number[]): Promise<void>;
 }

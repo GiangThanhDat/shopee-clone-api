@@ -9,7 +9,7 @@ export interface IProductDetailRepository {
   save(detail: DeepPartial<ProductDetailEntity>): Promise<ProductDetailEntity>;
   update(
     id: number,
-    data: Partial<ProductDetailEntity>,
+    data: DeepPartial<ProductDetailEntity>,
   ): Promise<ProductDetailEntity | null>;
   remove(id: number): Promise<void>;
   softRemoveByIds(ids: number[]): Promise<void>;

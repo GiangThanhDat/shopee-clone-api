@@ -26,7 +26,7 @@ import { OrdersModule } from './modules/orders/orders.module';
         database: config.get<string>('DB_NAME', 'shopee_clone'),
         entities: [__dirname + '/modules/**/domain/*.entity{.ts,.js}'],
         synchronize: config.get('NODE_ENV') === 'development',
-        logging: true,
+        // logging: true,
       }),
     }),
     UsersModule,

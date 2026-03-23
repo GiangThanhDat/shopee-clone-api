@@ -20,6 +20,14 @@ export class ProductSpecRepository implements IProductSpecRepository {
     return this.repository.save(entity);
   }
 
+  async update(
+    id: number,
+    data: Partial<ProductSpecEntity>,
+  ): Promise<ProductSpecEntity | null> {
+    await this.repository.update(id, data);
+    return this.findById(id);
+  }
+
   async findOrCreate(name: string, value: string): Promise<ProductSpecEntity> {
     const existing = await this.repository.findOne({
       where: { name, value },

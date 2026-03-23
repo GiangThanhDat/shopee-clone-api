@@ -23,6 +23,9 @@ import { ProductSkuService } from './application/product-sku.service';
 import { ProductMediaService } from './application/product-media.service';
 import { ProductDetailService } from './application/product-detail.service';
 import { ProductOrchestrator } from './application/product-orchestrator.service';
+import { SkuSyncService } from './application/sku-sync.service';
+import { MediaSyncService } from './application/media-sync.service';
+import { DetailSyncService } from './application/detail-sync.service';
 import { ProductController } from './product.controller';
 import { ProductSkuController } from './controllers/product-sku.controller';
 import { ProductMediaController } from './controllers/product-media.controller';
@@ -53,6 +56,9 @@ import { ProductDetailController } from './controllers/product-detail.controller
     { provide: PRODUCT_MEDIA_REPOSITORY, useClass: ProductMediaRepository },
     { provide: PRODUCT_DETAIL_REPOSITORY, useClass: ProductDetailRepository },
     { provide: PRODUCT_SPEC_REPOSITORY, useClass: ProductSpecRepository },
+    SkuSyncService,
+    MediaSyncService,
+    DetailSyncService,
     ProductOrchestrator,
     ProductService,
     ProductSkuService,

@@ -31,6 +31,14 @@ export class ProductMediaRepository implements IProductMediaRepository {
     return this.repository.save(media);
   }
 
+  async update(
+    id: number,
+    data: DeepPartial<ProductMediaEntity>,
+  ): Promise<ProductMediaEntity | null> {
+    await this.repository.update(id, data);
+    return this.findById(id);
+  }
+
   async remove(id: number): Promise<void> {
     await this.repository.delete(id);
   }
