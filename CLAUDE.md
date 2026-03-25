@@ -58,16 +58,18 @@ Each feature is **vertically sliced** — domain, application, and infrastructur
 
 ---
 
-## Object Calisthenics (Hard Rules)
+## Object Calisthenics
+
+Apply to **domain and application layers**. ORM entities and infrastructure classes are exempt where noted.
 
 1. **One level of indentation per method** — extract if you need to indent deeper
 2. **No `else` keyword** — use early returns / guard clauses
-3. **Wrap primitives** — `UserId`, `Email`, `Money`, `OrderCode` as value objects (no raw strings/numbers crossing domain boundaries)
+3. **Wrap primitives** — use value objects (`Email`, `Money`, etc.) when primitives carry domain meaning and validation. Not required for simple DTOs or entity column fields
 4. **First-class collections** — wrap arrays in domain collection classes when they carry behaviour
 5. **One dot per line** — respect Law of Demeter; no `a.b.c.d`
 6. **No abbreviations** — full words; if a name is getting too long the class is doing too much
-7. **Small entities** — classes ≤ 50 lines, methods ≤ 10 lines
-8. **Max 2 instance variables per class** — more means multiple responsibilities
+7. **Small classes and methods** — aim for classes ≤ 50 lines, methods ≤ 10 lines. ORM entities and repositories with query builders are exempt from the class-size limit
+8. **Few instance variables** — max 2 for domain/application classes. ORM entities are exempt (columns map to the DB schema)
 9. **Tell, don't ask** — avoid getters that expose internals; push behaviour into objects
 
 ---
