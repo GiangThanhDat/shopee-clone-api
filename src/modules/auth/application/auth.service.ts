@@ -27,9 +27,11 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
-    await this.ensureEmailNotTaken(dto.email);
-    await this.ensureUsernameNotTaken(dto.username);
-    const passwordHash = await bcrypt.hash(dto.password, this.bcryptRounds);
+    const [, , passwordHash] = await Promise.all([
+      this.ensureEmailNotTaken(dto.email),
+      this.ensureUsernameNotTaken(dto.username),
+      bcrypt.hash(dto.password, this.bcryptRounds),
+    ]);
     const user = await this.usersRepository.save({ ...dto, passwordHash });
     return this.buildAuthResponse(user);
   }
