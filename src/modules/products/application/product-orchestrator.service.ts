@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { DataSource, DeepPartial } from 'typeorm';
+import { DeepPartial } from 'typeorm';
+import { Transactional } from 'typeorm-transactional';
 import { ProductEntity } from '../domain/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -14,31 +15,28 @@ export class ProductOrchestrator {
   constructor(
     @Inject(PRODUCT_REPOSITORY)
     private readonly productRepository: IProductRepository,
-    private readonly dataSource: DataSource,
     private readonly skuSync: SkuSyncService,
     private readonly mediaSync: MediaSyncService,
     private readonly detailSync: DetailSyncService,
   ) {}
 
+  @Transactional()
   async create(dto: CreateProductDto): Promise<ProductEntity | null> {
-    return this.dataSource.transaction(async () => {
-      await this.skuSync.validate(dto.skus);
-      const graph = this.buildGraph(dto);
-      const product = await this.productRepository.create(graph);
-      return this.productRepository.findById(product.id);
-    });
+    await this.skuSync.validate(dto.skus);
+    const graph = this.buildGraph(dto);
+    const product = await this.productRepository.create(graph);
+    return this.productRepository.findById(product.id);
   }
 
+  @Transactional()
   async update(
     id: number,
     dto: UpdateProductDto,
   ): Promise<ProductEntity | null> {
-    return this.dataSource.transaction(async () => {
-      await this.skuSync.validate(dto.skus);
-      await this.updateProductFields(id, dto);
-      await this.syncSubEntities(id, dto);
-      return this.productRepository.findById(id);
-    });
+    await this.skuSync.validate(dto.skus);
+    await this.updateProductFields(id, dto);
+    await this.syncSubEntities(id, dto);
+    return this.productRepository.findById(id);
   }
 
   private buildGraph(dto: CreateProductDto): DeepPartial<ProductEntity> {

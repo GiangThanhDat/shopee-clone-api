@@ -38,36 +38,48 @@ export class SkuSyncService {
   ): Promise<void> {
     const existing = await this.skuRepository.findByProductId(productId);
     const idsToRemove = findIdsToRemove(existing, incoming);
+
+    const toUpdate = incoming.filter((s) => s.id);
+    const toCreate = incoming.filter((s) => !s.id);
+
     await this.skuRepository.softRemoveByIds(idsToRemove);
-    for (const s of incoming) {
-      if (s.id) {
-        await this.updateSku(s);
-        continue;
-      }
-      await this.createSku(productId, s);
-    }
+    await Promise.all([
+      this.bulkUpdate(toUpdate),
+      this.bulkCreate(productId, toCreate),
+    ]);
   }
 
-  private async updateSku(s: SkuInput): Promise<void> {
-    await this.skuRepository.update(Number(s.id), {
+  private async bulkUpdate(items: SkuInput[]): Promise<void> {
+    if (items.length === 0) {
+      return;
+    }
+    const mapped = items.map((s) => ({
+      id: Number(s.id),
       price: s.price,
       stock: s.stock,
       skuCode: s.skuCode,
       thumbUrl: s.thumbUrl,
-    });
+    }));
+    await this.skuRepository.updateMany(mapped);
   }
 
-  private async createSku(productId: number, s: SkuInput): Promise<void> {
-    const skuValues = s.optionValueIds?.map((id) => ({
-      optionValueId: id,
-    }));
-    await this.skuRepository.save({
+  private async bulkCreate(
+    productId: number,
+    items: SkuInput[],
+  ): Promise<void> {
+    if (items.length === 0) {
+      return;
+    }
+    const mapped = items.map((s) => ({
       productId,
       price: s.price,
       stock: s.stock,
       skuCode: s.skuCode,
       thumbUrl: s.thumbUrl,
-      skuValues,
-    });
+      skuValues: s.optionValueIds?.map((id) => ({
+        optionValueId: id,
+      })),
+    }));
+    await this.skuRepository.saveMany(mapped);
   }
 }

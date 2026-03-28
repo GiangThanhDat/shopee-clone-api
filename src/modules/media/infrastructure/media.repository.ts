@@ -24,12 +24,26 @@ export class MediaRepository implements IMediaRepository {
     return this.repository.save(entity);
   }
 
+  async saveMany(medias: Partial<MediaEntity>[]): Promise<MediaEntity[]> {
+    const entities = medias.map((m) => this.repository.create(m));
+    return this.repository.save(entities);
+  }
+
   async update(
     id: number,
     data: Partial<MediaEntity>,
   ): Promise<MediaEntity | null> {
     await this.repository.update(id, data);
     return this.findById(id);
+  }
+
+  async updateMany(items: Partial<MediaEntity>[]): Promise<void> {
+    await Promise.all(
+      items.map((item) => {
+        const { id, ...data } = item;
+        return this.repository.update(Number(id), data);
+      }),
+    );
   }
 
   async remove(id: number): Promise<void> {

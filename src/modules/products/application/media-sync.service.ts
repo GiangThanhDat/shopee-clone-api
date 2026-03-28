@@ -24,54 +24,76 @@ export class MediaSyncService {
     const existing =
       await this.productMediaRepository.findByProductId(productId);
     const idsToRemove = findIdsToRemove(existing, incoming);
+
+    const toUpdate = incoming.filter((m) => m.id);
+    const toCreate = incoming.filter((m) => !m.id);
+
     await this.productMediaRepository.softRemoveByIds(idsToRemove);
-    for (const m of incoming) {
-      if (m.id) {
-        await this.update(Number(m.id), m);
-        continue;
-      }
-      await this.create(productId, m);
-    }
+    await Promise.all([
+      this.bulkUpdate(toUpdate),
+      this.bulkCreate(productId, toCreate),
+    ]);
   }
 
-  private async update(productMediaId: number, m: MediaInput): Promise<void> {
-    if (m.mediaId) {
-      await this.updateExistingMedia(productMediaId, m);
+  private async bulkUpdate(items: MediaInput[]): Promise<void> {
+    if (items.length === 0) {
       return;
     }
-    await this.createAndLinkMedia(productMediaId, m);
+    const withExistingMedia = items.filter((m) => m.mediaId);
+    const withNewMedia = items.filter((m) => !m.mediaId);
+
+    await Promise.all([
+      this.updateExistingMediaBatch(withExistingMedia),
+      this.createAndLinkMediaBatch(withNewMedia),
+    ]);
   }
 
-  private async updateExistingMedia(
-    productMediaId: number,
-    m: MediaInput,
-  ): Promise<void> {
-    await this.productMediaRepository.update(productMediaId, {
+  private async updateExistingMediaBatch(items: MediaInput[]): Promise<void> {
+    if (items.length === 0) {
+      return;
+    }
+    const productMediaUpdates = items.map((m) => ({
+      id: Number(m.id),
       mediaId: m.mediaId,
-    });
-    await this.mediaRepository.update(Number(m.mediaId), {
+    }));
+    const mediaUpdates = items.map((m) => ({
+      id: Number(m.mediaId),
       url: m.url,
       size: m.size,
       fileName: m.fileName,
-    });
+    }));
+    await Promise.all([
+      this.productMediaRepository.updateMany(productMediaUpdates),
+      this.mediaRepository.updateMany(mediaUpdates),
+    ]);
   }
 
-  private async createAndLinkMedia(
-    productMediaId: number,
-    m: MediaInput,
+  private async createAndLinkMediaBatch(items: MediaInput[]): Promise<void> {
+    if (items.length === 0) {
+      return;
+    }
+    const newMedias = await this.mediaRepository.saveMany(
+      items.map((m) => ({
+        url: m.url,
+        size: m.size,
+        fileName: m.fileName,
+      })),
+    );
+    const linkUpdates = items.map((m, index) => ({
+      id: Number(m.id),
+      mediaId: newMedias[index].id,
+    }));
+    await this.productMediaRepository.updateMany(linkUpdates);
+  }
+
+  private async bulkCreate(
+    productId: number,
+    items: MediaInput[],
   ): Promise<void> {
-    const media = await this.mediaRepository.save({
-      url: m.url,
-      size: m.size,
-      fileName: m.fileName,
-    });
-    await this.productMediaRepository.update(productMediaId, {
-      mediaId: media.id,
-    });
-  }
-
-  private async create(productId: number, m: MediaInput): Promise<void> {
-    await this.productMediaRepository.save({
+    if (items.length === 0) {
+      return;
+    }
+    const mapped = items.map((m) => ({
       productId,
       mediaId: m.mediaId,
       media: {
@@ -80,6 +102,7 @@ export class MediaSyncService {
         size: m.size,
         fileName: m.fileName,
       },
-    });
+    }));
+    await this.productMediaRepository.saveMany(mapped);
   }
 }

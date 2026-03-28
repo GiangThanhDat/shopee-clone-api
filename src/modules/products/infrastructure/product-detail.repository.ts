@@ -31,12 +31,27 @@ export class ProductDetailRepository implements IProductDetailRepository {
     return this.repository.save(detail);
   }
 
+  async saveMany(
+    details: DeepPartial<ProductDetailEntity>[],
+  ): Promise<ProductDetailEntity[]> {
+    return this.repository.save(details);
+  }
+
   async update(
     id: number,
     data: Partial<ProductDetailEntity>,
   ): Promise<ProductDetailEntity | null> {
     await this.repository.update(id, data);
     return this.findById(id);
+  }
+
+  async updateMany(items: DeepPartial<ProductDetailEntity>[]): Promise<void> {
+    await Promise.all(
+      items.map((item) => {
+        const { id, ...data } = item;
+        return this.repository.update(Number(id), data);
+      }),
+    );
   }
 
   async remove(id: number): Promise<void> {

@@ -23,63 +23,95 @@ export class DetailSyncService {
   ): Promise<void> {
     const existing = await this.detailRepository.findByProductId(productId);
     const idsToRemove = findIdsToRemove(existing, incoming);
+
+    const toUpdate = incoming.filter((d) => d.id);
+    const toCreate = incoming.filter((d) => !d.id);
+
     await this.detailRepository.softRemoveByIds(idsToRemove);
-    for (const d of incoming) {
-      if (d.id) {
-        await this.update(Number(d.id), d);
-        continue;
-      }
-      await this.create(productId, d);
-    }
+
+    const specsToResolve = [...toUpdate, ...toCreate].filter((d) => !d.fieldId);
+    const resolvedSpecs = await this.resolveSpecs(specsToResolve);
+
+    await Promise.all([
+      this.bulkUpdate(toUpdate, resolvedSpecs),
+      this.bulkCreate(productId, toCreate, resolvedSpecs),
+    ]);
   }
 
-  private async update(detailId: number, d: DetailInput): Promise<void> {
-    if (d.fieldId) {
-      await this.updateExistingSpec(detailId, d);
-      return;
+  private async resolveSpecs(
+    items: DetailInput[],
+  ): Promise<Map<string, number>> {
+    if (items.length === 0) {
+      return new Map();
     }
-    await this.createAndLinkSpec(detailId, d);
-  }
-
-  private async updateExistingSpec(
-    detailId: number,
-    d: DetailInput,
-  ): Promise<void> {
-    await this.detailRepository.update(detailId, {
-      fieldId: d.fieldId,
-    });
-    await this.specRepository.update(Number(d.fieldId), {
+    const specInputs = items.map((d) => ({
       name: d.specName,
       value: d.specValue,
-    });
-  }
+    }));
+    const specs = await this.specRepository.findOrCreateMany(specInputs);
 
-  private async createAndLinkSpec(
-    detailId: number,
-    d: DetailInput,
-  ): Promise<void> {
-    const spec = await this.specRepository.findOrCreate(
-      d.specName,
-      d.specValue,
-    );
-    await this.detailRepository.update(detailId, {
-      fieldId: spec.id,
-    });
-  }
-
-  private async create(productId: number, d: DetailInput): Promise<void> {
-    const fieldId = await this.resolveFieldId(d);
-    await this.detailRepository.save({ productId, fieldId });
-  }
-
-  private async resolveFieldId(d: DetailInput): Promise<number> {
-    if (d.fieldId) {
-      return d.fieldId;
+    const specMap = new Map<string, number>();
+    for (const spec of specs) {
+      specMap.set(`${spec.name}::${spec.value}`, spec.id);
     }
-    const spec = await this.specRepository.findOrCreate(
-      d.specName,
-      d.specValue,
-    );
-    return spec.id;
+    return specMap;
+  }
+
+  private getFieldId(
+    detail: DetailInput,
+    resolvedSpecs: Map<string, number>,
+  ): number {
+    if (detail.fieldId) {
+      return detail.fieldId;
+    }
+    const key = `${detail.specName}::${detail.specValue}`;
+    return resolvedSpecs.get(key)!;
+  }
+
+  private async bulkUpdate(
+    items: DetailInput[],
+    resolvedSpecs: Map<string, number>,
+  ): Promise<void> {
+    if (items.length === 0) {
+      return;
+    }
+    const withExistingSpec = items.filter((d) => d.fieldId);
+    const withNewSpec = items.filter((d) => !d.fieldId);
+
+    const updates = [
+      ...withExistingSpec.map((d) => ({
+        id: Number(d.id),
+        fieldId: d.fieldId,
+      })),
+      ...withNewSpec.map((d) => ({
+        id: Number(d.id),
+        fieldId: this.getFieldId(d, resolvedSpecs),
+      })),
+    ];
+    await this.detailRepository.updateMany(updates);
+
+    const specUpdates = withExistingSpec.map((d) => ({
+      id: Number(d.fieldId),
+      name: d.specName,
+      value: d.specValue,
+    }));
+    if (specUpdates.length > 0) {
+      await this.specRepository.updateMany(specUpdates);
+    }
+  }
+
+  private async bulkCreate(
+    productId: number,
+    items: DetailInput[],
+    resolvedSpecs: Map<string, number>,
+  ): Promise<void> {
+    if (items.length === 0) {
+      return;
+    }
+    const mapped = items.map((d) => ({
+      productId,
+      fieldId: this.getFieldId(d, resolvedSpecs),
+    }));
+    await this.detailRepository.saveMany(mapped);
   }
 }

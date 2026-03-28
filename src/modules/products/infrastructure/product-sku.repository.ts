@@ -32,6 +32,12 @@ export class ProductSkuRepository implements IProductSkuRepository {
     return this.repository.save(sku);
   }
 
+  async saveMany(
+    skus: DeepPartial<ProductSkuEntity>[],
+  ): Promise<ProductSkuEntity[]> {
+    return this.repository.save(skus);
+  }
+
   async saveWithValues(
     sku: Partial<ProductSkuEntity>,
     values: Partial<SkuValueEntity>[],
@@ -50,6 +56,15 @@ export class ProductSkuRepository implements IProductSkuRepository {
   ): Promise<ProductSkuEntity | null> {
     await this.repository.update(id, data);
     return this.findById(id);
+  }
+
+  async updateMany(skus: DeepPartial<ProductSkuEntity>[]): Promise<void> {
+    await Promise.all(
+      skus.map((sku) => {
+        const { id, ...data } = sku;
+        return this.repository.update(Number(id), data);
+      }),
+    );
   }
 
   async remove(id: number): Promise<void> {

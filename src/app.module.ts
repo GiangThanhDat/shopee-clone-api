@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
@@ -28,6 +30,12 @@ import { OrdersModule } from './modules/orders/orders.module';
         synchronize: config.get('NODE_ENV') === 'development',
         // logging: true,
       }),
+      dataSourceFactory: (options) => {
+        if (!options) {
+          throw new Error('TypeORM options are not provided');
+        }
+        return addTransactionalDataSource(new DataSource(options));
+      },
     }),
     UsersModule,
     AuthModule,

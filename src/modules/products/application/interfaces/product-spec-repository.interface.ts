@@ -10,4 +10,8 @@ export interface IProductSpecRepository {
     data: Partial<ProductSpecEntity>,
   ): Promise<ProductSpecEntity | null>;
   findOrCreate(name: string, value: string): Promise<ProductSpecEntity>;
+  findOrCreateMany(
+    specs: { name: string; value: string }[],
+  ): Promise<ProductSpecEntity[]>;
+  updateMany(specs: Partial<ProductSpecEntity>[]): Promise<void>;
 }

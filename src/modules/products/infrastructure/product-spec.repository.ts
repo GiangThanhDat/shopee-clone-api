@@ -37,4 +37,36 @@ export class ProductSpecRepository implements IProductSpecRepository {
     }
     return this.save({ name, value });
   }
+
+  async findOrCreateMany(
+    specs: { name: string; value: string }[],
+  ): Promise<ProductSpecEntity[]> {
+    if (specs.length === 0) {
+      return [];
+    }
+    const conditions = specs.map((s) => ({ name: s.name, value: s.value }));
+    const existing = await this.repository.find({ where: conditions });
+
+    const existingKeys = new Set(existing.map((e) => `${e.name}::${e.value}`));
+    const toCreate = specs.filter(
+      (s) => !existingKeys.has(`${s.name}::${s.value}`),
+    );
+
+    if (toCreate.length === 0) {
+      return existing;
+    }
+    const created = await this.repository.save(
+      toCreate.map((s) => this.repository.create(s)),
+    );
+    return [...existing, ...created];
+  }
+
+  async updateMany(specs: Partial<ProductSpecEntity>[]): Promise<void> {
+    await Promise.all(
+      specs.map((spec) => {
+        const { id, ...data } = spec;
+        return this.repository.update(Number(id), data);
+      }),
+    );
+  }
 }

@@ -6,8 +6,8 @@ import { OPTION_VALUE_REPOSITORY } from '../../options/application/interfaces/op
 
 const mockSkuRepo = {
   findByProductId: jest.fn(),
-  save: jest.fn(),
-  update: jest.fn(),
+  saveMany: jest.fn(),
+  updateMany: jest.fn(),
   softRemoveByIds: jest.fn(),
 };
 
@@ -48,43 +48,50 @@ describe('SkuSyncService', () => {
   describe('sync', () => {
     it('should soft delete removed SKUs', async () => {
       mockSkuRepo.findByProductId.mockResolvedValue([{ id: 1 }, { id: 2 }]);
-      mockSkuRepo.update.mockResolvedValue({});
+      mockSkuRepo.updateMany.mockResolvedValue([]);
 
       await service.sync(1, [{ id: 1, price: 100 }] as any);
 
       expect(mockSkuRepo.softRemoveByIds).toHaveBeenCalledWith([2]);
     });
 
-    it('should update existing SKU', async () => {
+    it('should bulk update existing SKUs', async () => {
       mockSkuRepo.findByProductId.mockResolvedValue([{ id: 5 }]);
+      mockSkuRepo.updateMany.mockResolvedValue([]);
 
       await service.sync(1, [
         { id: 5, price: 300, stock: 20, skuCode: 'S1' },
       ] as any);
 
-      expect(mockSkuRepo.update).toHaveBeenCalledWith(5, {
-        price: 300,
-        stock: 20,
-        skuCode: 'S1',
-        thumbUrl: undefined,
-      });
+      expect(mockSkuRepo.updateMany).toHaveBeenCalledWith([
+        {
+          id: 5,
+          price: 300,
+          stock: 20,
+          skuCode: 'S1',
+          thumbUrl: undefined,
+        },
+      ]);
     });
 
-    it('should create new SKU', async () => {
+    it('should bulk create new SKUs', async () => {
       mockSkuRepo.findByProductId.mockResolvedValue([]);
+      mockSkuRepo.saveMany.mockResolvedValue([]);
 
       await service.sync(1, [
         { price: 100, stock: 10, skuCode: 'NEW', optionValueIds: [1] },
       ] as any);
 
-      expect(mockSkuRepo.save).toHaveBeenCalledWith({
-        productId: 1,
-        price: 100,
-        stock: 10,
-        skuCode: 'NEW',
-        thumbUrl: undefined,
-        skuValues: [{ optionValueId: 1 }],
-      });
+      expect(mockSkuRepo.saveMany).toHaveBeenCalledWith([
+        {
+          productId: 1,
+          price: 100,
+          stock: 10,
+          skuCode: 'NEW',
+          thumbUrl: undefined,
+          skuValues: [{ optionValueId: 1 }],
+        },
+      ]);
     });
   });
 });

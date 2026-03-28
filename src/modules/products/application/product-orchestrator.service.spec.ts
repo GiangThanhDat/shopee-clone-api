@@ -1,10 +1,13 @@
 import { Test } from '@nestjs/testing';
-import { DataSource } from 'typeorm';
 import { ProductOrchestrator } from './product-orchestrator.service';
 import { PRODUCT_REPOSITORY } from './interfaces/product-repository.interface';
 import { SkuSyncService } from './sku-sync.service';
 import { MediaSyncService } from './media-sync.service';
 import { DetailSyncService } from './detail-sync.service';
+
+jest.mock('typeorm-transactional', () => ({
+  Transactional: () => () => ({}),
+}));
 
 const mockProductRepo = {
   create: jest.fn(),
@@ -25,10 +28,6 @@ const mockDetailSync = {
   sync: jest.fn(),
 };
 
-const mockDataSource = {
-  transaction: jest.fn((cb: (em: unknown) => Promise<unknown>) => cb(null)),
-};
-
 describe('ProductOrchestrator', () => {
   let orchestrator: ProductOrchestrator;
 
@@ -40,7 +39,6 @@ describe('ProductOrchestrator', () => {
         { provide: SkuSyncService, useValue: mockSkuSync },
         { provide: MediaSyncService, useValue: mockMediaSync },
         { provide: DetailSyncService, useValue: mockDetailSync },
-        { provide: DataSource, useValue: mockDataSource },
       ],
     }).compile();
 

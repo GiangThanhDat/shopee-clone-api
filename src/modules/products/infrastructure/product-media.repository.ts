@@ -31,12 +31,27 @@ export class ProductMediaRepository implements IProductMediaRepository {
     return this.repository.save(media);
   }
 
+  async saveMany(
+    medias: DeepPartial<ProductMediaEntity>[],
+  ): Promise<ProductMediaEntity[]> {
+    return this.repository.save(medias);
+  }
+
   async update(
     id: number,
     data: DeepPartial<ProductMediaEntity>,
   ): Promise<ProductMediaEntity | null> {
     await this.repository.update(id, data);
     return this.findById(id);
+  }
+
+  async updateMany(items: DeepPartial<ProductMediaEntity>[]): Promise<void> {
+    await Promise.all(
+      items.map((item) => {
+        const { id, ...data } = item;
+        return this.repository.update(Number(id), data);
+      }),
+    );
   }
 
   async remove(id: number): Promise<void> {

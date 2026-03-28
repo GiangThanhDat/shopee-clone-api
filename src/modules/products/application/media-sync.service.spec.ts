@@ -5,14 +5,14 @@ import { MEDIA_REPOSITORY } from '../../media/application/interfaces/media-repos
 
 const mockProductMediaRepo = {
   findByProductId: jest.fn(),
-  save: jest.fn(),
-  update: jest.fn(),
+  saveMany: jest.fn(),
+  updateMany: jest.fn(),
   softRemoveByIds: jest.fn(),
 };
 
 const mockMediaRepo = {
-  save: jest.fn(),
-  update: jest.fn(),
+  saveMany: jest.fn(),
+  updateMany: jest.fn(),
 };
 
 describe('MediaSyncService', () => {
@@ -43,53 +43,52 @@ describe('MediaSyncService', () => {
       expect(mockProductMediaRepo.softRemoveByIds).toHaveBeenCalledWith([1, 2]);
     });
 
-    it('should update existing media entity when mediaId provided', async () => {
+    it('should bulk update existing media when mediaId provided', async () => {
       mockProductMediaRepo.findByProductId.mockResolvedValue([{ id: 6 }]);
 
       await service.sync(1, [
         { id: 6, mediaId: 3, url: 'new.jpg', size: 2048, fileName: 'f' },
       ] as any);
 
-      expect(mockProductMediaRepo.update).toHaveBeenCalledWith(6, {
-        mediaId: 3,
-      });
-      expect(mockMediaRepo.update).toHaveBeenCalledWith(3, {
-        url: 'new.jpg',
-        size: 2048,
-        fileName: 'f',
-      });
+      expect(mockProductMediaRepo.updateMany).toHaveBeenCalledWith([
+        { id: 6, mediaId: 3 },
+      ]);
+      expect(mockMediaRepo.updateMany).toHaveBeenCalledWith([
+        { id: 3, url: 'new.jpg', size: 2048, fileName: 'f' },
+      ]);
     });
 
-    it('should create new media when no mediaId provided', async () => {
+    it('should create new media and link when no mediaId provided', async () => {
       mockProductMediaRepo.findByProductId.mockResolvedValue([{ id: 6 }]);
-      mockMediaRepo.save.mockResolvedValue({ id: 99 });
+      mockMediaRepo.saveMany.mockResolvedValue([{ id: 99 }]);
 
       await service.sync(1, [
         { id: 6, url: 'new.jpg', size: 1024, fileName: 'f' },
       ] as any);
 
-      expect(mockMediaRepo.save).toHaveBeenCalledWith({
-        url: 'new.jpg',
-        size: 1024,
-        fileName: 'f',
-      });
-      expect(mockProductMediaRepo.update).toHaveBeenCalledWith(6, {
-        mediaId: 99,
-      });
+      expect(mockMediaRepo.saveMany).toHaveBeenCalledWith([
+        { url: 'new.jpg', size: 1024, fileName: 'f' },
+      ]);
+      expect(mockProductMediaRepo.updateMany).toHaveBeenCalledWith([
+        { id: 6, mediaId: 99 },
+      ]);
     });
 
-    it('should create new product media', async () => {
+    it('should bulk create new product media', async () => {
       mockProductMediaRepo.findByProductId.mockResolvedValue([]);
+      mockProductMediaRepo.saveMany.mockResolvedValue([]);
 
       await service.sync(1, [
         { mediaId: 3, url: 'url', size: 512, fileName: 'f' },
       ] as any);
 
-      expect(mockProductMediaRepo.save).toHaveBeenCalledWith({
-        productId: 1,
-        mediaId: 3,
-        media: { id: 3, url: 'url', size: 512, fileName: 'f' },
-      });
+      expect(mockProductMediaRepo.saveMany).toHaveBeenCalledWith([
+        {
+          productId: 1,
+          mediaId: 3,
+          media: { id: 3, url: 'url', size: 512, fileName: 'f' },
+        },
+      ]);
     });
   });
 });
