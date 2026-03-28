@@ -30,7 +30,8 @@ import { OrdersModule } from './modules/orders/orders.module';
         synchronize: config.get('NODE_ENV') === 'development',
         // logging: true,
       }),
-      dataSourceFactory: (options) => {
+      // eslint-disable-next-line @typescript-eslint/require-await
+      dataSourceFactory: async (options) => {
         if (!options) {
           throw new Error('TypeORM options are not provided');
         }
