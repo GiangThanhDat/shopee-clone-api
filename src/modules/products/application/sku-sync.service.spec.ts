@@ -9,6 +9,7 @@ const mockSkuRepo = {
   saveMany: jest.fn(),
   updateMany: jest.fn(),
   softRemoveByIds: jest.fn(),
+  syncSkuValues: jest.fn(),
 };
 
 const mockOptionValueRepo = {
@@ -37,9 +38,15 @@ describe('SkuSyncService', () => {
     });
 
     it('should throw when option value IDs are invalid', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const skus = [{ price: 100, optionValueIds: [1, 2] }] as any;
       mockOptionValueRepo.findByIds.mockResolvedValue([{ id: 1 }]);
+
+      await expect(service.validate(skus)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should validate optionValueIds for existing SKUs too', async () => {
+      const skus = [{ id: 5, price: 100, optionValueIds: [10, 20] }] as any;
+      mockOptionValueRepo.findByIds.mockResolvedValue([{ id: 10 }]);
 
       await expect(service.validate(skus)).rejects.toThrow(BadRequestException);
     });
@@ -92,6 +99,32 @@ describe('SkuSyncService', () => {
           skuValues: [{ optionValueId: 1 }],
         },
       ]);
+    });
+
+    it('should sync skuValues when updating with optionValueIds', async () => {
+      mockSkuRepo.findByProductId.mockResolvedValue([{ id: 5 }]);
+      mockSkuRepo.updateMany.mockResolvedValue(undefined);
+      mockSkuRepo.syncSkuValues.mockResolvedValue(undefined);
+
+      await service.sync(1, [
+        { id: 5, price: 300, stock: 20, skuCode: 'S1', optionValueIds: [10, 20] },
+      ] as any);
+
+      expect(mockSkuRepo.syncSkuValues).toHaveBeenCalledWith([
+        { skuId: 5, optionValueIds: [10, 20] },
+      ]);
+    });
+
+    it('should not sync skuValues when updating without optionValueIds', async () => {
+      mockSkuRepo.findByProductId.mockResolvedValue([{ id: 5 }]);
+      mockSkuRepo.updateMany.mockResolvedValue(undefined);
+      mockSkuRepo.syncSkuValues.mockResolvedValue(undefined);
+
+      await service.sync(1, [
+        { id: 5, price: 300, stock: 20, skuCode: 'S1' },
+      ] as any);
+
+      expect(mockSkuRepo.syncSkuValues).toHaveBeenCalledWith([]);
     });
   });
 });

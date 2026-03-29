@@ -29,14 +29,6 @@ export class MediaRepository implements IMediaRepository {
     return this.repository.save(entities);
   }
 
-  async update(
-    id: number,
-    data: Partial<MediaEntity>,
-  ): Promise<MediaEntity | null> {
-    await this.repository.update(id, data);
-    return this.findById(id);
-  }
-
   async updateMany(items: Partial<MediaEntity>[]): Promise<void> {
     await Promise.all(
       items.map((item) => {

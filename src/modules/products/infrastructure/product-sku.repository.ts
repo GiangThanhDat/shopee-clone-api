@@ -28,10 +28,6 @@ export class ProductSkuRepository implements IProductSkuRepository {
     });
   }
 
-  async save(sku: DeepPartial<ProductSkuEntity>): Promise<ProductSkuEntity> {
-    return this.repository.save(sku);
-  }
-
   async saveMany(
     skus: DeepPartial<ProductSkuEntity>[],
   ): Promise<ProductSkuEntity[]> {
@@ -42,7 +38,7 @@ export class ProductSkuRepository implements IProductSkuRepository {
     sku: Partial<ProductSkuEntity>,
     values: Partial<SkuValueEntity>[],
   ): Promise<ProductSkuEntity> {
-    const saved = await this.save(sku);
+    const saved = await this.repository.save(sku);
     const skuValues = values.map((v) =>
       this.skuValueRepository.create({ ...v, skuId: saved.id }),
     );
@@ -77,5 +73,27 @@ export class ProductSkuRepository implements IProductSkuRepository {
       return;
     }
     await this.repository.softDelete({ id: In(ids) });
+  }
+
+  async syncSkuValues(
+    entries: { skuId: number; optionValueIds: number[] }[],
+  ): Promise<void> {
+    if (entries.length === 0) {
+      return;
+    }
+    const skuIds = entries.map((e) => e.skuId);
+    await this.skuValueRepository.delete({ skuId: In(skuIds) });
+
+    const newValues = entries.flatMap((entry) =>
+      entry.optionValueIds.map((optionValueId) =>
+        this.skuValueRepository.create({
+          skuId: entry.skuId,
+          optionValueId,
+        }),
+      ),
+    );
+    if (newValues.length > 0) {
+      await this.skuValueRepository.save(newValues);
+    }
   }
 }

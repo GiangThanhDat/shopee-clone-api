@@ -7,7 +7,6 @@ export const PRODUCT_SKU_REPOSITORY = Symbol('PRODUCT_SKU_REPOSITORY');
 export interface IProductSkuRepository {
   findByProductId(productId: number): Promise<ProductSkuEntity[]>;
   findById(id: number): Promise<ProductSkuEntity | null>;
-  save(sku: DeepPartial<ProductSkuEntity>): Promise<ProductSkuEntity>;
   saveMany(skus: DeepPartial<ProductSkuEntity>[]): Promise<ProductSkuEntity[]>;
   saveWithValues(
     sku: Partial<ProductSkuEntity>,
@@ -20,4 +19,7 @@ export interface IProductSkuRepository {
   updateMany(skus: DeepPartial<ProductSkuEntity>[]): Promise<void>;
   remove(id: number): Promise<void>;
   softRemoveByIds(ids: number[]): Promise<void>;
+  syncSkuValues(
+    entries: { skuId: number; optionValueIds: number[] }[],
+  ): Promise<void>;
 }

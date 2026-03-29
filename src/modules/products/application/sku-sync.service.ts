@@ -21,7 +21,7 @@ export class SkuSyncService {
     if (!skus) {
       return;
     }
-    const allIds = skus.filter((s) => !s.id).flatMap((s) => s.optionValueIds);
+    const allIds = skus.flatMap((s) => s.optionValueIds ?? []);
     if (allIds.length === 0) {
       return;
     }
@@ -60,7 +60,19 @@ export class SkuSyncService {
       skuCode: s.skuCode,
       thumbUrl: s.thumbUrl,
     }));
-    await this.skuRepository.updateMany(mapped);
+    const skuValueEntries = items
+      .filter((s): s is SkuInput & { optionValueIds: number[] } =>
+        Array.isArray(s.optionValueIds),
+      )
+      .map((s) => ({
+        skuId: Number(s.id),
+        optionValueIds: s.optionValueIds,
+      }));
+
+    await Promise.all([
+      this.skuRepository.updateMany(mapped),
+      this.skuRepository.syncSkuValues(skuValueEntries),
+    ]);
   }
 
   private async bulkCreate(

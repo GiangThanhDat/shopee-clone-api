@@ -10,10 +10,6 @@ export interface IProductMediaRepository {
   saveMany(
     medias: DeepPartial<ProductMediaEntity>[],
   ): Promise<ProductMediaEntity[]>;
-  update(
-    id: number,
-    data: DeepPartial<ProductMediaEntity>,
-  ): Promise<ProductMediaEntity | null>;
   updateMany(items: DeepPartial<ProductMediaEntity>[]): Promise<void>;
   remove(id: number): Promise<void>;
   softRemoveByIds(ids: number[]): Promise<void>;
