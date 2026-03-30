@@ -55,12 +55,10 @@ export class ProductSkuRepository implements IProductSkuRepository {
   }
 
   async updateMany(skus: DeepPartial<ProductSkuEntity>[]): Promise<void> {
-    await Promise.all(
-      skus.map((sku) => {
-        const { id, ...data } = sku;
-        return this.repository.update(Number(id), data);
-      }),
-    );
+    if (skus.length === 0) {
+      return;
+    }
+    await this.repository.save(skus);
   }
 
   async remove(id: number): Promise<void> {

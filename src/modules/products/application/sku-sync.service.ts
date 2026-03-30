@@ -43,10 +43,8 @@ export class SkuSyncService {
     const toCreate = incoming.filter((s) => !s.id);
 
     await this.skuRepository.softRemoveByIds(idsToRemove);
-    await Promise.all([
-      this.bulkUpdate(toUpdate),
-      this.bulkCreate(productId, toCreate),
-    ]);
+    await this.bulkUpdate(toUpdate);
+    await this.bulkCreate(productId, toCreate);
   }
 
   private async bulkUpdate(items: SkuInput[]): Promise<void> {
@@ -69,10 +67,8 @@ export class SkuSyncService {
         optionValueIds: s.optionValueIds,
       }));
 
-    await Promise.all([
-      this.skuRepository.updateMany(mapped),
-      this.skuRepository.syncSkuValues(skuValueEntries),
-    ]);
+    await this.skuRepository.updateMany(mapped);
+    await this.skuRepository.syncSkuValues(skuValueEntries);
   }
 
   private async bulkCreate(

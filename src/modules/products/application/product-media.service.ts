@@ -35,11 +35,11 @@ export class ProductMediaService {
       size: dto.size,
       fileName: dto.fileName,
     });
-    const productMedia = await this.productMediaRepository.save({
+    const saved = await this.productMediaRepository.save({
       productId,
       mediaId: media.id,
     });
-    return { productMedia };
+    return this.findById(saved.id);
   }
 
   async removeMedia(productMediaId: number) {

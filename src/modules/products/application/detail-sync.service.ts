@@ -32,10 +32,8 @@ export class DetailSyncService {
     const specsToResolve = [...toUpdate, ...toCreate].filter((d) => !d.fieldId);
     const resolvedSpecs = await this.resolveSpecs(specsToResolve);
 
-    await Promise.all([
-      this.bulkUpdate(toUpdate, resolvedSpecs),
-      this.bulkCreate(productId, toCreate, resolvedSpecs),
-    ]);
+    await this.bulkUpdate(toUpdate, resolvedSpecs);
+    await this.bulkCreate(productId, toCreate, resolvedSpecs);
   }
 
   private async resolveSpecs(

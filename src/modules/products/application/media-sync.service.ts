@@ -29,10 +29,8 @@ export class MediaSyncService {
     const toCreate = incoming.filter((m) => !m.id);
 
     await this.productMediaRepository.softRemoveByIds(idsToRemove);
-    await Promise.all([
-      this.bulkUpdate(toUpdate),
-      this.bulkCreate(productId, toCreate),
-    ]);
+    await this.bulkUpdate(toUpdate);
+    await this.bulkCreate(productId, toCreate);
   }
 
   private async bulkUpdate(items: MediaInput[]): Promise<void> {
@@ -42,10 +40,8 @@ export class MediaSyncService {
     const withExistingMedia = items.filter((m) => m.mediaId);
     const withNewMedia = items.filter((m) => !m.mediaId);
 
-    await Promise.all([
-      this.updateExistingMediaBatch(withExistingMedia),
-      this.createAndLinkMediaBatch(withNewMedia),
-    ]);
+    await this.updateExistingMediaBatch(withExistingMedia);
+    await this.createAndLinkMediaBatch(withNewMedia);
   }
 
   private async updateExistingMediaBatch(items: MediaInput[]): Promise<void> {
@@ -62,10 +58,8 @@ export class MediaSyncService {
       size: m.size,
       fileName: m.fileName,
     }));
-    await Promise.all([
-      this.productMediaRepository.updateMany(productMediaUpdates),
-      this.mediaRepository.updateMany(mediaUpdates),
-    ]);
+    await this.productMediaRepository.updateMany(productMediaUpdates);
+    await this.mediaRepository.updateMany(mediaUpdates);
   }
 
   private async createAndLinkMediaBatch(items: MediaInput[]): Promise<void> {

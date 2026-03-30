@@ -33,11 +33,11 @@ export class ProductDetailService {
       dto.specName,
       dto.specValue,
     );
-    const detail = await this.detailRepository.save({
+    const saved = await this.detailRepository.save({
       productId,
       fieldId: spec.id,
     });
-    return { detail };
+    return this.findById(saved.id);
   }
 
   async updateDetail(detailId: number, dto: UpdateProductDetailDto) {

@@ -46,11 +46,9 @@ export class ProductSpecRepository implements IProductSpecRepository {
   }
 
   async updateMany(specs: Partial<ProductSpecEntity>[]): Promise<void> {
-    await Promise.all(
-      specs.map((spec) => {
-        const { id, ...data } = spec;
-        return this.repository.update(Number(id), data);
-      }),
-    );
+    if (specs.length === 0) {
+      return;
+    }
+    await this.repository.save(specs);
   }
 }

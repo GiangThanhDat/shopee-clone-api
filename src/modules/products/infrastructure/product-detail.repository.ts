@@ -46,12 +46,10 @@ export class ProductDetailRepository implements IProductDetailRepository {
   }
 
   async updateMany(items: DeepPartial<ProductDetailEntity>[]): Promise<void> {
-    await Promise.all(
-      items.map((item) => {
-        const { id, ...data } = item;
-        return this.repository.update(Number(id), data);
-      }),
-    );
+    if (items.length === 0) {
+      return;
+    }
+    await this.repository.save(items);
   }
 
   async remove(id: number): Promise<void> {
