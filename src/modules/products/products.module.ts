@@ -65,6 +65,6 @@ import { ProductDetailController } from './controllers/product-detail.controller
     ProductMediaService,
     ProductDetailService,
   ],
-  exports: [TypeOrmModule, ProductService],
+  exports: [TypeOrmModule, ProductService, PRODUCT_SKU_REPOSITORY],
 })
 export class ProductsModule {}

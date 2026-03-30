@@ -28,6 +28,10 @@ export class ProductSkuRepository implements IProductSkuRepository {
     });
   }
 
+  async findByIds(ids: number[]): Promise<ProductSkuEntity[]> {
+    return this.repository.findBy({ id: In(ids) });
+  }
+
   async saveMany(
     skus: DeepPartial<ProductSkuEntity>[],
   ): Promise<ProductSkuEntity[]> {

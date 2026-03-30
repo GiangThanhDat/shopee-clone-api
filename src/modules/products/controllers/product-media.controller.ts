@@ -51,6 +51,8 @@ export class ProductMediaController {
   @Post()
   @ApiOperation({ summary: 'Add media to product' })
   @ApiResponse({ status: 201, type: ProductMediaDataDto })
+  @ApiResponse({ status: 400, type: ErrorResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ResponseMessage('Media added successfully')
   create(
     @Param('productId', ParseIntPipe) productId: number,
@@ -62,6 +64,7 @@ export class ProductMediaController {
   @Delete(':mediaId')
   @ApiOperation({ summary: 'Remove media from product' })
   @ApiResponse({ status: 200, type: ProductMediaDataDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Media removed successfully')
   remove(@Param('mediaId', ParseIntPipe) mediaId: number) {

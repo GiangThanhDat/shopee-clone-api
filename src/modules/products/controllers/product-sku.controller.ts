@@ -54,6 +54,7 @@ export class ProductSkuController {
   @ApiOperation({ summary: 'Create product SKU' })
   @ApiResponse({ status: 201, type: ProductSkuDataDto })
   @ApiResponse({ status: 400, type: ErrorResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ResponseMessage('SKU created successfully')
   create(
     @Param('productId', ParseIntPipe) productId: number,
@@ -65,6 +66,8 @@ export class ProductSkuController {
   @Patch(':skuId')
   @ApiOperation({ summary: 'Update product SKU' })
   @ApiResponse({ status: 200, type: ProductSkuDataDto })
+  @ApiResponse({ status: 400, type: ErrorResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('SKU updated successfully')
   update(
@@ -77,6 +80,7 @@ export class ProductSkuController {
   @Delete(':skuId')
   @ApiOperation({ summary: 'Delete product SKU' })
   @ApiResponse({ status: 200, type: ProductSkuDataDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('SKU deleted successfully')
   remove(@Param('skuId', ParseIntPipe) skuId: number) {

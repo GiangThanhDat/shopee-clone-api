@@ -12,8 +12,8 @@ import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenResponseDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
-import type { IUsersRepository } from './interfaces/users-repository.interface';
-import { USERS_REPOSITORY } from './interfaces/users-repository.interface';
+import type { IUsersRepository } from '../../users/application/interfaces/users-repository.interface';
+import { USERS_REPOSITORY } from '../../users/application/interfaces/users-repository.interface';
 
 @Injectable()
 export class AuthService {

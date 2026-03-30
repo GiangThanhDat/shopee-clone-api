@@ -1,10 +1,13 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import {
+  PRODUCT_SKU_REPOSITORY,
+  type IProductSkuRepository,
+} from '../../products/application/interfaces/product-sku-repository.interface';
 import { ProductSkuEntity } from '../../products/domain/product-sku.entity';
 import { CreateOrderDto, OrderItemDto } from './dto/create-order.dto';
 
@@ -16,8 +19,8 @@ export interface VerifiedOrderResult {
 @Injectable()
 export class OrderPriceVerifier {
   constructor(
-    @InjectRepository(ProductSkuEntity)
-    private readonly skuRepository: Repository<ProductSkuEntity>,
+    @Inject(PRODUCT_SKU_REPOSITORY)
+    private readonly skuRepository: IProductSkuRepository,
   ) {}
 
   async verify(dto: CreateOrderDto): Promise<VerifiedOrderResult> {
@@ -31,7 +34,7 @@ export class OrderPriceVerifier {
   private async loadSkus(
     skuIds: number[],
   ): Promise<Map<number, ProductSkuEntity>> {
-    const skus = await this.skuRepository.findBy({ id: In(skuIds) });
+    const skus = await this.skuRepository.findByIds(skuIds);
     const skuMap = new Map<number, ProductSkuEntity>();
     for (const sku of skus) {
       skuMap.set(sku.id, sku);

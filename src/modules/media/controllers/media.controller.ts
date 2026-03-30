@@ -51,6 +51,8 @@ export class MediaController {
   @Post()
   @ApiOperation({ summary: 'Upload media' })
   @ApiResponse({ status: 201, type: MediaDataDto })
+  @ApiResponse({ status: 400, type: ErrorResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ResponseMessage('Media created successfully')
   create(@Body() dto: CreateMediaDto) {
     return this.mediaService.create(dto);
@@ -59,6 +61,7 @@ export class MediaController {
   @Delete(':mediaId')
   @ApiOperation({ summary: 'Delete media' })
   @ApiResponse({ status: 200, type: MediaDataDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Media deleted successfully')
   remove(@Param('mediaId', ParseIntPipe) mediaId: number) {

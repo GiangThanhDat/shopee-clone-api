@@ -53,6 +53,8 @@ export class ProductDetailController {
   @Post()
   @ApiOperation({ summary: 'Add specification to product' })
   @ApiResponse({ status: 201, type: ProductDetailDataDto })
+  @ApiResponse({ status: 400, type: ErrorResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ResponseMessage('Detail added successfully')
   create(
     @Param('productId', ParseIntPipe) productId: number,
@@ -64,6 +66,8 @@ export class ProductDetailController {
   @Patch(':detailId')
   @ApiOperation({ summary: 'Update product specification' })
   @ApiResponse({ status: 200, type: ProductDetailDataDto })
+  @ApiResponse({ status: 400, type: ErrorResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Detail updated successfully')
   update(
@@ -76,6 +80,7 @@ export class ProductDetailController {
   @Delete(':detailId')
   @ApiOperation({ summary: 'Remove product specification' })
   @ApiResponse({ status: 200, type: ProductDetailDataDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Detail deleted successfully')
   remove(@Param('detailId', ParseIntPipe) detailId: number) {

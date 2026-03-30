@@ -33,7 +33,6 @@ export class OptionValueRepository implements IOptionValueRepository {
   async saveMany(
     values: Partial<OptionValueEntity>[],
   ): Promise<OptionValueEntity[]> {
-    console.log('[values]:', values);
     return this.repository.save(values);
   }
 
