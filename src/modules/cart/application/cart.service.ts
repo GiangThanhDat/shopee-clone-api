@@ -1,72 +1,40 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { CartEntity } from '../domain/cart.entity';
+import { CartItemSyncService } from './cart-item-sync.service';
+import { UpdateCartDto } from './dto/update-cart.dto';
 import type { ICartRepository } from './interfaces/cart-repository.interface';
 import { CART_REPOSITORY } from './interfaces/cart-repository.interface';
-import { AddToCartDto } from './dto/add-to-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
 
 @Injectable()
 export class CartService {
   constructor(
     @Inject(CART_REPOSITORY)
     private readonly cartRepository: ICartRepository,
+    private readonly cartItemSyncService: CartItemSyncService,
   ) {}
 
-  async getCart(userId: number) {
-    const items = await this.cartRepository.findByUserId(userId);
-    return { items };
-  }
-
-  async addItem(userId: number, dto: AddToCartDto) {
-    const existing = await this.cartRepository.findByUserAndSku(
-      userId,
-      dto.skuId,
-    );
+  async getOrCreateCart(userId: number): Promise<CartEntity> {
+    const existing = await this.cartRepository.findByUserId(userId);
     if (existing) {
-      throw new BadRequestException(
-        'SKU already in cart. Use PATCH to update quantity.',
-      );
+      return existing;
     }
-    const item = await this.cartRepository.save({
-      userId,
-      skuId: dto.skuId,
-      quantity: dto.quantity,
-    });
-    return { item };
+    return this.cartRepository.save({ userId });
   }
 
-  async updateQuantity(id: number, userId: number, dto: UpdateCartDto) {
-    const item = await this.findOwnedItem(id, userId);
-    const updated = await this.cartRepository.update(item.id, {
-      quantity: dto.quantity,
-    });
-    if (!updated) {
-      throw new NotFoundException(`Cart item ${id} not found`);
+  async getCart(userId: number) {
+    const loaded = await this.cartRepository.findByUserIdWithItems(userId);
+    if (loaded) {
+      return { cart: loaded };
     }
-    return { item: updated };
+    const cart = await this.cartRepository.save({ userId });
+    return { cart: { ...cart, items: [] } };
   }
 
-  async removeItem(id: number, userId: number) {
-    const item = await this.findOwnedItem(id, userId);
-    await this.cartRepository.remove(id);
-    return { item };
-  }
-
-  async clearCart(userId: number) {
-    const items = await this.cartRepository.findByUserId(userId);
-    await this.cartRepository.clearByUserId(userId);
-    return { items };
-  }
-
-  private async findOwnedItem(id: number, userId: number) {
-    const item = await this.cartRepository.findByIdAndUser(id, userId);
-    if (!item) {
-      throw new NotFoundException(`Cart item ${id} not found`);
-    }
-    return item;
+  async syncItems(userId: number, dto: UpdateCartDto) {
+    const cart = await this.getOrCreateCart(userId);
+    await this.cartItemSyncService.validate(dto.items);
+    await this.cartItemSyncService.sync(cart.id, dto.items);
+    const loaded = await this.cartRepository.findByUserIdWithItems(userId);
+    return { cart: loaded! };
   }
 }

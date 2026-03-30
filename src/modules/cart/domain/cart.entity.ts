@@ -3,34 +3,32 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToMany,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Unique,
 } from 'typeorm';
 import { UserEntity } from '../../users/domain/user.entity';
-import { ProductSkuEntity } from '../../products/domain/product-sku.entity';
+import { CartItemEntity } from './cart-item.entity';
 
 @Entity('carts')
+@Unique(['userId'])
 export class CartEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id: number;
 
-  @Column({ type: 'bigint' })
-  quantity: number;
-
   @Column({ name: 'user_id', type: 'bigint' })
   userId: number;
-
-  @Column({ name: 'sku_id', type: 'bigint' })
-  skuId: number;
 
   @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
-  @ManyToOne(() => ProductSkuEntity)
-  @JoinColumn({ name: 'sku_id' })
-  sku: ProductSkuEntity;
+  @OneToMany(() => CartItemEntity, (item) => item.cart, {
+    cascade: ['insert', 'update'],
+  })
+  items: CartItemEntity[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
