@@ -10,13 +10,22 @@ import {
 import { Type } from 'class-transformer';
 
 export class UpdateCartItemDto {
-  @ApiProperty({ example: 1, description: 'Cart item id. If provided, updates existing item. If omitted, creates new item.', required: false })
+  @ApiProperty({
+    example: 1,
+    description:
+      'Cart item id. If provided, updates existing item. If omitted, creates new item.',
+    required: false,
+  })
   @IsOptional()
   @IsInt()
   @IsPositive()
   id?: number;
 
-  @ApiProperty({ example: 1, description: 'Product SKU id. Required when creating a new item (id not provided).' })
+  @ApiProperty({
+    example: 1,
+    description:
+      'Product SKU id. Required when creating a new item (id not provided).',
+  })
   @ValidateIf((o: UpdateCartItemDto) => !o.id)
   @IsInt()
   @IsPositive()
@@ -29,7 +38,10 @@ export class UpdateCartItemDto {
 }
 
 export class UpdateCartDto {
-  @ApiProperty({ type: [UpdateCartItemDto], description: 'Cart items. Omitted items will be soft-deleted.' })
+  @ApiProperty({
+    type: [UpdateCartItemDto],
+    description: 'Cart items. Omitted items will be soft-deleted.',
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UpdateCartItemDto)

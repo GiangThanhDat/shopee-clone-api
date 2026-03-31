@@ -107,7 +107,13 @@ describe('SkuSyncService', () => {
       mockSkuRepo.syncSkuValues.mockResolvedValue(undefined);
 
       await service.sync(1, [
-        { id: 5, price: 300, stock: 20, skuCode: 'S1', optionValueIds: [10, 20] },
+        {
+          id: 5,
+          price: 300,
+          stock: 20,
+          skuCode: 'S1',
+          optionValueIds: [10, 20],
+        },
       ] as any);
 
       expect(mockSkuRepo.syncSkuValues).toHaveBeenCalledWith([
