@@ -8,6 +8,7 @@ import type { ICartItemRepository } from './interfaces/cart-item-repository.inte
 import { CART_ITEM_REPOSITORY } from './interfaces/cart-item-repository.interface';
 import type { IProductSkuRepository } from '../../products/application/interfaces/product-sku-repository.interface';
 import { PRODUCT_SKU_REPOSITORY } from '../../products/application/interfaces/product-sku-repository.interface';
+import { Quantity } from '../../../common/value-objects/quantity.vo';
 import { CartService } from './cart.service';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartQuantityDto } from './dto/update-cart-quantity.dto';
@@ -73,7 +74,9 @@ export class CartItemService {
   }
 
   private async restoreItem(id: number, quantity: number) {
-    const restored = await this.cartItemRepository.restore(id, { quantity });
+    const restored = await this.cartItemRepository.restore(id, {
+      quantity: Quantity.of(quantity).toNumber(),
+    });
     if (!restored) {
       throw new NotFoundException(`Cart item not found after restore`);
     }
@@ -84,7 +87,7 @@ export class CartItemService {
     const saved = await this.cartItemRepository.save({
       cartId,
       skuId: dto.skuId,
-      quantity: dto.quantity,
+      quantity: Quantity.of(dto.quantity).toNumber(),
     });
     const item = await this.cartItemRepository.findByIdAndCart(
       saved.id,

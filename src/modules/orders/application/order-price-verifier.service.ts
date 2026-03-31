@@ -9,6 +9,7 @@ import {
   type IProductSkuRepository,
 } from '../../products/application/interfaces/product-sku-repository.interface';
 import { ProductSkuEntity } from '../../products/domain/product-sku.entity';
+import { Money } from '../../../common/value-objects/money.vo';
 import { CreateOrderDto, OrderItemDto } from './dto/create-order.dto';
 
 export interface VerifiedOrderResult {
@@ -64,7 +65,9 @@ export class OrderPriceVerifier {
     if (!sku) {
       throw new NotFoundException(`SKU ${item.skuId} not found`);
     }
-    if (item.price !== sku.price) {
+    const itemPrice = Money.of(item.price);
+    const skuPrice = Money.of(sku.price);
+    if (!itemPrice.equals(skuPrice)) {
       throw new BadRequestException(
         `Price mismatch for SKU ${item.skuId}: expected ${sku.price} but received ${item.price}`,
       );
@@ -73,9 +76,13 @@ export class OrderPriceVerifier {
   }
 
   private computeSubtotal(item: OrderItemDto): number {
-    const discount = item.discountPercent ?? 0;
-    const shipping = item.shippingFee ?? 0;
-    return item.price * item.quantity * (1 - discount / 100) + shipping;
+    const price = Money.of(item.price);
+    const shipping = Money.of(item.shippingFee ?? 0);
+    return price
+      .multiply(item.quantity)
+      .applyDiscount(item.discountPercent ?? 0)
+      .add(shipping)
+      .toNumber();
   }
 
   private verifyTotalAmount(clientTotal: number, serverTotal: number): void {

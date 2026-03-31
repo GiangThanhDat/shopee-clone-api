@@ -7,6 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { Email } from '../../users/domain/value-objects/email.vo';
 import { UserEntity } from '../../users/domain/user.entity';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
@@ -27,17 +28,23 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
+    const email = Email.of(dto.email);
     const [, , passwordHash] = await Promise.all([
-      this.ensureEmailNotTaken(dto.email),
+      this.ensureEmailNotTaken(email.toString()),
       this.ensureUsernameNotTaken(dto.username),
       bcrypt.hash(dto.password, this.bcryptRounds),
     ]);
-    const user = await this.usersRepository.save({ ...dto, passwordHash });
+    const user = await this.usersRepository.save({
+      ...dto,
+      email: email.toString(),
+      passwordHash,
+    });
     return this.buildAuthResponse(user);
   }
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
-    const user = await this.usersRepository.findByEmail(dto.email);
+    const email = Email.of(dto.email);
+    const user = await this.usersRepository.findByEmail(email.toString());
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
