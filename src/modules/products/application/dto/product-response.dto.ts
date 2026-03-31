@@ -85,7 +85,7 @@ export class ProductResponse {
   updatedAt: Date;
 }
 
-export class ProductSingleDataDto {
+export class ProductSingleResponse {
   @ApiProperty({ type: ProductResponse })
   product: ProductResponse;
 }

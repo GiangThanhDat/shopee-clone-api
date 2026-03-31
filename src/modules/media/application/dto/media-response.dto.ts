@@ -14,12 +14,12 @@ export class MediaResponse {
   fileName: string;
 }
 
-export class MediaDataDto {
+export class MediaSingleResponse {
   @ApiProperty({ type: MediaResponse })
   media: MediaResponse;
 }
 
-export class MediaListDataDto {
+export class MediaListResponse {
   @ApiProperty({ type: [MediaResponse] })
   mediaList: MediaResponse[];
 }

@@ -21,8 +21,8 @@ import { ProductSkuService } from '../application/product-sku.service';
 import { CreateProductSkuDto } from '../application/dto/create-product-sku.dto';
 import { UpdateProductSkuDto } from '../application/dto/update-product-sku.dto';
 import {
-  ProductSkuDataDto,
-  ProductSkuListDataDto,
+  ProductSkuSingleResponse,
+  ProductSkuListResponse,
 } from '../application/dto/sub-entity-response.dto';
 
 @ApiTags('Product SKUs')
@@ -34,7 +34,7 @@ export class ProductSkuController {
   @Get()
   @Public()
   @ApiOperation({ summary: 'List product SKUs' })
-  @ApiResponse({ status: 200, type: ProductSkuListDataDto })
+  @ApiResponse({ status: 200, type: ProductSkuListResponse })
   @ResponseMessage('SKUs retrieved successfully')
   findAll(@Param('productId', ParseIntPipe) productId: number) {
     return this.skuService.findByProductId(productId);
@@ -43,7 +43,7 @@ export class ProductSkuController {
   @Get(':skuId')
   @Public()
   @ApiOperation({ summary: 'Get SKU detail' })
-  @ApiResponse({ status: 200, type: ProductSkuDataDto })
+  @ApiResponse({ status: 200, type: ProductSkuSingleResponse })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('SKU retrieved successfully')
   findOne(@Param('skuId', ParseIntPipe) skuId: number) {
@@ -52,7 +52,7 @@ export class ProductSkuController {
 
   @Post()
   @ApiOperation({ summary: 'Create product SKU' })
-  @ApiResponse({ status: 201, type: ProductSkuDataDto })
+  @ApiResponse({ status: 201, type: ProductSkuSingleResponse })
   @ApiResponse({ status: 400, type: ErrorResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ResponseMessage('SKU created successfully')
@@ -65,7 +65,7 @@ export class ProductSkuController {
 
   @Patch(':skuId')
   @ApiOperation({ summary: 'Update product SKU' })
-  @ApiResponse({ status: 200, type: ProductSkuDataDto })
+  @ApiResponse({ status: 200, type: ProductSkuSingleResponse })
   @ApiResponse({ status: 400, type: ErrorResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
@@ -79,7 +79,7 @@ export class ProductSkuController {
 
   @Delete(':skuId')
   @ApiOperation({ summary: 'Delete product SKU' })
-  @ApiResponse({ status: 200, type: ProductSkuDataDto })
+  @ApiResponse({ status: 200, type: ProductSkuSingleResponse })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('SKU deleted successfully')

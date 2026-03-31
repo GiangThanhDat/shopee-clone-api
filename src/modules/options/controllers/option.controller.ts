@@ -23,9 +23,9 @@ import { UpdateOptionDto } from '../application/dto/update-option.dto';
 import { CreateOptionValueDto } from '../application/dto/create-option-value.dto';
 import { UpdateOptionValueDto } from '../application/dto/update-option-value.dto';
 import {
-  OptionDataDto,
-  OptionListDataDto,
-  OptionValueDataDto,
+  OptionSingleResponse,
+  OptionListResponse,
+  OptionValueSingleResponse,
 } from '../application/dto/option-response.dto';
 
 @ApiTags('Options')
@@ -37,7 +37,7 @@ export class OptionController {
   @Get()
   @Public()
   @ApiOperation({ summary: 'List all options' })
-  @ApiResponse({ status: 200, type: OptionListDataDto })
+  @ApiResponse({ status: 200, type: OptionListResponse })
   @ResponseMessage('Options retrieved successfully')
   findAll() {
     return this.optionService.findAll();
@@ -46,7 +46,7 @@ export class OptionController {
   @Get(':optionId')
   @Public()
   @ApiOperation({ summary: 'Get option detail' })
-  @ApiResponse({ status: 200, type: OptionDataDto })
+  @ApiResponse({ status: 200, type: OptionSingleResponse })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Option retrieved successfully')
   findOne(@Param('optionId', ParseIntPipe) optionId: number) {
@@ -55,7 +55,7 @@ export class OptionController {
 
   @Post()
   @ApiOperation({ summary: 'Create option' })
-  @ApiResponse({ status: 201, type: OptionDataDto })
+  @ApiResponse({ status: 201, type: OptionSingleResponse })
   @ApiResponse({ status: 400, type: ErrorResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ResponseMessage('Option created successfully')
@@ -65,7 +65,7 @@ export class OptionController {
 
   @Patch(':optionId')
   @ApiOperation({ summary: 'Update option' })
-  @ApiResponse({ status: 200, type: OptionDataDto })
+  @ApiResponse({ status: 200, type: OptionSingleResponse })
   @ApiResponse({ status: 400, type: ErrorResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
@@ -79,7 +79,7 @@ export class OptionController {
 
   @Delete(':optionId')
   @ApiOperation({ summary: 'Delete option' })
-  @ApiResponse({ status: 200, type: OptionDataDto })
+  @ApiResponse({ status: 200, type: OptionSingleResponse })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Option deleted successfully')
@@ -89,7 +89,7 @@ export class OptionController {
 
   @Post(':optionId/values')
   @ApiOperation({ summary: 'Add option value' })
-  @ApiResponse({ status: 201, type: OptionValueDataDto })
+  @ApiResponse({ status: 201, type: OptionValueSingleResponse })
   @ApiResponse({ status: 400, type: ErrorResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
@@ -103,7 +103,7 @@ export class OptionController {
 
   @Patch(':optionId/values/:valueId')
   @ApiOperation({ summary: 'Update option value' })
-  @ApiResponse({ status: 200, type: OptionValueDataDto })
+  @ApiResponse({ status: 200, type: OptionValueSingleResponse })
   @ApiResponse({ status: 400, type: ErrorResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
@@ -117,7 +117,7 @@ export class OptionController {
 
   @Delete(':optionId/values/:valueId')
   @ApiOperation({ summary: 'Delete option value' })
-  @ApiResponse({ status: 200, type: OptionValueDataDto })
+  @ApiResponse({ status: 200, type: OptionValueSingleResponse })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Option value deleted successfully')

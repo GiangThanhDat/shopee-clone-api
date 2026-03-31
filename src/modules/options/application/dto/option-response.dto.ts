@@ -22,17 +22,17 @@ export class OptionResponse {
   values: OptionValueResponse[];
 }
 
-export class OptionDataDto {
+export class OptionSingleResponse {
   @ApiProperty({ type: OptionResponse })
   option: OptionResponse;
 }
 
-export class OptionListDataDto {
+export class OptionListResponse {
   @ApiProperty({ type: [OptionResponse] })
   options: OptionResponse[];
 }
 
-export class OptionValueDataDto {
+export class OptionValueSingleResponse {
   @ApiProperty({ type: OptionValueResponse })
   value: OptionValueResponse;
 }

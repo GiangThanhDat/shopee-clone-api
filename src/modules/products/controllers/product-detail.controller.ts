@@ -21,8 +21,8 @@ import { ProductDetailService } from '../application/product-detail.service';
 import { CreateProductDetailDto } from '../application/dto/create-product-detail.dto';
 import { UpdateProductDetailDto } from '../application/dto/update-product-detail.dto';
 import {
-  ProductDetailDataDto,
-  ProductDetailListDataDto,
+  ProductDetailSingleResponse,
+  ProductDetailListResponse,
 } from '../application/dto/sub-entity-response.dto';
 
 @ApiTags('Product Details')
@@ -34,7 +34,7 @@ export class ProductDetailController {
   @Get()
   @Public()
   @ApiOperation({ summary: 'List product specifications' })
-  @ApiResponse({ status: 200, type: ProductDetailListDataDto })
+  @ApiResponse({ status: 200, type: ProductDetailListResponse })
   @ResponseMessage('Details retrieved successfully')
   findAll(@Param('productId', ParseIntPipe) productId: number) {
     return this.detailService.findByProductId(productId);
@@ -43,7 +43,7 @@ export class ProductDetailController {
   @Get(':detailId')
   @Public()
   @ApiOperation({ summary: 'Get product specification detail' })
-  @ApiResponse({ status: 200, type: ProductDetailDataDto })
+  @ApiResponse({ status: 200, type: ProductDetailSingleResponse })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Detail retrieved successfully')
   findOne(@Param('detailId', ParseIntPipe) detailId: number) {
@@ -52,7 +52,7 @@ export class ProductDetailController {
 
   @Post()
   @ApiOperation({ summary: 'Add specification to product' })
-  @ApiResponse({ status: 201, type: ProductDetailDataDto })
+  @ApiResponse({ status: 201, type: ProductDetailSingleResponse })
   @ApiResponse({ status: 400, type: ErrorResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ResponseMessage('Detail added successfully')
@@ -65,7 +65,7 @@ export class ProductDetailController {
 
   @Patch(':detailId')
   @ApiOperation({ summary: 'Update product specification' })
-  @ApiResponse({ status: 200, type: ProductDetailDataDto })
+  @ApiResponse({ status: 200, type: ProductDetailSingleResponse })
   @ApiResponse({ status: 400, type: ErrorResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
@@ -79,7 +79,7 @@ export class ProductDetailController {
 
   @Delete(':detailId')
   @ApiOperation({ summary: 'Remove product specification' })
-  @ApiResponse({ status: 200, type: ProductDetailDataDto })
+  @ApiResponse({ status: 200, type: ProductDetailSingleResponse })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Detail deleted successfully')

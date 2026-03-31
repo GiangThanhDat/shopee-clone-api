@@ -19,8 +19,8 @@ import { Public } from '../../../common/decorators/public.decorator';
 import { ProductMediaService } from '../application/product-media.service';
 import { CreateProductMediaDto } from '../application/dto/create-product-media.dto';
 import {
-  ProductMediaDataDto,
-  ProductMediaListDataDto,
+  ProductMediaSingleResponse,
+  ProductMediaListResponse,
 } from '../application/dto/sub-entity-response.dto';
 
 @ApiTags('Product Media')
@@ -32,7 +32,7 @@ export class ProductMediaController {
   @Get()
   @Public()
   @ApiOperation({ summary: 'List product media' })
-  @ApiResponse({ status: 200, type: ProductMediaListDataDto })
+  @ApiResponse({ status: 200, type: ProductMediaListResponse })
   @ResponseMessage('Media retrieved successfully')
   findAll(@Param('productId', ParseIntPipe) productId: number) {
     return this.mediaService.findByProductId(productId);
@@ -41,7 +41,7 @@ export class ProductMediaController {
   @Get(':mediaId')
   @Public()
   @ApiOperation({ summary: 'Get product media detail' })
-  @ApiResponse({ status: 200, type: ProductMediaDataDto })
+  @ApiResponse({ status: 200, type: ProductMediaSingleResponse })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Media retrieved successfully')
   findOne(@Param('mediaId', ParseIntPipe) mediaId: number) {
@@ -50,7 +50,7 @@ export class ProductMediaController {
 
   @Post()
   @ApiOperation({ summary: 'Add media to product' })
-  @ApiResponse({ status: 201, type: ProductMediaDataDto })
+  @ApiResponse({ status: 201, type: ProductMediaSingleResponse })
   @ApiResponse({ status: 400, type: ErrorResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ResponseMessage('Media added successfully')
@@ -63,7 +63,7 @@ export class ProductMediaController {
 
   @Delete(':mediaId')
   @ApiOperation({ summary: 'Remove media from product' })
-  @ApiResponse({ status: 200, type: ProductMediaDataDto })
+  @ApiResponse({ status: 200, type: ProductMediaSingleResponse })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Media removed successfully')

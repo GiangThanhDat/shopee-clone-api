@@ -49,7 +49,7 @@ export class OrderListMetadataDto {
   pagination: PaginationMetaDto;
 }
 
-export class OrderListDataDto {
+export class OrderListResponse {
   @ApiProperty({ type: [OrderResponse] })
   orders: OrderResponse[];
 
@@ -57,7 +57,7 @@ export class OrderListDataDto {
   metadata?: OrderListMetadataDto;
 }
 
-export class OrderDetailDataDto {
+export class OrderSingleResponse {
   @ApiProperty({ type: OrderResponse })
   order: OrderResponse;
 }

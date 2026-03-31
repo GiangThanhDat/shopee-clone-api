@@ -10,7 +10,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 import { UserProfileService } from './application/user-profile.service';
 import { UpdateProfileDto } from './application/dto/update-profile.dto';
-import { UserProfileDataDto } from './application/dto/user-profile-response.dto';
+import { UserProfileSingleResponse } from './application/dto/user-profile-response.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -23,7 +23,7 @@ export class UserProfileController {
   @ApiResponse({
     status: 200,
     description: 'Profile retrieved successfully',
-    type: UserProfileDataDto,
+    type: UserProfileSingleResponse,
   })
   @ApiResponse({
     status: 401,
@@ -33,7 +33,7 @@ export class UserProfileController {
   @ResponseMessage('Profile retrieved successfully')
   async getProfile(
     @CurrentUser('userId') userId: number,
-  ): Promise<UserProfileDataDto> {
+  ): Promise<UserProfileSingleResponse> {
     return this.profileService.getProfile(userId);
   }
 
@@ -42,7 +42,7 @@ export class UserProfileController {
   @ApiResponse({
     status: 200,
     description: 'Profile updated successfully',
-    type: UserProfileDataDto,
+    type: UserProfileSingleResponse,
   })
   @ApiResponse({
     status: 400,
@@ -58,7 +58,7 @@ export class UserProfileController {
   async updateProfile(
     @CurrentUser('userId') userId: number,
     @Body() dto: UpdateProfileDto,
-  ): Promise<UserProfileDataDto> {
+  ): Promise<UserProfileSingleResponse> {
     return this.profileService.updateProfile(userId, dto);
   }
 }

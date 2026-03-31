@@ -7,7 +7,7 @@ export class ProductListMetadataDto {
   pagination: PaginationMetaDto;
 }
 
-export class ProductListDataDto {
+export class ProductListResponse {
   @ApiProperty({ type: [ProductResponse] })
   products: ProductResponse[];
 

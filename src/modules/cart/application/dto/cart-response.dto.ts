@@ -48,17 +48,17 @@ export class CartResponse {
   updatedAt: Date;
 }
 
-export class CartDataDto {
+export class CartSingleResponse {
   @ApiProperty({ type: CartResponse })
   cart: CartResponse;
 }
 
-export class CartItemDataDto {
+export class CartItemSingleResponse {
   @ApiProperty({ type: CartItemResponse })
   item: CartItemResponse;
 }
 
-export class CartItemListDataDto {
+export class CartItemListResponse {
   @ApiProperty({ type: [CartItemResponse] })
   items: CartItemResponse[];
 }

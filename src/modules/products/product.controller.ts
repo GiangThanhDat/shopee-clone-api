@@ -20,10 +20,10 @@ import { ResponseMessage } from '../../common/decorators/response-message.decora
 import { ErrorResponseDto } from '../../common/dto/api-response.dto';
 import { CreateProductDto } from './application/dto/create-product.dto';
 import { ProductFilterDto } from './application/dto/product-filter.dto';
-import { ProductListDataDto } from './application/dto/product-list-response.dto';
+import { ProductListResponse } from './application/dto/product-list-response.dto';
 import {
   ProductResponse,
-  ProductSingleDataDto,
+  ProductSingleResponse,
 } from './application/dto/product-response.dto';
 import { UpdateProductDto } from './application/dto/update-product.dto';
 import { ProductService } from './application/product.service';
@@ -39,7 +39,7 @@ export class ProductController {
   @ApiResponse({
     status: 200,
     description: 'Products retrieved successfully',
-    type: ProductListDataDto,
+    type: ProductListResponse,
   })
   @ApiResponse({
     status: 400,
@@ -49,7 +49,7 @@ export class ProductController {
   @ResponseMessage('Products retrieved successfully')
   async findAll(
     @Query() filterDto: ProductFilterDto,
-  ): Promise<ProductListDataDto> {
+  ): Promise<ProductListResponse> {
     return this.productService.findAll(filterDto);
   }
 
@@ -79,7 +79,7 @@ export class ProductController {
   @ApiResponse({
     status: 201,
     description: 'Product created successfully',
-    type: ProductSingleDataDto,
+    type: ProductSingleResponse,
   })
   @ApiResponse({
     status: 400,
@@ -92,7 +92,7 @@ export class ProductController {
     type: ErrorResponseDto,
   })
   @ResponseMessage('Product created successfully')
-  async create(@Body() dto: CreateProductDto): Promise<ProductSingleDataDto> {
+  async create(@Body() dto: CreateProductDto): Promise<ProductSingleResponse> {
     return this.productService.create(dto);
   }
 
@@ -102,7 +102,7 @@ export class ProductController {
   @ApiResponse({
     status: 200,
     description: 'Product updated successfully',
-    type: ProductSingleDataDto,
+    type: ProductSingleResponse,
   })
   @ApiResponse({
     status: 400,
@@ -123,7 +123,7 @@ export class ProductController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateProductDto,
-  ): Promise<ProductSingleDataDto> {
+  ): Promise<ProductSingleResponse> {
     return this.productService.update(id, dto);
   }
 
@@ -133,7 +133,7 @@ export class ProductController {
   @ApiResponse({
     status: 200,
     description: 'Product deleted successfully',
-    type: ProductSingleDataDto,
+    type: ProductSingleResponse,
   })
   @ApiResponse({
     status: 401,

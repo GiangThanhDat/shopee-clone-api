@@ -19,8 +19,8 @@ import { Public } from '../../../common/decorators/public.decorator';
 import { MediaService } from '../application/media.service';
 import { CreateMediaDto } from '../application/dto/create-media.dto';
 import {
-  MediaDataDto,
-  MediaListDataDto,
+  MediaSingleResponse,
+  MediaListResponse,
 } from '../application/dto/media-response.dto';
 
 @ApiTags('Media')
@@ -32,7 +32,7 @@ export class MediaController {
   @Get()
   @Public()
   @ApiOperation({ summary: 'List all media' })
-  @ApiResponse({ status: 200, type: MediaListDataDto })
+  @ApiResponse({ status: 200, type: MediaListResponse })
   @ResponseMessage('Media retrieved successfully')
   findAll() {
     return this.mediaService.findAll();
@@ -41,7 +41,7 @@ export class MediaController {
   @Get(':mediaId')
   @Public()
   @ApiOperation({ summary: 'Get media detail' })
-  @ApiResponse({ status: 200, type: MediaDataDto })
+  @ApiResponse({ status: 200, type: MediaSingleResponse })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Media retrieved successfully')
   findOne(@Param('mediaId', ParseIntPipe) mediaId: number) {
@@ -50,7 +50,7 @@ export class MediaController {
 
   @Post()
   @ApiOperation({ summary: 'Upload media' })
-  @ApiResponse({ status: 201, type: MediaDataDto })
+  @ApiResponse({ status: 201, type: MediaSingleResponse })
   @ApiResponse({ status: 400, type: ErrorResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ResponseMessage('Media created successfully')
@@ -60,7 +60,7 @@ export class MediaController {
 
   @Delete(':mediaId')
   @ApiOperation({ summary: 'Delete media' })
-  @ApiResponse({ status: 200, type: MediaDataDto })
+  @ApiResponse({ status: 200, type: MediaSingleResponse })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
   @ResponseMessage('Media deleted successfully')

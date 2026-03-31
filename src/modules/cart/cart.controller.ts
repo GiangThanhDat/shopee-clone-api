@@ -10,7 +10,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 import { CartService } from './application/cart.service';
 import { UpdateCartDto } from './application/dto/update-cart.dto';
-import { CartDataDto } from './application/dto/cart-response.dto';
+import { CartSingleResponse } from './application/dto/cart-response.dto';
 
 @ApiTags('Cart')
 @ApiBearerAuth()
@@ -23,7 +23,7 @@ export class CartController {
   @ApiResponse({
     status: 200,
     description: 'Cart retrieved successfully',
-    type: CartDataDto,
+    type: CartSingleResponse,
   })
   @ApiResponse({
     status: 401,
@@ -31,7 +31,7 @@ export class CartController {
     type: ErrorResponseDto,
   })
   @ResponseMessage('Cart retrieved successfully')
-  async getCart(@CurrentUser('userId') userId: number): Promise<CartDataDto> {
+  async getCart(@CurrentUser('userId') userId: number): Promise<CartSingleResponse> {
     return this.cartService.getCart(userId);
   }
 
@@ -43,7 +43,7 @@ export class CartController {
   @ApiResponse({
     status: 200,
     description: 'Cart synced successfully',
-    type: CartDataDto,
+    type: CartSingleResponse,
   })
   @ApiResponse({
     status: 400,
@@ -59,7 +59,7 @@ export class CartController {
   async syncItems(
     @CurrentUser('userId') userId: number,
     @Body() dto: UpdateCartDto,
-  ): Promise<CartDataDto> {
+  ): Promise<CartSingleResponse> {
     return this.cartService.syncItems(userId, dto);
   }
 }

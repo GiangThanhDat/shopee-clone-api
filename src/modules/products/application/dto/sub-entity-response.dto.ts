@@ -5,32 +5,32 @@ import {
   ProductDetailResponse,
 } from './product-response.dto';
 
-export class ProductSkuDataDto {
+export class ProductSkuSingleResponse {
   @ApiProperty({ type: ProductSkuResponse })
   sku: ProductSkuResponse;
 }
 
-export class ProductMediaDataDto {
+export class ProductMediaSingleResponse {
   @ApiProperty({ type: ProductMediaResponse })
   productMedia: ProductMediaResponse;
 }
 
-export class ProductDetailDataDto {
+export class ProductDetailSingleResponse {
   @ApiProperty({ type: ProductDetailResponse })
   detail: ProductDetailResponse;
 }
 
-export class ProductSkuListDataDto {
+export class ProductSkuListResponse {
   @ApiProperty({ type: [ProductSkuResponse] })
   skus: ProductSkuResponse[];
 }
 
-export class ProductMediaListDataDto {
+export class ProductMediaListResponse {
   @ApiProperty({ type: [ProductMediaResponse] })
   productMedia: ProductMediaResponse[];
 }
 
-export class ProductDetailListDataDto {
+export class ProductDetailListResponse {
   @ApiProperty({ type: [ProductDetailResponse] })
   details: ProductDetailResponse[];
 }

@@ -38,7 +38,7 @@ export class UserProfileResponse {
   updatedAt: Date;
 }
 
-export class UserProfileDataDto {
+export class UserProfileSingleResponse {
   @ApiProperty({ type: UserProfileResponse })
   profile: UserProfileResponse;
 }

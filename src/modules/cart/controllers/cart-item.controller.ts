@@ -21,9 +21,9 @@ import { CartItemService } from '../application/cart-item.service';
 import { AddToCartDto } from '../application/dto/add-to-cart.dto';
 import { UpdateCartQuantityDto } from '../application/dto/update-cart-quantity.dto';
 import {
-  CartDataDto,
-  CartItemDataDto,
-  CartItemListDataDto,
+  CartSingleResponse,
+  CartItemSingleResponse,
+  CartItemListResponse,
 } from '../application/dto/cart-response.dto';
 
 @ApiTags('Cart')
@@ -37,7 +37,7 @@ export class CartItemController {
   @ApiResponse({
     status: 200,
     description: 'Cart items retrieved successfully',
-    type: CartItemListDataDto,
+    type: CartItemListResponse,
   })
   @ApiResponse({
     status: 401,
@@ -47,7 +47,7 @@ export class CartItemController {
   @ResponseMessage('Cart items retrieved successfully')
   async findAll(
     @CurrentUser('userId') userId: number,
-  ): Promise<CartItemListDataDto> {
+  ): Promise<CartItemListResponse> {
     return this.cartItemService.findByCartId(userId);
   }
 
@@ -56,7 +56,7 @@ export class CartItemController {
   @ApiResponse({
     status: 201,
     description: 'Item added to cart',
-    type: CartItemDataDto,
+    type: CartItemSingleResponse,
   })
   @ApiResponse({
     status: 400,
@@ -72,7 +72,7 @@ export class CartItemController {
   async addItem(
     @CurrentUser('userId') userId: number,
     @Body() dto: AddToCartDto,
-  ): Promise<CartItemDataDto> {
+  ): Promise<CartItemSingleResponse> {
     return this.cartItemService.addItem(userId, dto);
   }
 
@@ -81,7 +81,7 @@ export class CartItemController {
   @ApiResponse({
     status: 200,
     description: 'Cart item updated',
-    type: CartItemDataDto,
+    type: CartItemSingleResponse,
   })
   @ApiResponse({
     status: 401,
@@ -98,7 +98,7 @@ export class CartItemController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser('userId') userId: number,
     @Body() dto: UpdateCartQuantityDto,
-  ): Promise<CartItemDataDto> {
+  ): Promise<CartItemSingleResponse> {
     return this.cartItemService.updateQuantity(id, userId, dto);
   }
 
@@ -107,7 +107,7 @@ export class CartItemController {
   @ApiResponse({
     status: 200,
     description: 'Cart item removed',
-    type: CartItemDataDto,
+    type: CartItemSingleResponse,
   })
   @ApiResponse({
     status: 401,
@@ -123,7 +123,7 @@ export class CartItemController {
   async removeItem(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser('userId') userId: number,
-  ): Promise<CartItemDataDto> {
+  ): Promise<CartItemSingleResponse> {
     return this.cartItemService.removeItem(id, userId);
   }
 
@@ -132,7 +132,7 @@ export class CartItemController {
   @ApiResponse({
     status: 200,
     description: 'Cart cleared',
-    type: CartDataDto,
+    type: CartSingleResponse,
   })
   @ApiResponse({
     status: 401,
@@ -140,7 +140,7 @@ export class CartItemController {
     type: ErrorResponseDto,
   })
   @ResponseMessage('Cart cleared')
-  async clearCart(@CurrentUser('userId') userId: number): Promise<CartDataDto> {
+  async clearCart(@CurrentUser('userId') userId: number): Promise<CartSingleResponse> {
     return this.cartItemService.clearCart(userId);
   }
 }

@@ -22,8 +22,8 @@ import { CreateOrderDto } from './application/dto/create-order.dto';
 import { OrderFilterDto } from './application/dto/order-filter.dto';
 import { UpdateOrderStatusDto } from './application/dto/update-order-status.dto';
 import {
-  OrderListDataDto,
-  OrderDetailDataDto,
+  OrderListResponse,
+  OrderSingleResponse,
 } from './application/dto/order-response.dto';
 
 @ApiTags('Orders')
@@ -37,7 +37,7 @@ export class OrderController {
   @ApiResponse({
     status: 200,
     description: 'Orders retrieved successfully',
-    type: OrderListDataDto,
+    type: OrderListResponse,
   })
   @ApiResponse({
     status: 401,
@@ -48,7 +48,7 @@ export class OrderController {
   async findAll(
     @CurrentUser('userId') userId: number,
     @Query() filterDto: OrderFilterDto,
-  ): Promise<OrderListDataDto> {
+  ): Promise<OrderListResponse> {
     return this.orderService.findAll(userId, filterDto);
   }
 
@@ -57,7 +57,7 @@ export class OrderController {
   @ApiResponse({
     status: 200,
     description: 'Order retrieved successfully',
-    type: OrderDetailDataDto,
+    type: OrderSingleResponse,
   })
   @ApiResponse({
     status: 401,
@@ -73,7 +73,7 @@ export class OrderController {
   async findById(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser('userId') userId: number,
-  ): Promise<OrderDetailDataDto> {
+  ): Promise<OrderSingleResponse> {
     return this.orderService.findById(id, userId);
   }
 
@@ -82,7 +82,7 @@ export class OrderController {
   @ApiResponse({
     status: 201,
     description: 'Order created successfully',
-    type: OrderDetailDataDto,
+    type: OrderSingleResponse,
   })
   @ApiResponse({
     status: 400,
@@ -103,7 +103,7 @@ export class OrderController {
   async create(
     @CurrentUser('userId') userId: number,
     @Body() dto: CreateOrderDto,
-  ): Promise<OrderDetailDataDto> {
+  ): Promise<OrderSingleResponse> {
     return this.orderService.create(userId, dto);
   }
 
@@ -112,7 +112,7 @@ export class OrderController {
   @ApiResponse({
     status: 200,
     description: 'Order status updated',
-    type: OrderDetailDataDto,
+    type: OrderSingleResponse,
   })
   @ApiResponse({
     status: 401,
@@ -129,7 +129,7 @@ export class OrderController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser('userId') userId: number,
     @Body() dto: UpdateOrderStatusDto,
-  ): Promise<OrderDetailDataDto> {
+  ): Promise<OrderSingleResponse> {
     return this.orderService.updateStatus(id, userId, dto);
   }
 }
