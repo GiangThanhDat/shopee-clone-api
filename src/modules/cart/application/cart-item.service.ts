@@ -37,41 +37,58 @@ export class CartItemService {
   }
 
   async addItem(userId: number, dto: AddToCartDto) {
-    const sku = await this.skuRepository.findById(dto.skuId);
-    if (!sku) {
-      throw new NotFoundException(`SKU ${dto.skuId} not found`);
-    }
+    await this.validateSku(dto.skuId);
     const cart = await this.cartService.getOrCreateCart(userId);
-    const existing = await this.cartItemRepository.findByCartAndSku(
+    await this.ensureSkuNotInCart(cart.id, dto.skuId);
+    const deleted = await this.cartItemRepository.findDeletedByCartAndSku(
       cart.id,
       dto.skuId,
+    );
+    if (deleted) {
+      return this.restoreItem(deleted.id, dto.quantity);
+    }
+    return this.createItem(cart.id, dto);
+  }
+
+  private async validateSku(skuId: number): Promise<void> {
+    const sku = await this.skuRepository.findById(skuId);
+    if (!sku) {
+      throw new NotFoundException(`SKU ${skuId} not found`);
+    }
+  }
+
+  private async ensureSkuNotInCart(
+    cartId: number,
+    skuId: number,
+  ): Promise<void> {
+    const existing = await this.cartItemRepository.findByCartAndSku(
+      cartId,
+      skuId,
     );
     if (existing) {
       throw new BadRequestException(
         'SKU already in cart. Use PATCH to update quantity.',
       );
     }
-    const deleted = await this.cartItemRepository.findDeletedByCartAndSku(
-      cart.id,
-      dto.skuId,
-    );
-    if (deleted) {
-      const restored = await this.cartItemRepository.restore(deleted.id, {
-        quantity: dto.quantity,
-      });
-      if (!restored) {
-        throw new NotFoundException(`Cart item not found after restore`);
-      }
-      return { item: restored };
+  }
+
+  private async restoreItem(id: number, quantity: number) {
+    const restored = await this.cartItemRepository.restore(id, { quantity });
+    if (!restored) {
+      throw new NotFoundException(`Cart item not found after restore`);
     }
+    return { item: restored };
+  }
+
+  private async createItem(cartId: number, dto: AddToCartDto) {
     const saved = await this.cartItemRepository.save({
-      cartId: cart.id,
+      cartId,
       skuId: dto.skuId,
       quantity: dto.quantity,
     });
     const item = await this.cartItemRepository.findByIdAndCart(
       saved.id,
-      cart.id,
+      cartId,
     );
     if (!item) {
       throw new NotFoundException(`Cart item not found after save`);

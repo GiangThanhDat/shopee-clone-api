@@ -69,10 +69,13 @@ export class OrderPriceVerifier {
         `Price mismatch for SKU ${item.skuId}: expected ${sku.price} but received ${item.price}`,
       );
     }
+    return this.computeSubtotal(item);
+  }
+
+  private computeSubtotal(item: OrderItemDto): number {
     const discount = item.discountPercent ?? 0;
     const shipping = item.shippingFee ?? 0;
-    const discounted = item.price * item.quantity * (1 - discount / 100);
-    return discounted + shipping;
+    return item.price * item.quantity * (1 - discount / 100) + shipping;
   }
 
   private verifyTotalAmount(clientTotal: number, serverTotal: number): void {

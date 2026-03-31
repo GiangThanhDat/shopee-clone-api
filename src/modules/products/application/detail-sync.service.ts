@@ -73,29 +73,33 @@ export class DetailSyncService {
     if (items.length === 0) {
       return;
     }
-    const withExistingSpec = items.filter((d) => d.fieldId);
-    const withNewSpec = items.filter((d) => !d.fieldId);
-
-    const updates = [
-      ...withExistingSpec.map((d) => ({
-        id: Number(d.id),
-        fieldId: d.fieldId,
-      })),
-      ...withNewSpec.map((d) => ({
-        id: Number(d.id),
-        fieldId: this.getFieldId(d, resolvedSpecs),
-      })),
-    ];
-    await this.detailRepository.updateMany(updates);
-
-    const specUpdates = withExistingSpec.map((d) => ({
-      id: Number(d.fieldId),
-      name: d.specName,
-      value: d.specValue,
-    }));
+    await this.detailRepository.updateMany(
+      this.buildDetailUpdates(items, resolvedSpecs),
+    );
+    const specUpdates = this.buildSpecUpdates(items);
     if (specUpdates.length > 0) {
       await this.specRepository.updateMany(specUpdates);
     }
+  }
+
+  private buildDetailUpdates(
+    items: DetailInput[],
+    resolvedSpecs: Map<string, number>,
+  ) {
+    return items.map((d) => ({
+      id: Number(d.id),
+      fieldId: this.getFieldId(d, resolvedSpecs),
+    }));
+  }
+
+  private buildSpecUpdates(items: DetailInput[]) {
+    return items
+      .filter((d) => d.fieldId)
+      .map((d) => ({
+        id: Number(d.fieldId),
+        name: d.specName,
+        value: d.specValue,
+      }));
   }
 
   private async bulkCreate(
