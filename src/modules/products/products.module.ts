@@ -8,11 +8,23 @@ import { ProductSkuEntity } from './domain/product-sku.entity';
 import { SkuValueEntity } from './domain/sku-value.entity';
 import { OptionsModule } from '../options/options.module';
 import { MediaModule } from '../media/media.module';
-import { PRODUCT_REPOSITORY } from './application/interfaces/product-repository.interface';
-import { PRODUCT_SKU_REPOSITORY } from './application/interfaces/product-sku-repository.interface';
-import { PRODUCT_MEDIA_REPOSITORY } from './application/interfaces/product-media-repository.interface';
-import { PRODUCT_DETAIL_REPOSITORY } from './application/interfaces/product-detail-repository.interface';
-import { PRODUCT_SPEC_REPOSITORY } from './application/interfaces/product-spec-repository.interface';
+import {
+  PRODUCT_QUERY_REPOSITORY,
+  PRODUCT_COMMAND_REPOSITORY,
+} from './application/interfaces/product-repository.interface';
+import {
+  PRODUCT_SKU_QUERY_REPOSITORY,
+  PRODUCT_SKU_COMMAND_REPOSITORY,
+} from './application/interfaces/product-sku-repository.interface';
+import {
+  PRODUCT_MEDIA_QUERY_REPOSITORY,
+  PRODUCT_MEDIA_COMMAND_REPOSITORY,
+} from './application/interfaces/product-media-repository.interface';
+import {
+  PRODUCT_DETAIL_QUERY_REPOSITORY,
+  PRODUCT_DETAIL_COMMAND_REPOSITORY,
+} from './application/interfaces/product-detail-repository.interface';
+import { PRODUCT_SPEC_COMMAND_REPOSITORY } from './application/interfaces/product-spec-repository.interface';
 import { ProductRepository } from './infrastructure/product.repository';
 import { ProductSkuRepository } from './infrastructure/product-sku.repository';
 import { ProductMediaRepository } from './infrastructure/product-media.repository';
@@ -51,11 +63,15 @@ import { ProductDetailController } from './controllers/product-detail.controller
     ProductDetailController,
   ],
   providers: [
-    { provide: PRODUCT_REPOSITORY, useClass: ProductRepository },
-    { provide: PRODUCT_SKU_REPOSITORY, useClass: ProductSkuRepository },
-    { provide: PRODUCT_MEDIA_REPOSITORY, useClass: ProductMediaRepository },
-    { provide: PRODUCT_DETAIL_REPOSITORY, useClass: ProductDetailRepository },
-    { provide: PRODUCT_SPEC_REPOSITORY, useClass: ProductSpecRepository },
+    { provide: PRODUCT_QUERY_REPOSITORY, useClass: ProductRepository },
+    { provide: PRODUCT_COMMAND_REPOSITORY, useClass: ProductRepository },
+    { provide: PRODUCT_SKU_QUERY_REPOSITORY, useClass: ProductSkuRepository },
+    { provide: PRODUCT_SKU_COMMAND_REPOSITORY, useClass: ProductSkuRepository },
+    { provide: PRODUCT_MEDIA_QUERY_REPOSITORY, useClass: ProductMediaRepository },
+    { provide: PRODUCT_MEDIA_COMMAND_REPOSITORY, useClass: ProductMediaRepository },
+    { provide: PRODUCT_DETAIL_QUERY_REPOSITORY, useClass: ProductDetailRepository },
+    { provide: PRODUCT_DETAIL_COMMAND_REPOSITORY, useClass: ProductDetailRepository },
+    { provide: PRODUCT_SPEC_COMMAND_REPOSITORY, useClass: ProductSpecRepository },
     SkuSyncService,
     MediaSyncService,
     DetailSyncService,
@@ -65,6 +81,6 @@ import { ProductDetailController } from './controllers/product-detail.controller
     ProductMediaService,
     ProductDetailService,
   ],
-  exports: [TypeOrmModule, ProductService, PRODUCT_SKU_REPOSITORY],
+  exports: [TypeOrmModule, ProductService, PRODUCT_SKU_QUERY_REPOSITORY],
 })
 export class ProductsModule {}

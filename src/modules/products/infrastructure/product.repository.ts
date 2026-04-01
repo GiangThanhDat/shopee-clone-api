@@ -4,12 +4,15 @@ import { DeepPartial, Repository, SelectQueryBuilder } from 'typeorm';
 import { applyPagination } from '../../../common/utils/pagination';
 import { ProductEntity } from '../domain/product.entity';
 import {
-  IProductRepository,
+  IProductQueryRepository,
+  IProductCommandRepository,
   ProductFilterQuery,
 } from '../application/interfaces/product-repository.interface';
 
 @Injectable()
-export class ProductRepository implements IProductRepository {
+export class ProductRepository
+  implements IProductQueryRepository, IProductCommandRepository
+{
   constructor(
     @InjectRepository(ProductEntity)
     private readonly repository: Repository<ProductEntity>,

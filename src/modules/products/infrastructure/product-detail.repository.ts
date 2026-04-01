@@ -2,10 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, In, Repository } from 'typeorm';
 import { ProductDetailEntity } from '../domain/product-detail.entity';
-import type { IProductDetailRepository } from '../application/interfaces/product-detail-repository.interface';
+import type {
+  IProductDetailQueryRepository,
+  IProductDetailCommandRepository,
+} from '../application/interfaces/product-detail-repository.interface';
 
 @Injectable()
-export class ProductDetailRepository implements IProductDetailRepository {
+export class ProductDetailRepository
+  implements IProductDetailQueryRepository, IProductDetailCommandRepository
+{
   constructor(
     @InjectRepository(ProductDetailEntity)
     private readonly repository: Repository<ProductDetailEntity>,

@@ -13,16 +13,24 @@ import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenResponseDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
-import type { IUsersRepository } from '../../users/application/interfaces/users-repository.interface';
-import { USERS_REPOSITORY } from '../../users/application/interfaces/users-repository.interface';
+import type {
+  IUsersQueryRepository,
+  IUsersCommandRepository,
+} from '../../users/application/interfaces/users-repository.interface';
+import {
+  USERS_QUERY_REPOSITORY,
+  USERS_COMMAND_REPOSITORY,
+} from '../../users/application/interfaces/users-repository.interface';
 
 @Injectable()
 export class AuthService {
   private readonly bcryptRounds = 12;
 
   constructor(
-    @Inject(USERS_REPOSITORY)
-    private readonly usersRepository: IUsersRepository,
+    @Inject(USERS_QUERY_REPOSITORY)
+    private readonly usersQueryRepository: IUsersQueryRepository,
+    @Inject(USERS_COMMAND_REPOSITORY)
+    private readonly usersCommandRepository: IUsersCommandRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -34,7 +42,7 @@ export class AuthService {
       this.ensureUsernameNotTaken(dto.username),
       bcrypt.hash(dto.password, this.bcryptRounds),
     ]);
-    const user = await this.usersRepository.save({
+    const user = await this.usersCommandRepository.save({
       ...dto,
       email: email.toString(),
       passwordHash,
@@ -44,7 +52,7 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const email = Email.of(dto.email);
-    const user = await this.usersRepository.findByEmail(email.toString());
+    const user = await this.usersQueryRepository.findByEmail(email.toString());
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -54,7 +62,7 @@ export class AuthService {
 
   async refreshToken(token: string): Promise<RefreshTokenResponseDto> {
     const payload = this.verifyRefreshToken(token);
-    const user = await this.usersRepository.findById(payload.sub);
+    const user = await this.usersQueryRepository.findById(payload.sub);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
@@ -76,14 +84,14 @@ export class AuthService {
   }
 
   private async ensureEmailNotTaken(email: string): Promise<void> {
-    const existing = await this.usersRepository.findByEmail(email);
+    const existing = await this.usersQueryRepository.findByEmail(email);
     if (existing) {
       throw new ConflictException('Email already in use');
     }
   }
 
   private async ensureUsernameNotTaken(username: string): Promise<void> {
-    const existing = await this.usersRepository.findByUsername(username);
+    const existing = await this.usersQueryRepository.findByUsername(username);
     if (existing) {
       throw new ConflictException('Username already in use');
     }

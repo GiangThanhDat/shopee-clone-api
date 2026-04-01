@@ -1,7 +1,13 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { buildPaginationMeta } from '../../../common/utils/pagination';
-import type { IOrderRepository } from './interfaces/order-repository.interface';
-import { ORDER_REPOSITORY } from './interfaces/order-repository.interface';
+import type {
+  IOrderQueryRepository,
+  IOrderCommandRepository,
+} from './interfaces/order-repository.interface';
+import {
+  ORDER_QUERY_REPOSITORY,
+  ORDER_COMMAND_REPOSITORY,
+} from './interfaces/order-repository.interface';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderFilterDto } from './dto/order-filter.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
@@ -10,15 +16,17 @@ import { OrderPriceVerifier } from './order-price-verifier.service';
 @Injectable()
 export class OrderService {
   constructor(
-    @Inject(ORDER_REPOSITORY)
-    private readonly orderRepository: IOrderRepository,
+    @Inject(ORDER_QUERY_REPOSITORY)
+    private readonly orderQueryRepository: IOrderQueryRepository,
+    @Inject(ORDER_COMMAND_REPOSITORY)
+    private readonly orderCommandRepository: IOrderCommandRepository,
     private readonly priceVerifier: OrderPriceVerifier,
   ) {}
 
   async findAll(userId: number, filterDto: OrderFilterDto) {
     const page = filterDto.page ?? 1;
     const limit = filterDto.limit ?? 10;
-    const [orders, totalItems] = await this.orderRepository.findAll({
+    const [orders, totalItems] = await this.orderQueryRepository.findAll({
       userId,
       page,
       limit,
@@ -29,7 +37,7 @@ export class OrderService {
   }
 
   async findById(id: number, userId: number) {
-    const order = await this.orderRepository.findByIdAndUser(id, userId);
+    const order = await this.orderQueryRepository.findByIdAndUser(id, userId);
     if (!order) {
       throw new NotFoundException(`Order ${id} not found`);
     }
@@ -38,7 +46,7 @@ export class OrderService {
 
   async create(userId: number, dto: CreateOrderDto) {
     const { total, subtotals } = await this.priceVerifier.verify(dto);
-    const order = await this.orderRepository.save({
+    const order = await this.orderCommandRepository.save({
       userId,
       orderCode: Date.now(),
       totalAmount: total,
@@ -47,7 +55,7 @@ export class OrderService {
       orderedAt: new Date(),
     });
     await this.saveDetails(order.id, userId, dto, subtotals);
-    const saved = await this.orderRepository.findById(order.id);
+    const saved = await this.orderQueryRepository.findById(order.id);
     if (!saved) {
       throw new NotFoundException(`Order ${order.id} not found`);
     }
@@ -57,7 +65,7 @@ export class OrderService {
   async updateStatus(id: number, userId: number, dto: UpdateOrderStatusDto) {
     await this.findById(id, userId);
     const timestamps = this.resolveStatusTimestamp(dto.orderStatus);
-    const updated = await this.orderRepository.update(id, {
+    const updated = await this.orderCommandRepository.update(id, {
       orderStatus: dto.orderStatus,
       ...timestamps,
     });
@@ -83,7 +91,7 @@ export class OrderService {
       shippingFee: item.shippingFee ?? 0,
       subtotal: subtotals.get(item.skuId) ?? 0,
     }));
-    await this.orderRepository.saveDetails(details);
+    await this.orderCommandRepository.saveDetails(details);
   }
 
   private resolveStatusTimestamp(

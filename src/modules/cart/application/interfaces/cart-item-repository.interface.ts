@@ -1,8 +1,11 @@
 import { CartItemEntity } from '../../domain/cart-item.entity';
 
-export const CART_ITEM_REPOSITORY = Symbol('CART_ITEM_REPOSITORY');
+export const CART_ITEM_QUERY_REPOSITORY = Symbol('CART_ITEM_QUERY_REPOSITORY');
+export const CART_ITEM_COMMAND_REPOSITORY = Symbol(
+  'CART_ITEM_COMMAND_REPOSITORY',
+);
 
-export interface ICartItemRepository {
+export interface ICartItemQueryRepository {
   findByCartId(cartId: number): Promise<CartItemEntity[]>;
   findByCartAndSku(
     cartId: number,
@@ -13,6 +16,9 @@ export interface ICartItemRepository {
     skuId: number,
   ): Promise<CartItemEntity | null>;
   findByIdAndCart(id: number, cartId: number): Promise<CartItemEntity | null>;
+}
+
+export interface ICartItemCommandRepository {
   save(item: Partial<CartItemEntity>): Promise<CartItemEntity>;
   update(
     id: number,

@@ -4,8 +4,14 @@ import { Transactional } from 'typeorm-transactional';
 import { ProductEntity } from '../domain/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import type { IProductRepository } from './interfaces/product-repository.interface';
-import { PRODUCT_REPOSITORY } from './interfaces/product-repository.interface';
+import type {
+  IProductQueryRepository,
+  IProductCommandRepository,
+} from './interfaces/product-repository.interface';
+import {
+  PRODUCT_QUERY_REPOSITORY,
+  PRODUCT_COMMAND_REPOSITORY,
+} from './interfaces/product-repository.interface';
 import { SkuSyncService } from './sku-sync.service';
 import { MediaSyncService } from './media-sync.service';
 import { DetailSyncService } from './detail-sync.service';
@@ -13,8 +19,10 @@ import { DetailSyncService } from './detail-sync.service';
 @Injectable()
 export class ProductOrchestrator {
   constructor(
-    @Inject(PRODUCT_REPOSITORY)
-    private readonly productRepository: IProductRepository,
+    @Inject(PRODUCT_QUERY_REPOSITORY)
+    private readonly productQueryRepository: IProductQueryRepository,
+    @Inject(PRODUCT_COMMAND_REPOSITORY)
+    private readonly productCommandRepository: IProductCommandRepository,
     private readonly skuSync: SkuSyncService,
     private readonly mediaSync: MediaSyncService,
     private readonly detailSync: DetailSyncService,
@@ -24,8 +32,8 @@ export class ProductOrchestrator {
   async create(dto: CreateProductDto): Promise<ProductEntity | null> {
     await this.skuSync.validate(dto.skus);
     const graph = this.buildGraph(dto);
-    const product = await this.productRepository.create(graph);
-    return this.productRepository.findById(product.id);
+    const product = await this.productCommandRepository.create(graph);
+    return this.productQueryRepository.findById(product.id);
   }
 
   @Transactional()
@@ -36,7 +44,7 @@ export class ProductOrchestrator {
     await this.skuSync.validate(dto.skus);
     await this.updateProductFields(id, dto);
     await this.syncSubEntities(id, dto);
-    return this.productRepository.findById(id);
+    return this.productQueryRepository.findById(id);
   }
 
   private buildGraph(dto: CreateProductDto): DeepPartial<ProductEntity> {
@@ -102,7 +110,7 @@ export class ProductOrchestrator {
     if (name === undefined && description === undefined) {
       return;
     }
-    await this.productRepository.update(id, { name, description });
+    await this.productCommandRepository.update(id, { name, description });
   }
 
   private async syncSubEntities(

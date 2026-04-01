@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrderPriceVerifier } from './order-price-verifier.service';
-import { PRODUCT_SKU_REPOSITORY } from '../../products/application/interfaces/product-sku-repository.interface';
+import { PRODUCT_SKU_QUERY_REPOSITORY } from '../../products/application/interfaces/product-sku-repository.interface';
 import { ProductSkuEntity } from '../../products/domain/product-sku.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 
@@ -26,7 +26,7 @@ describe('OrderPriceVerifier', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrderPriceVerifier,
-        { provide: PRODUCT_SKU_REPOSITORY, useValue: mockSkuRepository },
+        { provide: PRODUCT_SKU_QUERY_REPOSITORY, useValue: mockSkuRepository },
       ],
     }).compile();
 

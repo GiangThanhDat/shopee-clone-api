@@ -3,10 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, In, Repository } from 'typeorm';
 import { ProductSkuEntity } from '../domain/product-sku.entity';
 import { SkuValueEntity } from '../domain/sku-value.entity';
-import type { IProductSkuRepository } from '../application/interfaces/product-sku-repository.interface';
+import type {
+  IProductSkuQueryRepository,
+  IProductSkuCommandRepository,
+} from '../application/interfaces/product-sku-repository.interface';
 
 @Injectable()
-export class ProductSkuRepository implements IProductSkuRepository {
+export class ProductSkuRepository
+  implements IProductSkuQueryRepository, IProductSkuCommandRepository
+{
   constructor(
     @InjectRepository(ProductSkuEntity)
     private readonly repository: Repository<ProductSkuEntity>,

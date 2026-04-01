@@ -9,22 +9,30 @@ import { ProductEntity } from '../domain/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductFilterDto } from './dto/product-filter.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import type { IProductRepository } from './interfaces/product-repository.interface';
-import { PRODUCT_REPOSITORY } from './interfaces/product-repository.interface';
+import type {
+  IProductQueryRepository,
+  IProductCommandRepository,
+} from './interfaces/product-repository.interface';
+import {
+  PRODUCT_QUERY_REPOSITORY,
+  PRODUCT_COMMAND_REPOSITORY,
+} from './interfaces/product-repository.interface';
 import { ProductOrchestrator } from './product-orchestrator.service';
 
 @Injectable()
 export class ProductService {
   constructor(
-    @Inject(PRODUCT_REPOSITORY)
-    private readonly productRepository: IProductRepository,
+    @Inject(PRODUCT_QUERY_REPOSITORY)
+    private readonly productQueryRepository: IProductQueryRepository,
+    @Inject(PRODUCT_COMMAND_REPOSITORY)
+    private readonly productCommandRepository: IProductCommandRepository,
     private readonly orchestrator: ProductOrchestrator,
   ) {}
 
   async findAll(filterDto: ProductFilterDto) {
     const page = filterDto.page ?? 1;
     const limit = filterDto.limit ?? 10;
-    const [products, totalItems] = await this.productRepository.findAll({
+    const [products, totalItems] = await this.productQueryRepository.findAll({
       ...filterDto,
       page,
       limit,
@@ -34,7 +42,7 @@ export class ProductService {
   }
 
   async findById(id: number): Promise<{ product: ProductEntity }> {
-    const product = await this.productRepository.findById(id);
+    const product = await this.productQueryRepository.findById(id);
     if (!product) {
       throw new NotFoundException(`Product with id ${id} not found`);
     }
@@ -63,7 +71,7 @@ export class ProductService {
 
   async remove(id: number) {
     const { product } = await this.findById(id);
-    await this.productRepository.remove(id);
+    await this.productCommandRepository.remove(id);
     return { product };
   }
 }

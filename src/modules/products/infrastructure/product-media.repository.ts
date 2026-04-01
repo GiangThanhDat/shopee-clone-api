@@ -2,10 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, In, Repository } from 'typeorm';
 import { ProductMediaEntity } from '../domain/product-media.entity';
-import type { IProductMediaRepository } from '../application/interfaces/product-media-repository.interface';
+import type {
+  IProductMediaQueryRepository,
+  IProductMediaCommandRepository,
+} from '../application/interfaces/product-media-repository.interface';
 
 @Injectable()
-export class ProductMediaRepository implements IProductMediaRepository {
+export class ProductMediaRepository
+  implements IProductMediaQueryRepository, IProductMediaCommandRepository
+{
   constructor(
     @InjectRepository(ProductMediaEntity)
     private readonly repository: Repository<ProductMediaEntity>,

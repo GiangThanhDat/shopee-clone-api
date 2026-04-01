@@ -150,7 +150,7 @@ describe('ProductService', () => {
 - Migration files in `src/database/migrations/`
 - Seed files in `src/database/seeds/`
 
----
+---µ
 
 ## Auth
 

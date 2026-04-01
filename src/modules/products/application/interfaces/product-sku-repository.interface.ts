@@ -2,12 +2,20 @@ import { DeepPartial } from 'typeorm';
 import { ProductSkuEntity } from '../../domain/product-sku.entity';
 import { SkuValueEntity } from '../../domain/sku-value.entity';
 
-export const PRODUCT_SKU_REPOSITORY = Symbol('PRODUCT_SKU_REPOSITORY');
+export const PRODUCT_SKU_QUERY_REPOSITORY = Symbol(
+  'PRODUCT_SKU_QUERY_REPOSITORY',
+);
+export const PRODUCT_SKU_COMMAND_REPOSITORY = Symbol(
+  'PRODUCT_SKU_COMMAND_REPOSITORY',
+);
 
-export interface IProductSkuRepository {
+export interface IProductSkuQueryRepository {
   findByProductId(productId: number): Promise<ProductSkuEntity[]>;
   findById(id: number): Promise<ProductSkuEntity | null>;
   findByIds(ids: number[]): Promise<ProductSkuEntity[]>;
+}
+
+export interface IProductSkuCommandRepository {
   saveMany(skus: DeepPartial<ProductSkuEntity>[]): Promise<ProductSkuEntity[]>;
   saveWithValues(
     sku: Partial<ProductSkuEntity>,

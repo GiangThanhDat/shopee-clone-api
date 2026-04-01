@@ -1,7 +1,10 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrderService } from './order.service';
-import { ORDER_REPOSITORY } from './interfaces/order-repository.interface';
+import {
+  ORDER_QUERY_REPOSITORY,
+  ORDER_COMMAND_REPOSITORY,
+} from './interfaces/order-repository.interface';
 import { OrderPriceVerifier } from './order-price-verifier.service';
 import { OrderEntity } from '../domain/order.entity';
 import { OrderDetailEntity } from '../domain/order-detail.entity';
@@ -52,10 +55,13 @@ const makeCreateDto = (
   ...overrides,
 });
 
-const mockOrderRepository = {
+const mockOrderQueryRepository = {
   findAll: jest.fn(),
   findById: jest.fn(),
   findByIdAndUser: jest.fn(),
+};
+
+const mockOrderCommandRepository = {
   save: jest.fn(),
   update: jest.fn(),
   saveDetails: jest.fn(),
@@ -72,7 +78,8 @@ describe('OrderService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrderService,
-        { provide: ORDER_REPOSITORY, useValue: mockOrderRepository },
+        { provide: ORDER_QUERY_REPOSITORY, useValue: mockOrderQueryRepository },
+        { provide: ORDER_COMMAND_REPOSITORY, useValue: mockOrderCommandRepository },
         { provide: OrderPriceVerifier, useValue: mockPriceVerifier },
       ],
     }).compile();
@@ -85,7 +92,7 @@ describe('OrderService', () => {
     it('should return order history with pagination metadata', async () => {
       // Arrange
       const orders = [makeOrder(), makeOrder({ id: 2 })];
-      mockOrderRepository.findAll.mockResolvedValue([orders, 2]);
+      mockOrderQueryRepository.findAll.mockResolvedValue([orders, 2]);
 
       // Act
       const result = await service.findAll(1, { page: 1, limit: 10 });
@@ -100,7 +107,7 @@ describe('OrderService', () => {
     it('should return only orders matching the requested status', async () => {
       // Arrange - user wants to see only shipped orders
       const shippedOrders = [makeOrder({ orderStatus: 2 })];
-      mockOrderRepository.findAll.mockResolvedValue([shippedOrders, 1]);
+      mockOrderQueryRepository.findAll.mockResolvedValue([shippedOrders, 1]);
 
       // Act
       const filterDto: OrderFilterDto = { status: 2 };
@@ -108,14 +115,14 @@ describe('OrderService', () => {
 
       // Assert
       expect(result.orders).toHaveLength(1);
-      expect(mockOrderRepository.findAll).toHaveBeenCalledWith(
+      expect(mockOrderQueryRepository.findAll).toHaveBeenCalledWith(
         expect.objectContaining({ status: 2 }),
       );
     });
 
     it('should return empty list when user has no orders', async () => {
       // Arrange
-      mockOrderRepository.findAll.mockResolvedValue([[], 0]);
+      mockOrderQueryRepository.findAll.mockResolvedValue([[], 0]);
 
       // Act
       const result = await service.findAll(1, {});
@@ -130,7 +137,7 @@ describe('OrderService', () => {
     it('should return order detail when user owns the order', async () => {
       // Arrange
       const order = makeOrder({ details: [makeDetail()] });
-      mockOrderRepository.findByIdAndUser.mockResolvedValue(order);
+      mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(order);
 
       // Act
       const result = await service.findById(1, 1);
@@ -142,7 +149,7 @@ describe('OrderService', () => {
 
     it('should throw NotFoundException when order does not belong to the user', async () => {
       // Arrange - another user's order, or order doesn't exist
-      mockOrderRepository.findByIdAndUser.mockResolvedValue(null);
+      mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.findById(99, 1)).rejects.toThrow(
@@ -159,10 +166,10 @@ describe('OrderService', () => {
         total: 150000,
         subtotals: new Map([[1, 150000]]),
       });
-      mockOrderRepository.save.mockResolvedValue(makeOrder({ id: 1 }));
-      mockOrderRepository.saveDetails.mockResolvedValue(undefined);
+      mockOrderCommandRepository.save.mockResolvedValue(makeOrder({ id: 1 }));
+      mockOrderCommandRepository.saveDetails.mockResolvedValue(undefined);
       const fullOrder = makeOrder({ details: [makeDetail()] });
-      mockOrderRepository.findById.mockResolvedValue(fullOrder);
+      mockOrderQueryRepository.findById.mockResolvedValue(fullOrder);
 
       // Act
       const result = await service.create(1, dto);
@@ -179,9 +186,9 @@ describe('OrderService', () => {
         total: 150000,
         subtotals: new Map([[1, 150000]]),
       });
-      mockOrderRepository.save.mockResolvedValue(makeOrder());
-      mockOrderRepository.saveDetails.mockResolvedValue(undefined);
-      mockOrderRepository.findById.mockResolvedValue(makeOrder());
+      mockOrderCommandRepository.save.mockResolvedValue(makeOrder());
+      mockOrderCommandRepository.saveDetails.mockResolvedValue(undefined);
+      mockOrderQueryRepository.findById.mockResolvedValue(makeOrder());
 
       // Act
       await service.create(1, dto);
@@ -200,17 +207,17 @@ describe('OrderService', () => {
         total: 135000,
         subtotals: new Map([[1, 135000]]),
       });
-      mockOrderRepository.save.mockResolvedValue(
+      mockOrderCommandRepository.save.mockResolvedValue(
         makeOrder({ totalAmount: 135000 }),
       );
-      mockOrderRepository.saveDetails.mockResolvedValue(undefined);
-      mockOrderRepository.findById.mockResolvedValue(makeOrder());
+      mockOrderCommandRepository.saveDetails.mockResolvedValue(undefined);
+      mockOrderQueryRepository.findById.mockResolvedValue(makeOrder());
 
       // Act
       await service.create(1, dto);
 
       // Assert
-      expect(mockOrderRepository.saveDetails).toHaveBeenCalledWith([
+      expect(mockOrderCommandRepository.saveDetails).toHaveBeenCalledWith([
         expect.objectContaining({ subtotal: 135000 }),
       ]);
     });
@@ -219,16 +226,16 @@ describe('OrderService', () => {
   describe('updateStatus', () => {
     it('should mark an order as paid and record the payment timestamp', async () => {
       // Arrange
-      mockOrderRepository.findByIdAndUser.mockResolvedValue(makeOrder());
+      mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(makeOrder());
       const paidOrder = makeOrder({ orderStatus: 1, paidAt: new Date() });
-      mockOrderRepository.update.mockResolvedValue(paidOrder);
+      mockOrderCommandRepository.update.mockResolvedValue(paidOrder);
 
       // Act
       const result = await service.updateStatus(1, 1, { orderStatus: 1 });
 
       // Assert
       expect(result.order.orderStatus).toBe(1);
-      expect(mockOrderRepository.update).toHaveBeenCalledWith(
+      expect(mockOrderCommandRepository.update).toHaveBeenCalledWith(
         1,
         expect.objectContaining({
           paidAt: expect.any(Date) as unknown as Date,
@@ -238,8 +245,8 @@ describe('OrderService', () => {
 
     it('should mark an order as shipped and record the shipped timestamp', async () => {
       // Arrange
-      mockOrderRepository.findByIdAndUser.mockResolvedValue(makeOrder());
-      mockOrderRepository.update.mockResolvedValue(
+      mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(makeOrder());
+      mockOrderCommandRepository.update.mockResolvedValue(
         makeOrder({ orderStatus: 2 }),
       );
       const dto: UpdateOrderStatusDto = { orderStatus: 2 };
@@ -248,7 +255,7 @@ describe('OrderService', () => {
       await service.updateStatus(1, 1, dto);
 
       // Assert
-      expect(mockOrderRepository.update).toHaveBeenCalledWith(
+      expect(mockOrderCommandRepository.update).toHaveBeenCalledWith(
         1,
         expect.objectContaining({
           shippedAt: expect.any(Date) as unknown as Date,
@@ -258,8 +265,8 @@ describe('OrderService', () => {
 
     it('should mark an order as completed and record the completed timestamp', async () => {
       // Arrange
-      mockOrderRepository.findByIdAndUser.mockResolvedValue(makeOrder());
-      mockOrderRepository.update.mockResolvedValue(
+      mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(makeOrder());
+      mockOrderCommandRepository.update.mockResolvedValue(
         makeOrder({ orderStatus: 3 }),
       );
       const dto: UpdateOrderStatusDto = { orderStatus: 3 };
@@ -268,7 +275,7 @@ describe('OrderService', () => {
       await service.updateStatus(1, 1, dto);
 
       // Assert
-      expect(mockOrderRepository.update).toHaveBeenCalledWith(
+      expect(mockOrderCommandRepository.update).toHaveBeenCalledWith(
         1,
         expect.objectContaining({
           completedAt: expect.any(Date) as unknown as Date,
@@ -278,8 +285,8 @@ describe('OrderService', () => {
 
     it('should cancel an order without recording any delivery timestamp', async () => {
       // Arrange
-      mockOrderRepository.findByIdAndUser.mockResolvedValue(makeOrder());
-      mockOrderRepository.update.mockResolvedValue(
+      mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(makeOrder());
+      mockOrderCommandRepository.update.mockResolvedValue(
         makeOrder({ orderStatus: 4 }),
       );
       const dto: UpdateOrderStatusDto = { orderStatus: 4 };
@@ -288,15 +295,15 @@ describe('OrderService', () => {
       await service.updateStatus(1, 1, dto);
 
       // Assert
-      expect(mockOrderRepository.update).not.toHaveBeenCalledWith(
+      expect(mockOrderCommandRepository.update).not.toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ paidAt: expect.anything() as unknown }),
       );
-      expect(mockOrderRepository.update).not.toHaveBeenCalledWith(
+      expect(mockOrderCommandRepository.update).not.toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ shippedAt: expect.anything() as unknown }),
       );
-      expect(mockOrderRepository.update).not.toHaveBeenCalledWith(
+      expect(mockOrderCommandRepository.update).not.toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ completedAt: expect.anything() as unknown }),
       );
@@ -304,7 +311,7 @@ describe('OrderService', () => {
 
     it('should throw NotFoundException when order does not exist or does not belong to the user', async () => {
       // Arrange
-      mockOrderRepository.findByIdAndUser.mockResolvedValue(null);
+      mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(null);
 
       // Act & Assert
       await expect(

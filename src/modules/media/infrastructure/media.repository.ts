@@ -2,10 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MediaEntity } from '../domain/media.entity';
-import type { IMediaRepository } from '../application/interfaces/media-repository.interface';
+import type {
+  IMediaQueryRepository,
+  IMediaCommandRepository,
+} from '../application/interfaces/media-repository.interface';
 
 @Injectable()
-export class MediaRepository implements IMediaRepository {
+export class MediaRepository
+  implements IMediaQueryRepository, IMediaCommandRepository
+{
   constructor(
     @InjectRepository(MediaEntity)
     private readonly repository: Repository<MediaEntity>,
