@@ -5,5 +5,5 @@ export class UpdateCartQuantityDto {
   @ApiProperty({ example: 3, description: 'New quantity' })
   @IsInt()
   @IsPositive()
-  quantity: number;
+  quantity!: number;
 }

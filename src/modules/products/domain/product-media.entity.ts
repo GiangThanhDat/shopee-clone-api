@@ -14,28 +14,28 @@ import { MediaEntity } from '../../media/domain/media.entity';
 @Entity('product_media')
 export class ProductMediaEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
-  id: number;
+  id!: number;
 
   @Column({ name: 'product_id', type: 'bigint' })
-  productId: number;
+  productId!: number;
 
   @ManyToOne(() => ProductEntity, (product) => product.productMedia)
   @JoinColumn({ name: 'product_id' })
-  product: ProductEntity;
+  product!: ProductEntity;
 
   @Column({ name: 'media_id', type: 'bigint' })
-  mediaId: number;
+  mediaId!: number;
 
   @ManyToOne(() => MediaEntity, { cascade: ['insert'] })
   @JoinColumn({ name: 'media_id' })
-  media: MediaEntity;
+  media!: MediaEntity;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @DeleteDateColumn({ name: 'deleted_at' })
-  deletedAt: Date | null;
+  deletedAt!: Date | null;
 }

@@ -15,16 +15,16 @@ export class CreateMediaDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  url: string;
+  url!: string;
 
   @ApiProperty({ example: 1024000, description: 'File size in bytes' })
   @IsNumber()
   @Min(0)
-  size: number;
+  size!: number;
 
   @ApiProperty({ example: 'image.png', description: 'File name' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  fileName: string;
+  fileName!: string;
 }

@@ -9,20 +9,20 @@ import {
 @Entity('media')
 export class MediaEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 255 })
-  url: string;
+  url!: string;
 
   @Column({ type: 'bigint' })
-  size: number;
+  size!: number;
 
   @Column({ name: 'file_name', type: 'varchar', length: 255 })
-  fileName: string;
+  fileName!: string;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

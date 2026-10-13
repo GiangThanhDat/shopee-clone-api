@@ -15,7 +15,7 @@ export class CreateOptionDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  name: string;
+  name!: string;
 
   @ApiPropertyOptional({
     type: [CreateOptionValueDto],

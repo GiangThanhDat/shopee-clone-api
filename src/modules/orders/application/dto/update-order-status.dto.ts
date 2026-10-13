@@ -10,5 +10,5 @@ export class UpdateOrderStatusDto {
   @IsInt()
   @Min(0)
   @Max(4)
-  orderStatus: number;
+  orderStatus!: number;
 }

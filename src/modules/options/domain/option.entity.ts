@@ -11,19 +11,19 @@ import { OptionValueEntity } from './option-value.entity';
 @Entity('options')
 export class OptionEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 255 })
-  name: string;
+  name!: string;
 
   @OneToMany(() => OptionValueEntity, (value) => value.option, {
     cascade: ['insert', 'update'],
   })
-  values: OptionValueEntity[];
+  values!: OptionValueEntity[];
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

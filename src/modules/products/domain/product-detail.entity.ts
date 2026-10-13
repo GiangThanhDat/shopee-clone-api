@@ -14,28 +14,28 @@ import { ProductSpecEntity } from './product-spec.entity';
 @Entity('product_details')
 export class ProductDetailEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
-  id: number;
+  id!: number;
 
   @Column({ name: 'product_id', type: 'bigint' })
-  productId: number;
+  productId!: number;
 
   @ManyToOne(() => ProductEntity, (product) => product.details)
   @JoinColumn({ name: 'product_id' })
-  product: ProductEntity;
+  product!: ProductEntity;
 
   @Column({ name: 'field_id', type: 'bigint' })
-  fieldId: number;
+  fieldId!: number;
 
   @ManyToOne(() => ProductSpecEntity, { cascade: ['insert'] })
   @JoinColumn({ name: 'field_id' })
-  spec: ProductSpecEntity;
+  spec!: ProductSpecEntity;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @DeleteDateColumn({ name: 'deleted_at' })
-  deletedAt: Date | null;
+  deletedAt!: Date | null;
 }

@@ -19,31 +19,31 @@ import { ProductSkuEntity } from '../../products/domain/product-sku.entity';
 })
 export class CartItemEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
-  id: number;
+  id!: number;
 
   @Column({ name: 'cart_id', type: 'bigint' })
-  cartId: number;
+  cartId!: number;
 
   @Column({ name: 'sku_id', type: 'bigint' })
-  skuId: number;
+  skuId!: number;
 
   @Column({ type: 'bigint' })
-  quantity: number;
+  quantity!: number;
 
   @ManyToOne(() => CartEntity, (cart) => cart.items)
   @JoinColumn({ name: 'cart_id' })
-  cart: CartEntity;
+  cart!: CartEntity;
 
   @ManyToOne(() => ProductSkuEntity)
   @JoinColumn({ name: 'sku_id' })
-  sku: ProductSkuEntity;
+  sku!: ProductSkuEntity;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @DeleteDateColumn({ name: 'deleted_at' })
-  deletedAt: Date | null;
+  deletedAt!: Date | null;
 }

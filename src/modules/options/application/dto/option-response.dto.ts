@@ -2,37 +2,37 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class OptionValueResponse {
   @ApiProperty({ example: 1 })
-  id: number;
+  id!: number;
 
   @ApiProperty({ example: 'Red' })
-  value: string;
+  value!: string;
 
   @ApiProperty({ example: 'https://cdn.example.com/red.jpg' })
-  imageUrl: string;
+  imageUrl!: string;
 }
 
 export class OptionResponse {
   @ApiProperty({ example: 1 })
-  id: number;
+  id!: number;
 
   @ApiProperty({ example: 'Color' })
-  name: string;
+  name!: string;
 
   @ApiProperty({ type: [OptionValueResponse] })
-  values: OptionValueResponse[];
+  values!: OptionValueResponse[];
 }
 
 export class OptionSingleResponse {
   @ApiProperty({ type: OptionResponse })
-  option: OptionResponse;
+  option!: OptionResponse;
 }
 
 export class OptionListResponse {
   @ApiProperty({ type: [OptionResponse] })
-  options: OptionResponse[];
+  options!: OptionResponse[];
 }
 
 export class OptionValueSingleResponse {
   @ApiProperty({ type: OptionValueResponse })
-  value: OptionValueResponse;
+  value!: OptionValueResponse;
 }

@@ -27,20 +27,20 @@ export class CreateProductSkuDto {
   @ValidateIf((o: CreateProductSkuDto) => !o.id)
   @IsNumber()
   @IsPositive()
-  price: number;
+  price!: number;
 
   @ApiProperty({ example: 100, description: 'Stock quantity' })
   @ValidateIf((o: CreateProductSkuDto) => !o.id)
   @IsInt()
   @Min(0)
-  stock: number;
+  stock!: number;
 
   @ApiProperty({ example: 'PHONE-RED-128GB', description: 'SKU code' })
   @ValidateIf((o: CreateProductSkuDto) => !o.id)
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  skuCode: string;
+  skuCode!: string;
 
   @ApiProperty({
     example: 'https://cdn.example.com/thumb.png',
@@ -49,7 +49,7 @@ export class CreateProductSkuDto {
   @ValidateIf((o: CreateProductSkuDto) => !o.id)
   @IsString()
   @MaxLength(255)
-  thumbUrl: string;
+  thumbUrl!: string;
 
   @ApiProperty({
     example: [1, 3],
@@ -59,5 +59,5 @@ export class CreateProductSkuDto {
   @IsArray()
   @ArrayMinSize(0)
   @IsInt({ each: true })
-  optionValueIds: number[];
+  optionValueIds!: number[];
 }

@@ -2,63 +2,63 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CartSkuResponse {
   @ApiProperty({ example: 1 })
-  id: number;
+  id!: number;
 
   @ApiProperty({ example: 150000 })
-  price: number;
+  price!: number;
 
   @ApiProperty({ example: 'SKU-001' })
-  skuCode: string;
+  skuCode!: string;
 
   @ApiProperty({ example: 'https://example.com/thumb.jpg' })
-  thumbUrl: string;
+  thumbUrl!: string;
 }
 
 export class CartItemResponse {
   @ApiProperty({ example: 1 })
-  id: number;
+  id!: number;
 
   @ApiProperty({ example: 2 })
-  quantity: number;
+  quantity!: number;
 
   @ApiProperty({ example: 1 })
-  skuId: number;
+  skuId!: number;
 
   @ApiProperty({ type: CartSkuResponse })
-  sku: CartSkuResponse;
+  sku!: CartSkuResponse;
 
   @ApiProperty({ example: '2026-03-20T00:00:00.000Z' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @ApiProperty({ example: '2026-03-20T00:00:00.000Z' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }
 
 export class CartResponse {
   @ApiProperty({ example: 1 })
-  id: number;
+  id!: number;
 
   @ApiProperty({ type: [CartItemResponse] })
-  items: CartItemResponse[];
+  items!: CartItemResponse[];
 
   @ApiProperty({ example: '2026-03-20T00:00:00.000Z' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @ApiProperty({ example: '2026-03-20T00:00:00.000Z' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }
 
 export class CartSingleResponse {
   @ApiProperty({ type: CartResponse })
-  cart: CartResponse;
+  cart!: CartResponse;
 }
 
 export class CartItemSingleResponse {
   @ApiProperty({ type: CartItemResponse })
-  item: CartItemResponse;
+  item!: CartItemResponse;
 }
 
 export class CartItemListResponse {
   @ApiProperty({ type: [CartItemResponse] })
-  items: CartItemResponse[];
+  items!: CartItemResponse[];
 }

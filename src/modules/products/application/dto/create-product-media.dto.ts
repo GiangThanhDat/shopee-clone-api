@@ -38,18 +38,18 @@ export class CreateProductMediaDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  url: string;
+  url!: string;
 
   @ApiProperty({ example: 1024000, description: 'File size in bytes' })
   @ValidateIf((o: CreateProductMediaDto) => !o.mediaId)
   @IsNumber()
   @Min(0)
-  size: number;
+  size!: number;
 
   @ApiProperty({ example: 'product.png', description: 'File name' })
   @ValidateIf((o: CreateProductMediaDto) => !o.mediaId)
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  fileName: string;
+  fileName!: string;
 }

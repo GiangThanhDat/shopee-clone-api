@@ -8,10 +8,10 @@ export class LoginDto {
   })
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @ApiProperty({ example: 'StrongP@ss1', description: 'Account password' })
   @IsString()
   @IsNotEmpty()
-  password: string;
+  password!: string;
 }

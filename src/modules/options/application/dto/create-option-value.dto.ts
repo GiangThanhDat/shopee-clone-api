@@ -24,7 +24,7 @@ export class CreateOptionValueDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  value: string;
+  value!: string;
 
   @ApiProperty({
     example: 'https://cdn.example.com/red.png',

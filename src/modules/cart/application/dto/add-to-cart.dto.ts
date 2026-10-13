@@ -5,10 +5,10 @@ export class AddToCartDto {
   @ApiProperty({ example: 1, description: 'Product SKU id' })
   @IsInt()
   @IsPositive()
-  skuId: number;
+  skuId!: number;
 
   @ApiProperty({ example: 2, description: 'Quantity to add' })
   @IsInt()
   @IsPositive()
-  quantity: number;
+  quantity!: number;
 }

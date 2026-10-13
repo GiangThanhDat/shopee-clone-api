@@ -33,12 +33,12 @@ export class CreateProductDetailDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  specName: string;
+  specName!: string;
 
   @ApiProperty({ example: '6.7 inches', description: 'Spec value' })
   @ValidateIf((o: CreateProductDetailDto) => !o.fieldId)
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  specValue: string;
+  specValue!: string;
 }

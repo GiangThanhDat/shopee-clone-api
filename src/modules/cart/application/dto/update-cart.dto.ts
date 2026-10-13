@@ -29,12 +29,12 @@ export class UpdateCartItemDto {
   @ValidateIf((o: UpdateCartItemDto) => !o.id)
   @IsInt()
   @IsPositive()
-  skuId: number;
+  skuId!: number;
 
   @ApiProperty({ example: 2, description: 'Quantity' })
   @IsInt()
   @IsPositive()
-  quantity: number;
+  quantity!: number;
 }
 
 export class UpdateCartDto {
@@ -45,5 +45,5 @@ export class UpdateCartDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UpdateCartItemDto)
-  items: UpdateCartItemDto[];
+  items!: UpdateCartItemDto[];
 }

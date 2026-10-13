@@ -2,16 +2,16 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class PaginationMetaDto {
   @ApiProperty({ example: 1 })
-  currentPage: number;
+  currentPage!: number;
 
   @ApiProperty({ example: 10 })
-  itemsPerPage: number;
+  itemsPerPage!: number;
 
   @ApiProperty({ example: 100 })
-  totalItems: number;
+  totalItems!: number;
 
   @ApiProperty({ example: 10 })
-  totalPages: number;
+  totalPages!: number;
 }
 
 export class ResponseMetadataDto {
@@ -21,8 +21,8 @@ export class ResponseMetadataDto {
 
 export class ErrorResponseDto {
   @ApiProperty({ example: 400 })
-  status: number;
+  status!: number;
 
   @ApiProperty({ example: 'Validation failed' })
-  message: string;
+  message!: string;
 }

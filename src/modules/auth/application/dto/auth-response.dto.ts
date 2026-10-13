@@ -2,29 +2,29 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class AuthUserDto {
   @ApiProperty({ example: 1, description: 'User ID' })
-  id: number;
+  id!: number;
 
   @ApiProperty({ example: 'Nguyen Van A', description: 'Full name' })
-  fullName: string;
+  fullName!: string;
 
   @ApiProperty({ example: 'nguyenvana@example.com', description: 'Email' })
-  email: string;
+  email!: string;
 
   @ApiProperty({ example: 'nguyenvana', description: 'Username' })
-  username: string;
+  username!: string;
 }
 
 class AuthDto {
   @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
-  accessToken: string;
+  accessToken!: string;
 
   @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
-  refreshToken: string;
+  refreshToken!: string;
 }
 
 export class AuthResponseDto {
   @ApiProperty({ type: AuthUserDto })
-  user: AuthUserDto;
+  user!: AuthUserDto;
   @ApiProperty({ type: AuthDto })
-  auth: AuthDto;
+  auth!: AuthDto;
 }

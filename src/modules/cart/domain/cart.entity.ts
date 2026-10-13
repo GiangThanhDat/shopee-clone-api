@@ -16,23 +16,23 @@ import { CartItemEntity } from './cart-item.entity';
 @Unique(['userId'])
 export class CartEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
-  id: number;
+  id!: number;
 
   @Column({ name: 'user_id', type: 'bigint' })
-  userId: number;
+  userId!: number;
 
   @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'user_id' })
-  user: UserEntity;
+  user!: UserEntity;
 
   @OneToMany(() => CartItemEntity, (item) => item.cart, {
     cascade: ['insert', 'update'],
   })
-  items: CartItemEntity[];
+  items!: CartItemEntity[];
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

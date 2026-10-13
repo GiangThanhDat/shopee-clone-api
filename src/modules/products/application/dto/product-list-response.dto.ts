@@ -4,12 +4,12 @@ import { ProductResponse } from './product-response.dto';
 
 export class ProductListMetadataDto {
   @ApiProperty({ type: PaginationMetaDto })
-  pagination: PaginationMetaDto;
+  pagination!: PaginationMetaDto;
 }
 
 export class ProductListResponse {
   @ApiProperty({ type: [ProductResponse] })
-  products: ProductResponse[];
+  products!: ProductResponse[];
 
   @ApiPropertyOptional({ type: ProductListMetadataDto })
   metadata?: ProductListMetadataDto;

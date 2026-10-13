@@ -14,47 +14,47 @@ import { ProductSkuEntity } from '../../products/domain/product-sku.entity';
 @Entity('order_details')
 export class OrderDetailEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
-  id: number;
+  id!: number;
 
   @Column({ name: 'shipping_fee', type: 'double precision' })
-  shippingFee: number;
+  shippingFee!: number;
 
   @Column({ type: 'double precision' })
-  price: number;
+  price!: number;
 
   @Column({ type: 'bigint' })
-  quantity: number;
+  quantity!: number;
 
   @Column({ name: 'discount_percent', type: 'bigint', default: 0 })
-  discountPercent: number;
+  discountPercent!: number;
 
   @Column({ type: 'double precision', default: 0 })
-  subtotal: number;
+  subtotal!: number;
 
   @Column({ name: 'order_id', type: 'bigint' })
-  orderId: number;
+  orderId!: number;
 
   @Column({ name: 'user_id', type: 'bigint' })
-  userId: number;
+  userId!: number;
 
   @Column({ name: 'sku_id', type: 'bigint' })
-  skuId: number;
+  skuId!: number;
 
   @ManyToOne(() => OrderEntity, (order) => order.details)
   @JoinColumn({ name: 'order_id' })
-  order: OrderEntity;
+  order!: OrderEntity;
 
   @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'user_id' })
-  user: UserEntity;
+  user!: UserEntity;
 
   @ManyToOne(() => ProductSkuEntity)
   @JoinColumn({ name: 'sku_id' })
-  sku: ProductSkuEntity;
+  sku!: ProductSkuEntity;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

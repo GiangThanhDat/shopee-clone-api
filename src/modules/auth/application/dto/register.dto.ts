@@ -15,13 +15,13 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  fullName: string;
+  fullName!: string;
 
   @ApiProperty({ example: 'nguyenvana', description: 'Unique username' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  username: string;
+  username!: string;
 
   @ApiProperty({
     example: 'nguyenvana@example.com',
@@ -29,7 +29,7 @@ export class RegisterDto {
   })
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     example: 'StrongP@ss1',
@@ -38,5 +38,5 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
-  password: string;
+  password!: string;
 }

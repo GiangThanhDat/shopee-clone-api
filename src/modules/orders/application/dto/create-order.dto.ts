@@ -17,7 +17,7 @@ export class OrderItemDto {
   @ApiProperty({ example: 1, description: 'Product SKU id' })
   @IsInt()
   @IsPositive()
-  skuId: number;
+  skuId!: number;
 
   @ApiProperty({
     example: 150000,
@@ -25,12 +25,12 @@ export class OrderItemDto {
   })
   @IsNumber()
   @IsPositive()
-  price: number;
+  price!: number;
 
   @ApiProperty({ example: 2, description: 'Quantity' })
   @IsInt()
   @IsPositive()
-  quantity: number;
+  quantity!: number;
 
   @ApiProperty({
     example: 10,
@@ -62,7 +62,7 @@ export class CreateOrderDto {
     description: 'Delivery address',
   })
   @IsString()
-  deliveryAddress: string;
+  deliveryAddress!: string;
 
   @ApiProperty({
     example: 300000,
@@ -71,12 +71,12 @@ export class CreateOrderDto {
   })
   @IsNumber()
   @IsPositive()
-  totalAmount: number;
+  totalAmount!: number;
 
   @ApiProperty({ type: [OrderItemDto], description: 'List of items to order' })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
-  items: OrderItemDto[];
+  items!: OrderItemDto[];
 }

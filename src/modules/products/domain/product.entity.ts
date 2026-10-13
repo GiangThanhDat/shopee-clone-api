@@ -13,32 +13,32 @@ import { ProductDetailEntity } from './product-detail.entity';
 @Entity('product')
 export class ProductEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 255 })
-  name: string;
+  name!: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  description: string | null;
+  description!: string | null;
 
   @OneToMany(() => ProductSkuEntity, (sku) => sku.product, {
     cascade: ['insert', 'update'],
   })
-  skus: ProductSkuEntity[];
+  skus!: ProductSkuEntity[];
 
   @OneToMany(() => ProductMediaEntity, (media) => media.product, {
     cascade: ['insert', 'update'],
   })
-  productMedia: ProductMediaEntity[];
+  productMedia!: ProductMediaEntity[];
 
   @OneToMany(() => ProductDetailEntity, (detail) => detail.product, {
     cascade: ['insert', 'update'],
   })
-  details: ProductDetailEntity[];
+  details!: ProductDetailEntity[];
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

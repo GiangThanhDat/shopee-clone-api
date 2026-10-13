@@ -21,7 +21,7 @@ export class CreateProductDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(255)
-  name: string;
+  name!: string;
 
   @ApiPropertyOptional({
     example: 'Latest Apple smartphone with A17 Pro chip',
