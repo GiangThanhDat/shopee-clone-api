@@ -30,8 +30,14 @@ describe('SkuSyncService', () => {
       providers: [
         SkuSyncService,
         { provide: PRODUCT_SKU_QUERY_REPOSITORY, useValue: mockSkuQueryRepo },
-        { provide: PRODUCT_SKU_COMMAND_REPOSITORY, useValue: mockSkuCommandRepo },
-        { provide: OPTION_VALUE_QUERY_REPOSITORY, useValue: mockOptionValueQueryRepo },
+        {
+          provide: PRODUCT_SKU_COMMAND_REPOSITORY,
+          useValue: mockSkuCommandRepo,
+        },
+        {
+          provide: OPTION_VALUE_QUERY_REPOSITORY,
+          useValue: mockOptionValueQueryRepo,
+        },
       ],
     }).compile();
 
@@ -61,7 +67,10 @@ describe('SkuSyncService', () => {
 
   describe('sync', () => {
     it('should soft delete removed SKUs', async () => {
-      mockSkuQueryRepo.findByProductId.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+      mockSkuQueryRepo.findByProductId.mockResolvedValue([
+        { id: 1 },
+        { id: 2 },
+      ]);
       mockSkuCommandRepo.updateMany.mockResolvedValue([]);
 
       await service.sync(1, [{ id: 1, price: 100 }] as any);

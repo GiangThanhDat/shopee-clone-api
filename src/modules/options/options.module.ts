@@ -22,7 +22,10 @@ import { OptionController } from './controllers/option.controller';
     { provide: OPTION_QUERY_REPOSITORY, useClass: OptionRepository },
     { provide: OPTION_COMMAND_REPOSITORY, useClass: OptionRepository },
     { provide: OPTION_VALUE_QUERY_REPOSITORY, useClass: OptionValueRepository },
-    { provide: OPTION_VALUE_COMMAND_REPOSITORY, useClass: OptionValueRepository },
+    {
+      provide: OPTION_VALUE_COMMAND_REPOSITORY,
+      useClass: OptionValueRepository,
+    },
     OptionService,
   ],
   exports: [TypeOrmModule, OPTION_VALUE_QUERY_REPOSITORY],

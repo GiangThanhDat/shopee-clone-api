@@ -42,7 +42,10 @@ describe('ProductOrchestrator', () => {
       providers: [
         ProductOrchestrator,
         { provide: PRODUCT_QUERY_REPOSITORY, useValue: mockProductQueryRepo },
-        { provide: PRODUCT_COMMAND_REPOSITORY, useValue: mockProductCommandRepo },
+        {
+          provide: PRODUCT_COMMAND_REPOSITORY,
+          useValue: mockProductCommandRepo,
+        },
         { provide: SkuSyncService, useValue: mockSkuSync },
         { provide: MediaSyncService, useValue: mockMediaSync },
         { provide: DetailSyncService, useValue: mockDetailSync },

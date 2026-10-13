@@ -140,7 +140,9 @@ export class CartItemController {
     type: ErrorResponseDto,
   })
   @ResponseMessage('Cart cleared')
-  async clearCart(@CurrentUser('userId') userId: number): Promise<CartSingleResponse> {
+  async clearCart(
+    @CurrentUser('userId') userId: number,
+  ): Promise<CartSingleResponse> {
     return this.cartItemService.clearCart(userId);
   }
 }

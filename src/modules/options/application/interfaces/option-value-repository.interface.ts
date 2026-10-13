@@ -15,9 +15,7 @@ export interface IOptionValueQueryRepository {
 
 export interface IOptionValueCommandRepository {
   save(value: Partial<OptionValueEntity>): Promise<OptionValueEntity>;
-  saveMany(
-    values: Partial<OptionValueEntity>[],
-  ): Promise<OptionValueEntity[]>;
+  saveMany(values: Partial<OptionValueEntity>[]): Promise<OptionValueEntity[]>;
   update(
     id: number,
     data: Partial<OptionValueEntity>,

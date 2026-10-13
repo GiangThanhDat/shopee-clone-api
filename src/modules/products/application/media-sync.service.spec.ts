@@ -28,8 +28,14 @@ describe('MediaSyncService', () => {
     const module = await Test.createTestingModule({
       providers: [
         MediaSyncService,
-        { provide: PRODUCT_MEDIA_QUERY_REPOSITORY, useValue: mockProductMediaQueryRepo },
-        { provide: PRODUCT_MEDIA_COMMAND_REPOSITORY, useValue: mockProductMediaCommandRepo },
+        {
+          provide: PRODUCT_MEDIA_QUERY_REPOSITORY,
+          useValue: mockProductMediaQueryRepo,
+        },
+        {
+          provide: PRODUCT_MEDIA_COMMAND_REPOSITORY,
+          useValue: mockProductMediaCommandRepo,
+        },
         { provide: MEDIA_COMMAND_REPOSITORY, useValue: mockMediaCommandRepo },
       ],
     }).compile();
@@ -47,7 +53,9 @@ describe('MediaSyncService', () => {
 
       await service.sync(1, [] as any);
 
-      expect(mockProductMediaCommandRepo.softRemoveByIds).toHaveBeenCalledWith([1, 2]);
+      expect(mockProductMediaCommandRepo.softRemoveByIds).toHaveBeenCalledWith([
+        1, 2,
+      ]);
     });
 
     it('should bulk update existing media when mediaId provided', async () => {

@@ -67,11 +67,26 @@ import { ProductDetailController } from './controllers/product-detail.controller
     { provide: PRODUCT_COMMAND_REPOSITORY, useClass: ProductRepository },
     { provide: PRODUCT_SKU_QUERY_REPOSITORY, useClass: ProductSkuRepository },
     { provide: PRODUCT_SKU_COMMAND_REPOSITORY, useClass: ProductSkuRepository },
-    { provide: PRODUCT_MEDIA_QUERY_REPOSITORY, useClass: ProductMediaRepository },
-    { provide: PRODUCT_MEDIA_COMMAND_REPOSITORY, useClass: ProductMediaRepository },
-    { provide: PRODUCT_DETAIL_QUERY_REPOSITORY, useClass: ProductDetailRepository },
-    { provide: PRODUCT_DETAIL_COMMAND_REPOSITORY, useClass: ProductDetailRepository },
-    { provide: PRODUCT_SPEC_COMMAND_REPOSITORY, useClass: ProductSpecRepository },
+    {
+      provide: PRODUCT_MEDIA_QUERY_REPOSITORY,
+      useClass: ProductMediaRepository,
+    },
+    {
+      provide: PRODUCT_MEDIA_COMMAND_REPOSITORY,
+      useClass: ProductMediaRepository,
+    },
+    {
+      provide: PRODUCT_DETAIL_QUERY_REPOSITORY,
+      useClass: ProductDetailRepository,
+    },
+    {
+      provide: PRODUCT_DETAIL_COMMAND_REPOSITORY,
+      useClass: ProductDetailRepository,
+    },
+    {
+      provide: PRODUCT_SPEC_COMMAND_REPOSITORY,
+      useClass: ProductSpecRepository,
+    },
     SkuSyncService,
     MediaSyncService,
     DetailSyncService,

@@ -28,9 +28,18 @@ describe('DetailSyncService', () => {
     const module = await Test.createTestingModule({
       providers: [
         DetailSyncService,
-        { provide: PRODUCT_DETAIL_QUERY_REPOSITORY, useValue: mockDetailQueryRepo },
-        { provide: PRODUCT_DETAIL_COMMAND_REPOSITORY, useValue: mockDetailCommandRepo },
-        { provide: PRODUCT_SPEC_COMMAND_REPOSITORY, useValue: mockSpecCommandRepo },
+        {
+          provide: PRODUCT_DETAIL_QUERY_REPOSITORY,
+          useValue: mockDetailQueryRepo,
+        },
+        {
+          provide: PRODUCT_DETAIL_COMMAND_REPOSITORY,
+          useValue: mockDetailCommandRepo,
+        },
+        {
+          provide: PRODUCT_SPEC_COMMAND_REPOSITORY,
+          useValue: mockSpecCommandRepo,
+        },
       ],
     }).compile();
 
@@ -48,7 +57,9 @@ describe('DetailSyncService', () => {
 
       await service.sync(1, [] as any);
 
-      expect(mockDetailCommandRepo.softRemoveByIds).toHaveBeenCalledWith([10, 11]);
+      expect(mockDetailCommandRepo.softRemoveByIds).toHaveBeenCalledWith([
+        10, 11,
+      ]);
     });
 
     it('should bulk update with existing spec when fieldId provided', async () => {

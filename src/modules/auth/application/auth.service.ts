@@ -136,6 +136,9 @@ export class AuthService {
       'JWT_REFRESH_SECRET',
       'default-refresh-secret',
     );
-    return this.jwtService.sign({ sub: userId, email }, { secret, expiresIn: '7d' });
+    return this.jwtService.sign(
+      { sub: userId, email },
+      { secret, expiresIn: '7d' },
+    );
   }
 }

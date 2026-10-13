@@ -5,7 +5,9 @@ export class Money {
 
   static of(value: number): Money {
     if (value < 0) {
-      throw new BadRequestException(`Money amount cannot be negative: ${value}`);
+      throw new BadRequestException(
+        `Money amount cannot be negative: ${value}`,
+      );
     }
     return new Money(value);
   }

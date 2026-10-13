@@ -31,7 +31,9 @@ export class CartController {
     type: ErrorResponseDto,
   })
   @ResponseMessage('Cart retrieved successfully')
-  async getCart(@CurrentUser('userId') userId: number): Promise<CartSingleResponse> {
+  async getCart(
+    @CurrentUser('userId') userId: number,
+  ): Promise<CartSingleResponse> {
     return this.cartService.getCart(userId);
   }
 

@@ -79,7 +79,10 @@ describe('OrderService', () => {
       providers: [
         OrderService,
         { provide: ORDER_QUERY_REPOSITORY, useValue: mockOrderQueryRepository },
-        { provide: ORDER_COMMAND_REPOSITORY, useValue: mockOrderCommandRepository },
+        {
+          provide: ORDER_COMMAND_REPOSITORY,
+          useValue: mockOrderCommandRepository,
+        },
         { provide: OrderPriceVerifier, useValue: mockPriceVerifier },
       ],
     }).compile();
