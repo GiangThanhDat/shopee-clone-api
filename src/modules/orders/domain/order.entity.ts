@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { UserEntity } from '../../users/domain/user.entity';
 import { OrderDetailEntity } from './order-detail.entity';
+import { OrderStatus } from './order-status';
 
 @Entity('orders')
 export class OrderEntity {
@@ -26,7 +27,7 @@ export class OrderEntity {
   deliveryAddress!: string;
 
   @Column({ name: 'order_status', type: 'bigint', default: 0 })
-  orderStatus!: number;
+  orderStatus!: OrderStatus;
 
   @Column({ name: 'ordered_at', type: 'timestamp', nullable: true })
   orderedAt!: Date | null;

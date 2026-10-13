@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, Min, Max } from 'class-validator';
+import { IsEnum } from 'class-validator';
+import { OrderStatus } from '../../domain/order-status';
 
 export class UpdateOrderStatusDto {
   @ApiProperty({
-    example: 1,
+    example: OrderStatus.Cancelled,
+    enum: OrderStatus,
     description:
-      'Order status: 0=pending, 1=paid, 2=shipped, 3=completed, 4=cancelled',
+      'Target status. Customers may only cancel (4) a pending order; other transitions belong to payment and fulfilment flows',
   })
-  @IsInt()
-  @Min(0)
-  @Max(4)
-  orderStatus!: number;
+  @IsEnum(OrderStatus)
+  orderStatus!: OrderStatus;
 }

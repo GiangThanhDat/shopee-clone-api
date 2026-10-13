@@ -9,6 +9,7 @@ import {
 } from './application/interfaces/order-repository.interface';
 import { OrderRepository } from './infrastructure/order.repository';
 import { OrderPriceVerifier } from './application/order-price-verifier.service';
+import { OrderStockReservation } from './application/order-stock-reservation.service';
 import { OrderService } from './application/order.service';
 import { OrderController } from './order.controller';
 
@@ -22,6 +23,7 @@ import { OrderController } from './order.controller';
     { provide: ORDER_QUERY_REPOSITORY, useClass: OrderRepository },
     { provide: ORDER_COMMAND_REPOSITORY, useClass: OrderRepository },
     OrderPriceVerifier,
+    OrderStockReservation,
     OrderService,
   ],
   exports: [TypeOrmModule, OrderService],
