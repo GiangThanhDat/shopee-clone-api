@@ -7,6 +7,8 @@ import {
 import { SkuSyncService } from './sku-sync.service';
 import { MediaSyncService } from './media-sync.service';
 import { DetailSyncService } from './detail-sync.service';
+import type { CreateProductDto } from './dto/create-product.dto';
+import type { UpdateProductDto } from './dto/update-product.dto';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () => () => ({}),
@@ -62,7 +64,7 @@ describe('ProductOrchestrator', () => {
       mockProductCommandRepo.create.mockResolvedValue({ id: 1 });
       mockProductQueryRepo.findById.mockResolvedValue({ id: 1 });
 
-      await orchestrator.create(dto as any);
+      await orchestrator.create(dto as CreateProductDto);
 
       expect(mockSkuSync.validate).toHaveBeenCalled();
       expect(mockProductCommandRepo.create).toHaveBeenCalled();
@@ -74,7 +76,7 @@ describe('ProductOrchestrator', () => {
       const dto = { name: 'iPhone 16' };
       mockProductQueryRepo.findById.mockResolvedValue({ id: 1 });
 
-      await orchestrator.update(1, dto as any);
+      await orchestrator.update(1, dto as UpdateProductDto);
 
       expect(mockProductCommandRepo.update).toHaveBeenCalledWith(1, {
         name: 'iPhone 16',
@@ -87,7 +89,7 @@ describe('ProductOrchestrator', () => {
       const dto = { skus };
       mockProductQueryRepo.findById.mockResolvedValue({ id: 1 });
 
-      await orchestrator.update(1, dto as any);
+      await orchestrator.update(1, dto as UpdateProductDto);
 
       expect(mockSkuSync.sync).toHaveBeenCalledWith(1, skus);
     });
@@ -97,7 +99,7 @@ describe('ProductOrchestrator', () => {
       const dto = { media };
       mockProductQueryRepo.findById.mockResolvedValue({ id: 1 });
 
-      await orchestrator.update(1, dto as any);
+      await orchestrator.update(1, dto as UpdateProductDto);
 
       expect(mockMediaSync.sync).toHaveBeenCalledWith(1, media);
     });
@@ -107,7 +109,7 @@ describe('ProductOrchestrator', () => {
       const dto = { details };
       mockProductQueryRepo.findById.mockResolvedValue({ id: 1 });
 
-      await orchestrator.update(1, dto as any);
+      await orchestrator.update(1, dto as UpdateProductDto);
 
       expect(mockDetailSync.sync).toHaveBeenCalledWith(1, details);
     });
@@ -116,7 +118,7 @@ describe('ProductOrchestrator', () => {
       const dto = { skus: [] };
       mockProductQueryRepo.findById.mockResolvedValue({ id: 1 });
 
-      await orchestrator.update(1, dto as any);
+      await orchestrator.update(1, dto as UpdateProductDto);
 
       expect(mockProductCommandRepo.update).not.toHaveBeenCalled();
     });

@@ -38,6 +38,11 @@ import { OPTION_VALUE_QUERY_REPOSITORY } from '../src/modules/options/applicatio
 import { OptionValueRepository } from '../src/modules/options/infrastructure/option-value.repository';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import type { UpdateProductDto } from '../src/modules/products/application/dto/update-product.dto';
+
+type SkuInput = NonNullable<UpdateProductDto['skus']>;
+type MediaInput = NonNullable<UpdateProductDto['media']>;
+type DetailInput = NonNullable<UpdateProductDto['details']>;
 
 const entities = [
   ProductEntity,
@@ -180,7 +185,7 @@ describe('SkuSyncService (integration)', () => {
         thumbUrl: 'c.jpg',
         optionValueIds: [],
       },
-    ] as any);
+    ] as SkuInput);
 
     const saved = await skuRepo.find({ where: { productId: product.id } });
     expect(saved).toHaveLength(3);
@@ -207,7 +212,7 @@ describe('SkuSyncService (integration)', () => {
         thumbUrl: 'y.jpg',
         optionValueIds: [],
       },
-    ] as any);
+    ] as SkuInput);
 
     const created = await skuRepo.find({ where: { productId: product.id } });
 
@@ -228,7 +233,7 @@ describe('SkuSyncService (integration)', () => {
         thumbUrl: 'y2.jpg',
         optionValueIds: [],
       },
-    ] as any);
+    ] as SkuInput);
 
     const updated = await skuRepo.find({ where: { productId: product.id } });
     expect(updated).toHaveLength(2);
@@ -256,7 +261,7 @@ describe('SkuSyncService (integration)', () => {
         thumbUrl: 'd.jpg',
         optionValueIds: [],
       },
-    ] as any);
+    ] as SkuInput);
 
     const created = await skuRepo.find({ where: { productId: product.id } });
     const keepId = created.find((s) => s.skuCode === 'KEEP')!.id;
@@ -270,7 +275,7 @@ describe('SkuSyncService (integration)', () => {
         thumbUrl: 'k.jpg',
         optionValueIds: [],
       },
-    ] as any);
+    ] as SkuInput);
 
     const remaining = await skuRepo.find({ where: { productId: product.id } });
     expect(remaining).toHaveLength(1);
@@ -335,7 +340,7 @@ describe('MediaSyncService (integration)', () => {
     await mediaSync.sync(product.id, [
       { url: 'img1.jpg', size: 1024, fileName: 'img1.jpg' },
       { url: 'img2.jpg', size: 2048, fileName: 'img2.jpg' },
-    ] as any);
+    ] as MediaInput);
 
     const saved = await productMediaRepo.find({
       where: { productId: product.id },
@@ -349,7 +354,7 @@ describe('MediaSyncService (integration)', () => {
   it('should update fileName of existing media', async () => {
     await mediaSync.sync(product.id, [
       { url: 'orig.jpg', size: 100, fileName: 'original.jpg' },
-    ] as any);
+    ] as MediaInput);
 
     const created = await productMediaRepo.find({
       where: { productId: product.id },
@@ -365,7 +370,7 @@ describe('MediaSyncService (integration)', () => {
         size: 100,
         fileName: 'renamed.jpg',
       },
-    ] as any);
+    ] as MediaInput);
 
     const updated = await mediaRepo.findOne({
       where: { id: Number(pm.mediaId) },
@@ -377,7 +382,7 @@ describe('MediaSyncService (integration)', () => {
     await mediaSync.sync(product.id, [
       { url: 'keep.jpg', size: 100, fileName: 'keep.jpg' },
       { url: 'remove.jpg', size: 200, fileName: 'remove.jpg' },
-    ] as any);
+    ] as MediaInput);
 
     const created = await productMediaRepo.find({
       where: { productId: product.id },
@@ -392,7 +397,7 @@ describe('MediaSyncService (integration)', () => {
         size: 100,
         fileName: 'keep.jpg',
       },
-    ] as any);
+    ] as MediaInput);
 
     const remaining = await productMediaRepo.find({
       where: { productId: product.id },
@@ -458,7 +463,7 @@ describe('DetailSyncService (integration)', () => {
       { specName: 'Screen', specValue: '6.7 inches' },
       { specName: 'Battery', specValue: '5000mAh' },
       { specName: 'Weight', specValue: '200g' },
-    ] as any);
+    ] as DetailInput);
 
     const details = await detailRepo.find({
       where: { productId: product.id },
@@ -479,7 +484,7 @@ describe('DetailSyncService (integration)', () => {
     await detailSync.sync(product.id, [
       { specName: 'Screen', specValue: '6.7 inches' },
       { specName: 'Battery', specValue: '5000mAh' },
-    ] as any);
+    ] as DetailInput);
 
     const details = await detailRepo.find({
       where: { productId: product.id },
@@ -494,7 +499,7 @@ describe('DetailSyncService (integration)', () => {
   it('should update specName of existing detail', async () => {
     await detailSync.sync(product.id, [
       { specName: 'Screen', specValue: '6.7 inches' },
-    ] as any);
+    ] as DetailInput);
 
     const created = await detailRepo.find({
       where: { productId: product.id },
@@ -509,7 +514,7 @@ describe('DetailSyncService (integration)', () => {
         specName: 'Display Size',
         specValue: '6.7 inches',
       },
-    ] as any);
+    ] as DetailInput);
 
     const updatedSpec = await specRepo.findOne({
       where: { id: Number(detail.fieldId) },
@@ -521,7 +526,7 @@ describe('DetailSyncService (integration)', () => {
     await detailSync.sync(product.id, [
       { specName: 'Keep', specValue: 'yes' },
       { specName: 'Remove', specValue: 'yes' },
-    ] as any);
+    ] as DetailInput);
 
     const created = await detailRepo.find({
       where: { productId: product.id },
@@ -535,7 +540,7 @@ describe('DetailSyncService (integration)', () => {
         specName: 'Keep',
         specValue: 'yes',
       },
-    ] as any);
+    ] as DetailInput);
 
     const remaining = await detailRepo.find({
       where: { productId: product.id },

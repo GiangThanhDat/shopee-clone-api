@@ -5,6 +5,9 @@ import {
   PRODUCT_DETAIL_COMMAND_REPOSITORY,
 } from './interfaces/product-detail-repository.interface';
 import { PRODUCT_SPEC_COMMAND_REPOSITORY } from './interfaces/product-spec-repository.interface';
+import type { UpdateProductDto } from './dto/update-product.dto';
+
+type DetailInput = NonNullable<UpdateProductDto['details']>;
 
 const mockDetailQueryRepo = {
   findByProductId: jest.fn(),
@@ -55,7 +58,7 @@ describe('DetailSyncService', () => {
       ]);
       mockSpecCommandRepo.findOrCreateMany.mockResolvedValue([]);
 
-      await service.sync(1, [] as any);
+      await service.sync(1, [] as DetailInput);
 
       expect(mockDetailCommandRepo.softRemoveByIds).toHaveBeenCalledWith([
         10, 11,
@@ -70,7 +73,7 @@ describe('DetailSyncService', () => {
 
       await service.sync(1, [
         { id: 15, fieldId: 15, specName: 'Screen', specValue: '6.7' },
-      ] as any);
+      ] as DetailInput);
 
       expect(mockDetailCommandRepo.updateMany).toHaveBeenCalledWith([
         { id: 15, fieldId: 15 },
@@ -88,7 +91,7 @@ describe('DetailSyncService', () => {
 
       await service.sync(1, [
         { id: 15, specName: 'Battery', specValue: '4000mAh' },
-      ] as any);
+      ] as DetailInput);
 
       expect(mockSpecCommandRepo.findOrCreateMany).toHaveBeenCalledWith([
         { name: 'Battery', value: '4000mAh' },
@@ -103,7 +106,7 @@ describe('DetailSyncService', () => {
       mockSpecCommandRepo.findOrCreateMany.mockResolvedValue([]);
       mockDetailCommandRepo.saveMany.mockResolvedValue([]);
 
-      await service.sync(1, [{ fieldId: 5 }] as any);
+      await service.sync(1, [{ fieldId: 5 }] as DetailInput);
 
       expect(mockDetailCommandRepo.saveMany).toHaveBeenCalledWith([
         { productId: 1, fieldId: 5 },
@@ -117,7 +120,9 @@ describe('DetailSyncService', () => {
       ]);
       mockDetailCommandRepo.saveMany.mockResolvedValue([]);
 
-      await service.sync(1, [{ specName: 'Color', specValue: 'Black' }] as any);
+      await service.sync(1, [
+        { specName: 'Color', specValue: 'Black' },
+      ] as DetailInput);
 
       expect(mockSpecCommandRepo.findOrCreateMany).toHaveBeenCalledWith([
         { name: 'Color', value: 'Black' },

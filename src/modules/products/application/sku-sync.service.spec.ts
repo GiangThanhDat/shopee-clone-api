@@ -6,6 +6,9 @@ import {
   PRODUCT_SKU_COMMAND_REPOSITORY,
 } from './interfaces/product-sku-repository.interface';
 import { OPTION_VALUE_QUERY_REPOSITORY } from '../../options/application/interfaces/option-value-repository.interface';
+import type { UpdateProductDto } from './dto/update-product.dto';
+
+type SkuInput = NonNullable<UpdateProductDto['skus']>;
 
 const mockSkuQueryRepo = {
   findByProductId: jest.fn(),
@@ -51,14 +54,16 @@ describe('SkuSyncService', () => {
     });
 
     it('should throw when option value IDs are invalid', async () => {
-      const skus = [{ price: 100, optionValueIds: [1, 2] }] as any;
+      const skus = [{ price: 100, optionValueIds: [1, 2] }] as SkuInput;
       mockOptionValueQueryRepo.findByIds.mockResolvedValue([{ id: 1 }]);
 
       await expect(service.validate(skus)).rejects.toThrow(BadRequestException);
     });
 
     it('should validate optionValueIds for existing SKUs too', async () => {
-      const skus = [{ id: 5, price: 100, optionValueIds: [10, 20] }] as any;
+      const skus = [
+        { id: 5, price: 100, optionValueIds: [10, 20] },
+      ] as SkuInput;
       mockOptionValueQueryRepo.findByIds.mockResolvedValue([{ id: 10 }]);
 
       await expect(service.validate(skus)).rejects.toThrow(BadRequestException);
@@ -73,7 +78,7 @@ describe('SkuSyncService', () => {
       ]);
       mockSkuCommandRepo.updateMany.mockResolvedValue([]);
 
-      await service.sync(1, [{ id: 1, price: 100 }] as any);
+      await service.sync(1, [{ id: 1, price: 100 }] as SkuInput);
 
       expect(mockSkuCommandRepo.softRemoveByIds).toHaveBeenCalledWith([2]);
     });
@@ -84,7 +89,7 @@ describe('SkuSyncService', () => {
 
       await service.sync(1, [
         { id: 5, price: 300, stock: 20, skuCode: 'S1' },
-      ] as any);
+      ] as SkuInput);
 
       expect(mockSkuCommandRepo.updateMany).toHaveBeenCalledWith([
         {
@@ -103,7 +108,7 @@ describe('SkuSyncService', () => {
 
       await service.sync(1, [
         { price: 100, stock: 10, skuCode: 'NEW', optionValueIds: [1] },
-      ] as any);
+      ] as SkuInput);
 
       expect(mockSkuCommandRepo.saveMany).toHaveBeenCalledWith([
         {
@@ -130,7 +135,7 @@ describe('SkuSyncService', () => {
           skuCode: 'S1',
           optionValueIds: [10, 20],
         },
-      ] as any);
+      ] as SkuInput);
 
       expect(mockSkuCommandRepo.syncSkuValues).toHaveBeenCalledWith([
         { skuId: 5, optionValueIds: [10, 20] },
@@ -144,7 +149,7 @@ describe('SkuSyncService', () => {
 
       await service.sync(1, [
         { id: 5, price: 300, stock: 20, skuCode: 'S1' },
-      ] as any);
+      ] as SkuInput);
 
       expect(mockSkuCommandRepo.syncSkuValues).toHaveBeenCalledWith([]);
     });
