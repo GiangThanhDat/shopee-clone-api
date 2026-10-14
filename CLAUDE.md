@@ -1,10 +1,18 @@
 # CLAUDE.md — Shopee Clone API
 
-## Project Overview
+NestJS REST API for a Shopee-like e-commerce platform.
+Stack: NestJS 11 + TypeORM + PostgreSQL + Swagger + Jest.
+MVP features: Auth (JWT), Users, Products (options, SKUs, media), Cart, Orders.
 
-NestJS REST API for a Shopee-like e-commerce platform. Stack: NestJS 11 + TypeORM + PostgreSQL + Swagger + Jest.
+---
 
-MVP features: Auth (JWT), Products, Cart, Orders, User Profile.
+## Guiding Principle: Readability First
+
+Code is read far more often than it is written. Every rule below serves that goal.
+
+- When a guideline would make code harder to follow, choose the readable version and say why in the PR
+- Prefer the simplest design that handles today's requirements. Add an abstraction when a second real use case appears, not before
+- A reader should be able to go from controller → service → repository in a few jumps, without chasing tokens and wrappers
 
 ---
 
@@ -12,221 +20,203 @@ MVP features: Auth (JWT), Products, Cart, Orders, User Profile.
 
 ```
 src/
-├── modules/          # Feature modules (auth, users, products, cart, orders)
+├── modules/              # auth, users, products, options, media, cart, orders
 │   └── <feature>/
-│       ├── domain/           # Entities, value objects, domain interfaces
-│       ├── application/      # Use-case services, DTOs, interfaces
-│       ├── infrastructure/   # Repositories, external integrations
+│       ├── domain/           # TypeORM entities, value objects, domain rules
+│       ├── application/      # services (use cases), DTOs, repository interfaces
+│       ├── infrastructure/   # repository implementations, strategies, guards
 │       └── <feature>.module.ts
-├── common/           # Shared guards, interceptors, filters, decorators, pipes
-├── config/           # Configuration (database, jwt, swagger)
+├── common/               # decorators, filters, interceptors, pipes, value objects
+├── config/               # database, jwt, swagger
 └── main.ts
 ```
 
-Each feature is **vertically sliced** — domain, application, and infrastructure layers live together inside their module folder.
+Dependency direction: **controller → service → repository interface ← repository implementation**.
+
+- Controllers: HTTP only (params, DTOs, Swagger). No business logic
+- Services: business rules. Never touch `Repository<T>` or the HTTP request directly
+- Repositories: data access only. No business decisions
 
 ---
 
-## SOLID Principles
+## Business Invariants (must follow)
 
-### Single Responsibility Principle
+These protect money and data. They override every style guideline.
 
-- Each class/service has **one reason to change**
-- Services handle business logic only — never touch HTTP, never touch DB directly
-- Controllers handle HTTP only — no business logic
-- Repositories handle data access only
-
-### Open/Closed Principle
-
-- Extend behavior through interfaces and composition, not by modifying existing classes
-- Use NestJS interceptors, guards, and pipes to extend cross-cutting concerns
-
-### Liskov Substitution Principle
-
-- Subtypes must be substitutable for their base types
-- Repository interfaces must be honoured by all implementations
-
-### Interface Segregation Principle
-
-- Define narrow interfaces for each use case — no fat interfaces
-- Separate read (IProductQueryRepository) from write (IProductCommandRepository)
-
-### Dependency Inversion Principle
-
-- Services depend on interfaces/tokens, not concrete implementations
-- Use NestJS DI tokens: `@Inject(PRODUCT_REPOSITORY)` not `@InjectRepository(ProductEntity)`
+1. **Never trust the client for money.** Prices, discounts, shipping fees and totals are computed on the server from the database. A client-sent value may only be compared, never used
+2. **Multi-write operations run in one transaction.** Use `@Transactional()` from `typeorm-transactional` whenever a use case writes more than one row or table
+3. **Stock changes are atomic.** Decrement with a single conditional `UPDATE … SET stock = stock - :q WHERE stock >= :q` and check affected rows. Never read stock, compare in code, then write
+4. **Status changes go through an explicit transition table** (see `orders/domain/order-status.ts`) that states who may make each transition
+5. **Authorize by ownership and role.** Every query for user-owned data filters by the current user id
 
 ---
 
-## Object Calisthenics
+## Design Guidelines
 
-Apply to **domain and application layers**. ORM entities and infrastructure classes are exempt where noted.
+### Repositories
 
-1. **One level of indentation per method** — extract if you need to indent deeper
-2. **No `else` keyword** — use early returns / guard clauses
-3. **Wrap primitives** — use value objects (`Email`, `Money`, etc.) when primitives carry domain meaning and validation. Not required for simple DTOs or entity column fields
-4. **First-class collections** — wrap arrays in domain collection classes when they carry behaviour
-5. **One dot per line** — respect Law of Demeter; no `a.b.c.d`
-6. **No abbreviations** — full words; if a name is getting too long the class is doing too much
-7. **Small classes and methods** — aim for classes ≤ 50 lines, methods ≤ 10 lines. ORM entities and repositories with query builders are exempt from the class-size limit
-8. **Few instance variables** — max 2 for domain/application classes. ORM entities are exempt (columns map to the DB schema)
-9. **Tell, don't ask** — avoid getters that expose internals; push behaviour into objects
+- **One interface and one DI token per aggregate**: `IProductRepository` / `PRODUCT_REPOSITORY`
+- Create a narrower interface only when **another module** needs a small subset, e.g. `IProductSkuStockRepository` used by orders
+- Services inject the token: `@Inject(PRODUCT_REPOSITORY)`, never `@InjectRepository(ProductEntity)`
+- Do not split read/write (Query/Command) interfaces unless they are backed by different data sources
+
+### Services and Methods
+
+- One service per use-case area. Split a service when it mixes unrelated responsibilities, not because of line count
+- Soft limits: methods around 20 lines, classes around 150 lines. Exceeding them is a prompt to look, not an error
+- Prefer guard clauses and early returns over `else`; avoid nesting deeper than two levels
+- Use full words; no abbreviations (`quantity`, not `qty`)
+- Extract a private method when it gives a step a meaningful name, not to satisfy a line limit
+
+### Value Objects
+
+- Use them where they enforce a rule: `Money`, `Quantity`, `Email`
+- Do not wrap primitives that carry no validation or behaviour (ids, names, flags)
+- Wrap an array in a collection class only when it has real behaviour
 
 ---
 
 ## Naming Conventions
 
-| Layer                 | Convention                                 | Example                       |
-| --------------------- | ------------------------------------------ | ----------------------------- |
-| Module                | `<Feature>Module`                          | `ProductModule`               |
-| Controller            | `<Feature>Controller`                      | `ProductController`           |
-| Service (application) | `<Feature>Service`                         | `ProductService`              |
-| Repository interface  | `I<Feature>Repository`                     | `IProductRepository`          |
-| Repository impl       | `<Feature>Repository`                      | `ProductRepository`           |
-| Entity                | `<Feature>Entity`                          | `ProductEntity`               |
-| DTO (input)           | `Create<Feature>Dto`, `Update<Feature>Dto` | `CreateProductDto`            |
-| DTO (output)          | `<Feature>Response`                        | `ProductResponse`             |
-| Value Object          | noun                                       | `Email`, `Money`, `ProductId` |
+| Layer                | Convention                                 | Example                                   |
+| -------------------- | ------------------------------------------ | ----------------------------------------- |
+| Module               | `<Feature>Module`                          | `ProductsModule`                          |
+| Controller           | `<Feature>Controller`                      | `ProductController`                       |
+| Service              | `<Feature>Service` or a use-case noun      | `ProductService`, `OrderStockReservation` |
+| Repository interface | `I<Feature>Repository`                     | `IProductRepository`                      |
+| Repository token     | `<FEATURE>_REPOSITORY`                     | `PRODUCT_REPOSITORY`                      |
+| Repository impl      | `<Feature>Repository`                      | `ProductRepository`                       |
+| Entity               | `<Feature>Entity`                          | `ProductEntity`                           |
+| DTO (input)          | `Create<Feature>Dto`, `Update<Feature>Dto` | `CreateProductDto`                        |
+| DTO (output)         | `<Feature>Response`                        | `ProductResponse`                         |
+| Value object         | domain noun                                | `Money`, `Email`                          |
 
 - Avoid vague suffixes: `Manager`, `Handler`, `Processor`, `Utils`, `Helper`, `Data`, `Info`
-- Domain language first — use names from the business domain, not technical jargon
-
----
-
-## Testing Rules
-
-### Strategy
-
-- **Unit tests** — pure business logic, no DB/HTTP (mock at the interface boundary)
-- **Integration tests** — repository layer against a real test DB (use `@nestjs/testing` + test containers or a dedicated test DB)
-- **E2E tests** — full HTTP round-trip via Supertest
-
-### Structure (Arrange-Act-Assert)
-
-```typescript
-describe('ProductService', () => {
-  describe('createProduct', () => {
-    it('should return created product when valid data provided', async () => {
-      // Arrange
-      const dto = CreateProductDtoFactory.make();
-      mockRepo.save.mockResolvedValue(ProductFactory.make(dto));
-
-      // Act
-      const result = await service.createProduct(dto);
-
-      // Assert
-      expect(result.name).toBe(dto.name);
-    });
-  });
-});
-```
-
-### Rules
-
-- Test file co-located: `product.service.spec.ts` next to `product.service.ts`
-- E2E tests in `test/` folder
-- Test names must read like sentences: `should <expected behaviour> when <condition>`
-- Never test implementation details — test behaviour
-- Coverage thresholds (enforced in CI): statements ≥ 80%, branches ≥ 70%
-
----
-
-## API & Swagger
-
-- All routes prefixed with `/api/v1`
-- Every controller decorated with `@ApiTags` and `@ApiBearerAuth` (if protected)
-- Every DTO decorated with `@ApiProperty` with `example` values
-- Every endpoint decorated with `@ApiOperation`, `@ApiResponse` for success and error cases
-- Swagger UI available at `/api/docs` in development
-
----
-
-## Database (TypeORM + PostgreSQL)
-
-- Entity files in `domain/` folder of each module
-- Use `BIGINT` PKs with `@PrimaryGeneratedColumn('increment')`
-- Timestamps: `created_at`, `updated_at` via `@CreateDateColumn` / `@UpdateDateColumn`
-- Migrations required for all schema changes — never use `synchronize: true` in production
-- Migration files in `src/database/migrations/`
-- Seed files in `src/database/seeds/`
-
----µ
-
-## Auth
-
-- JWT access token (short-lived, 15m)
-- JWT refresh token (long-lived, 7d) stored as httpOnly cookie
-- `@Public()` decorator to opt-out of global JWT guard
-- Passwords hashed with bcrypt (salt rounds: 12)
+- Use business language (order, SKU, stock, checkout) over technical jargon
 
 ---
 
 ## Error Handling
 
-- Use NestJS built-in HTTP exceptions: `NotFoundException`, `BadRequestException`, `UnauthorizedException`, `ForbiddenException`, `ConflictException`
-- Domain errors thrown from services, translated to HTTP exceptions in controllers or via exception filter
-- Global exception filter for consistent error response shape:
+- Services and value objects throw NestJS HTTP exceptions directly: `NotFoundException`, `BadRequestException`, `ConflictException`, `ForbiddenException`, `UnauthorizedException`
+- Use `ConflictException` (409) for business conflicts such as insufficient stock
+- The global filter (`common/filters/http-exception.filter.ts`) formats every error as:
   ```json
-  { "statusCode": 404, "message": "Product not found", "error": "Not Found" }
+  { "status": 404, "message": "Order 99 not found", "data": null }
   ```
+- Successful responses are wrapped by `TransformResponseInterceptor` as `{ status, message, data }`; set the message with `@ResponseMessage()`
 
 ---
 
 ## Comments
 
-Only explain **WHY**, never what or how. The code should be self-documenting.
+Explain **why**, never what. If a comment restates the code, rename things instead.
 
 ```typescript
-// GOOD: explain non-obvious business rule
-// Discount only applies to verified users per marketing campaign #123
-if (user.isVerified && cart.total > 100_000) { ... }
+// GOOD: explains a non-obvious rule
+// Conditional UPDATE is atomic in Postgres, so concurrent orders cannot both take the last unit
 
 // BAD: restates the code
-// Check if user is verified and cart total is greater than 100000
+// Decrease stock by quantity
 ```
 
 ---
 
-## Docker
+## Database (TypeORM + PostgreSQL)
 
-- `Dockerfile` — multi-stage build (builder → runner)
-- `docker-compose.yml` — app + postgres + (optional) redis
-- `docker-compose.override.yml` — local dev overrides (hot-reload mounts)
-- Never hardcode secrets — use environment variables via `.env`
-
----
-
-## Environment Variables
-
-Required variables documented in `.env.example`. Never commit `.env` files.
+- Entities live in each module's `domain/` folder
+- Primary keys: `@PrimaryGeneratedColumn('increment', { type: 'bigint' })`
+- Timestamps: `@CreateDateColumn({ name: 'created_at' })`, `@UpdateDateColumn({ name: 'updated_at' })`
+- **`bigint` columns come back from Postgres as strings.** For new non-key numbers (quantity, stock, status) use `int`, or add a column transformer. Never compare a `bigint` column with `===` against a number without converting
+- **Money:** store VND as an integer (`int`/`bigint` with a transformer). Do not use `double precision` for new money columns
+- Schema changes require a migration in `src/database/migrations/`. `synchronize` is allowed only for `NODE_ENV=development`
+- Seeds go in `src/database/seeds/`
 
 ---
 
-## Git Conventions
+## Auth
 
-- Branch: `feat/<feature>`, `fix/<bug>`, `refactor/<area>`, `chore/<task>`
-- Commits follow Conventional Commits: `feat(product): add filter by category`
-- PRs must include passing tests and no lint errors
+- Global JWT guard; opt out with `@Public()`
+- Access token lifetime from `JWT_EXPIRES_IN` (15m), refresh token from `JWT_REFRESH_EXPIRES_IN` (7d)
+- Passwords hashed with bcrypt, 12 salt rounds
+- Read the current user with `@CurrentUser('userId')`
+
+---
+
+## API & Swagger
+
+- All routes prefixed with `/api/v1`; Swagger UI at `/api/docs`
+- Controllers: `@ApiTags`, plus `@ApiBearerAuth` when protected
+- Endpoints: `@ApiOperation` and `@ApiResponse` for the success case and each error the service can throw
+- DTO fields: `@ApiProperty` with an `example`
+- The global `ValidationPipe` uses `whitelist` + `forbidNonWhitelisted`: unknown fields are rejected with 400
+
+---
+
+## Testing
+
+- **Unit** (`*.spec.ts` next to the file): business logic with repositories mocked at the interface
+- **Integration / E2E** (`test/*.e2e-spec.ts`): real Postgres, Supertest for HTTP
+- Structure every test as Arrange / Act / Assert
+- Name tests as sentences: `should <expected behaviour> when <condition>`
+- Test behaviour, not implementation details
+- Every business invariant above needs a test that would fail if the rule were broken
+- When a service uses `@Transactional()`, mock it in unit tests:
+  ```typescript
+  jest.mock('typeorm-transactional', () => ({
+    Transactional: () => (_t: object, _k: string, d: PropertyDescriptor) => d,
+  }));
+  ```
+- Coverage targets: statements ≥ 80%, branches ≥ 70%
+
+---
+
+## Docker & Environment
+
+- `Dockerfile`: multi-stage (`builder` → `development` → `production`)
+- `docker-compose.yml`: app + Postgres
+- Required variables are documented in `.env.example`. Never commit `.env` or hardcode secrets
+
+---
+
+## Git & Pull Requests
+
+- Branches: `feat/<feature>`, `fix/<bug>`, `refactor/<area>`, `docs/<topic>`, `chore/<task>`
+- Commits follow Conventional Commits: `fix(orders): reserve stock atomically`
+- Every change goes through a PR. Do not push directly to `main`
+- A PR must pass `yarn lint`, `yarn test` and `yarn build`
 
 ---
 
 ## Commands
 
 ```bash
-# Development
-yarn start:dev
+yarn start:dev            # watch mode
+yarn lint                 # eslint --fix
+yarn test                 # unit tests
+yarn test:e2e             # e2e (needs Postgres)
+yarn test:cov             # coverage
+yarn build
 
-# Tests
-yarn test              # unit
-yarn test:e2e          # end-to-end
-yarn test:cov          # with coverage
-
-# Database
-yarn migration:generate -- src/database/migrations/<name>
+yarn migration:generate -- src/database/migrations/<Name>
 yarn migration:run
 yarn migration:revert
 
-# Docker
 docker-compose up -d
 docker-compose down
 ```
+
+---
+
+## Known Gaps (as of 2026-10-14)
+
+The codebase does not yet meet every rule above. Do not assume these exist; fix them in dedicated PRs.
+
+- Repositories are still split into Query/Command interfaces; they are being merged back to one interface per aggregate
+- No migrations yet: `src/database/` does not exist
+- Money columns use `double precision`; several numeric columns use `bigint` without a transformer
+- Refresh tokens are returned in the response body (not an httpOnly cookie) and are not stored, so they cannot be revoked
+- Token lifetimes are hardcoded (`15m` in `AuthModule`, `1h` and `7d` in `AuthService`); `JWT_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` are never read. `'default-secret'` is used as a fallback JWT secret
+- `orderCode` uses `Date.now()` and can collide
+- The jest config key is misspelled `coverageThresholds`, so coverage targets are not enforced; there is no CI pipeline yet
+- CORS is fully open; no helmet or rate limiting
