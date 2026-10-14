@@ -32,3 +32,12 @@ export interface IProductSkuCommandRepository {
     entries: { skuId: number; optionValueIds: number[] }[],
   ): Promise<void>;
 }
+
+export const PRODUCT_SKU_STOCK_REPOSITORY = Symbol(
+  'PRODUCT_SKU_STOCK_REPOSITORY',
+);
+
+export interface IProductSkuStockRepository {
+  decrementStock(id: number, quantity: number): Promise<boolean>;
+  incrementStock(id: number, quantity: number): Promise<void>;
+}

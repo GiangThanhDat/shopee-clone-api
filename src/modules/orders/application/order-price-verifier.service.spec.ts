@@ -71,11 +71,11 @@ describe('OrderPriceVerifier', () => {
       expect(result.subtotals.get(2)).toBe(150000);
     });
 
-    it('should deduct discount from subtotal when item has a discount', async () => {
-      // Arrange - 150000 * 1 * 10% discount = 135000
+    it('should multiply server price by quantity when computing subtotal', async () => {
+      // Arrange
       const dto = makeDto({
-        totalAmount: 135000,
-        items: [{ skuId: 1, price: 150000, quantity: 1, discountPercent: 10 }],
+        totalAmount: 450000,
+        items: [{ skuId: 1, price: 150000, quantity: 3 }],
       });
       mockSkuRepository.findByIds.mockResolvedValue([makeSku(1, 150000)]);
 
@@ -83,45 +83,22 @@ describe('OrderPriceVerifier', () => {
       const result = await verifier.verify(dto);
 
       // Assert
-      expect(result.subtotals.get(1)).toBe(135000);
+      expect(result.subtotals.get(1)).toBe(450000);
     });
 
-    it('should add shipping fee to subtotal', async () => {
-      // Arrange - 150000 item + 30000 shipping = 180000
-      const dto = makeDto({
-        totalAmount: 180000,
-        items: [{ skuId: 1, price: 150000, quantity: 1, shippingFee: 30000 }],
-      });
-      mockSkuRepository.findByIds.mockResolvedValue([makeSku(1, 150000)]);
-
-      // Act
-      const result = await verifier.verify(dto);
-
-      // Assert
-      expect(result.subtotals.get(1)).toBe(180000);
-    });
-
-    it('should calculate subtotal correctly when item has both discount and shipping fee', async () => {
-      // Arrange - (150000 * 2) * (1 - 10%) + 30000 = 270000 + 30000 = 300000
+    it('should reject order when the same SKU appears more than once', async () => {
+      // Arrange
       const dto = makeDto({
         totalAmount: 300000,
         items: [
-          {
-            skuId: 1,
-            price: 150000,
-            quantity: 2,
-            discountPercent: 10,
-            shippingFee: 30000,
-          },
+          { skuId: 1, price: 150000, quantity: 1 },
+          { skuId: 1, price: 150000, quantity: 1 },
         ],
       });
-      mockSkuRepository.findByIds.mockResolvedValue([makeSku(1, 150000)]);
 
-      // Act
-      const result = await verifier.verify(dto);
-
-      // Assert
-      expect(result.subtotals.get(1)).toBe(300000);
+      // Act & Assert
+      await expect(verifier.verify(dto)).rejects.toThrow(BadRequestException);
+      expect(mockSkuRepository.findByIds).not.toHaveBeenCalled();
     });
 
     it('should reject order when user orders a SKU that no longer exists', async () => {
