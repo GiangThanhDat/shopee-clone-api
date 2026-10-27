@@ -5,9 +5,6 @@ import {
   IsNumber,
   IsPositive,
   IsString,
-  IsOptional,
-  Min,
-  Max,
   ArrayMinSize,
   ValidateNested,
 } from 'class-validator';
@@ -31,29 +28,6 @@ export class OrderItemDto {
   @IsInt()
   @IsPositive()
   quantity!: number;
-
-  @ApiProperty({
-    example: 10,
-    description: 'Discount percentage (0-100)',
-    required: false,
-    default: 0,
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(100)
-  discountPercent?: number;
-
-  @ApiProperty({
-    example: 30000,
-    description: 'Shipping fee for this item',
-    required: false,
-    default: 0,
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  shippingFee?: number;
 }
 
 export class CreateOrderDto {

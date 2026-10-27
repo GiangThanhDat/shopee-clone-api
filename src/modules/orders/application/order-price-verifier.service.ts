@@ -26,10 +26,17 @@ export class OrderPriceVerifier {
 
   async verify(dto: CreateOrderDto): Promise<VerifiedOrderResult> {
     const skuIds = dto.items.map((item) => item.skuId);
+    this.rejectDuplicateSkus(skuIds);
     const skus = await this.loadSkus(skuIds);
     const result = this.calculateItems(dto.items, skus);
     this.verifyTotalAmount(dto.totalAmount, result.total);
     return result;
+  }
+
+  private rejectDuplicateSkus(skuIds: number[]): void {
+    if (new Set(skuIds).size !== skuIds.length) {
+      throw new BadRequestException('Each SKU may appear only once per order');
+    }
   }
 
   private async loadSkus(
@@ -72,17 +79,7 @@ export class OrderPriceVerifier {
         `Price mismatch for SKU ${item.skuId}: expected ${sku.price} but received ${item.price}`,
       );
     }
-    return this.computeSubtotal(item);
-  }
-
-  private computeSubtotal(item: OrderItemDto): number {
-    const price = Money.of(item.price);
-    const shipping = Money.of(item.shippingFee ?? 0);
-    return price
-      .multiply(item.quantity)
-      .applyDiscount(item.discountPercent ?? 0)
-      .add(shipping)
-      .toNumber();
+    return skuPrice.multiply(item.quantity).toNumber();
   }
 
   private verifyTotalAmount(clientTotal: number, serverTotal: number): void {

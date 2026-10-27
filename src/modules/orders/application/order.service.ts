@@ -1,4 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Transactional } from 'typeorm-transactional';
 import { buildPaginationMeta } from '../../../common/utils/pagination';
 import type {
   IOrderQueryRepository,
@@ -12,6 +18,9 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderFilterDto } from './dto/order-filter.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { OrderPriceVerifier } from './order-price-verifier.service';
+import { OrderStockReservation } from './order-stock-reservation.service';
+import { OrderEntity } from '../domain/order.entity';
+import { OrderStatus, canCustomerTransition } from '../domain/order-status';
 
 @Injectable()
 export class OrderService {
@@ -21,6 +30,7 @@ export class OrderService {
     @Inject(ORDER_COMMAND_REPOSITORY)
     private readonly orderCommandRepository: IOrderCommandRepository,
     private readonly priceVerifier: OrderPriceVerifier,
+    private readonly stockReservation: OrderStockReservation,
   ) {}
 
   async findAll(userId: number, filterDto: OrderFilterDto) {
@@ -44,35 +54,57 @@ export class OrderService {
     return { order };
   }
 
+  @Transactional()
   async create(userId: number, dto: CreateOrderDto) {
     const { total, subtotals } = await this.priceVerifier.verify(dto);
+    await this.stockReservation.reserve(dto.items);
     const order = await this.orderCommandRepository.save({
       userId,
       orderCode: Date.now(),
       totalAmount: total,
       deliveryAddress: dto.deliveryAddress,
-      orderStatus: 0,
+      orderStatus: OrderStatus.Pending,
       orderedAt: new Date(),
     });
     await this.saveDetails(order.id, userId, dto, subtotals);
-    const saved = await this.orderQueryRepository.findById(order.id);
-    if (!saved) {
-      throw new NotFoundException(`Order ${order.id} not found`);
-    }
-    return { order: saved };
+    return this.reload(order.id);
   }
 
+  @Transactional()
   async updateStatus(id: number, userId: number, dto: UpdateOrderStatusDto) {
-    await this.findById(id, userId);
-    const timestamps = this.resolveStatusTimestamp(dto.orderStatus);
-    const updated = await this.orderCommandRepository.update(id, {
+    const { order } = await this.findById(id, userId);
+    this.assertCustomerTransition(order.orderStatus, dto.orderStatus);
+    await this.releaseStockOnCancel(order, dto.orderStatus);
+    await this.orderCommandRepository.update(id, {
       orderStatus: dto.orderStatus,
-      ...timestamps,
     });
-    if (!updated) {
+    return this.reload(id);
+  }
+
+  private assertCustomerTransition(from: OrderStatus, to: OrderStatus): void {
+    if (!canCustomerTransition(from, to)) {
+      throw new BadRequestException(
+        `Order status cannot change from ${OrderStatus[from]} to ${OrderStatus[to]}`,
+      );
+    }
+  }
+
+  private async releaseStockOnCancel(
+    order: OrderEntity,
+    target: OrderStatus,
+  ): Promise<void> {
+    if (target !== OrderStatus.Cancelled) {
+      return;
+    }
+    await this.stockReservation.release(order.details);
+  }
+
+  private async reload(id: number): Promise<{ order: OrderEntity }> {
+    const order = await this.orderQueryRepository.findById(id);
+    if (!order) {
       throw new NotFoundException(`Order ${id} not found`);
     }
-    return { order: updated };
+    return { order };
   }
 
   private async saveDetails(
@@ -87,26 +119,10 @@ export class OrderService {
       skuId: item.skuId,
       price: item.price,
       quantity: item.quantity,
-      discountPercent: item.discountPercent ?? 0,
-      shippingFee: item.shippingFee ?? 0,
+      discountPercent: 0,
+      shippingFee: 0,
       subtotal: subtotals.get(item.skuId) ?? 0,
     }));
     await this.orderCommandRepository.saveDetails(details);
-  }
-
-  private resolveStatusTimestamp(
-    status: number,
-  ): Partial<Record<string, Date>> {
-    const now = new Date();
-    const map: Record<number, string> = {
-      1: 'paidAt',
-      2: 'shippedAt',
-      3: 'completedAt',
-    };
-    const field = map[status];
-    if (!field) {
-      return {};
-    }
-    return { [field]: now };
   }
 }

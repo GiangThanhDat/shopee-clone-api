@@ -15,6 +15,7 @@ import {
 import {
   PRODUCT_SKU_QUERY_REPOSITORY,
   PRODUCT_SKU_COMMAND_REPOSITORY,
+  PRODUCT_SKU_STOCK_REPOSITORY,
 } from './application/interfaces/product-sku-repository.interface';
 import {
   PRODUCT_MEDIA_QUERY_REPOSITORY,
@@ -67,6 +68,7 @@ import { ProductDetailController } from './controllers/product-detail.controller
     { provide: PRODUCT_COMMAND_REPOSITORY, useClass: ProductRepository },
     { provide: PRODUCT_SKU_QUERY_REPOSITORY, useClass: ProductSkuRepository },
     { provide: PRODUCT_SKU_COMMAND_REPOSITORY, useClass: ProductSkuRepository },
+    { provide: PRODUCT_SKU_STOCK_REPOSITORY, useClass: ProductSkuRepository },
     {
       provide: PRODUCT_MEDIA_QUERY_REPOSITORY,
       useClass: ProductMediaRepository,
@@ -96,6 +98,11 @@ import { ProductDetailController } from './controllers/product-detail.controller
     ProductMediaService,
     ProductDetailService,
   ],
-  exports: [TypeOrmModule, ProductService, PRODUCT_SKU_QUERY_REPOSITORY],
+  exports: [
+    TypeOrmModule,
+    ProductService,
+    PRODUCT_SKU_QUERY_REPOSITORY,
+    PRODUCT_SKU_STOCK_REPOSITORY,
+  ],
 })
 export class ProductsModule {}

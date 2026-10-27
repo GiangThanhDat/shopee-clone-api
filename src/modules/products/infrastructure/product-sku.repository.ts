@@ -6,11 +6,15 @@ import { SkuValueEntity } from '../domain/sku-value.entity';
 import type {
   IProductSkuQueryRepository,
   IProductSkuCommandRepository,
+  IProductSkuStockRepository,
 } from '../application/interfaces/product-sku-repository.interface';
 
 @Injectable()
 export class ProductSkuRepository
-  implements IProductSkuQueryRepository, IProductSkuCommandRepository
+  implements
+    IProductSkuQueryRepository,
+    IProductSkuCommandRepository,
+    IProductSkuStockRepository
 {
   constructor(
     @InjectRepository(ProductSkuEntity)
@@ -35,6 +39,24 @@ export class ProductSkuRepository
 
   async findByIds(ids: number[]): Promise<ProductSkuEntity[]> {
     return this.repository.findBy({ id: In(ids) });
+  }
+
+  // Conditional UPDATE is atomic in Postgres, so concurrent orders cannot both take the last unit
+  async decrementStock(id: number, quantity: number): Promise<boolean> {
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(ProductSkuEntity)
+      .set({ stock: () => 'stock - :quantity' })
+      .where('id = :id AND stock >= :quantity AND deleted_at IS NULL', {
+        id,
+        quantity,
+      })
+      .execute();
+    return result.affected === 1;
+  }
+
+  async incrementStock(id: number, quantity: number): Promise<void> {
+    await this.repository.increment({ id }, 'stock', quantity);
   }
 
   async saveMany(
