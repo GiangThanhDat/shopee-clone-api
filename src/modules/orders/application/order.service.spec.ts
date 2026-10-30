@@ -5,10 +5,7 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrderService } from './order.service';
-import {
-  ORDER_QUERY_REPOSITORY,
-  ORDER_COMMAND_REPOSITORY,
-} from './interfaces/order-repository.interface';
+import { ORDER_REPOSITORY } from './interfaces/order-repository.interface';
 import { OrderPriceVerifier } from './order-price-verifier.service';
 import { OrderStockReservation } from './order-stock-reservation.service';
 import { OrderStatus } from '../domain/order-status';
@@ -66,13 +63,10 @@ const makeCreateDto = (
   ...overrides,
 });
 
-const mockOrderQueryRepository = {
+const mockOrderRepository = {
   findAll: jest.fn(),
   findById: jest.fn(),
   findByIdAndUser: jest.fn(),
-};
-
-const mockOrderCommandRepository = {
   save: jest.fn(),
   update: jest.fn(),
   saveDetails: jest.fn(),
@@ -94,11 +88,7 @@ describe('OrderService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrderService,
-        { provide: ORDER_QUERY_REPOSITORY, useValue: mockOrderQueryRepository },
-        {
-          provide: ORDER_COMMAND_REPOSITORY,
-          useValue: mockOrderCommandRepository,
-        },
+        { provide: ORDER_REPOSITORY, useValue: mockOrderRepository },
         { provide: OrderPriceVerifier, useValue: mockPriceVerifier },
         { provide: OrderStockReservation, useValue: mockStockReservation },
       ],
@@ -112,7 +102,7 @@ describe('OrderService', () => {
     it('should return order history with pagination metadata', async () => {
       // Arrange
       const orders = [makeOrder(), makeOrder({ id: 2 })];
-      mockOrderQueryRepository.findAll.mockResolvedValue([orders, 2]);
+      mockOrderRepository.findAll.mockResolvedValue([orders, 2]);
 
       // Act
       const result = await service.findAll(1, { page: 1, limit: 10 });
@@ -127,7 +117,7 @@ describe('OrderService', () => {
     it('should return only orders matching the requested status', async () => {
       // Arrange - user wants to see only shipped orders
       const shippedOrders = [makeOrder({ orderStatus: 2 })];
-      mockOrderQueryRepository.findAll.mockResolvedValue([shippedOrders, 1]);
+      mockOrderRepository.findAll.mockResolvedValue([shippedOrders, 1]);
 
       // Act
       const filterDto: OrderFilterDto = { status: 2 };
@@ -135,14 +125,14 @@ describe('OrderService', () => {
 
       // Assert
       expect(result.orders).toHaveLength(1);
-      expect(mockOrderQueryRepository.findAll).toHaveBeenCalledWith(
+      expect(mockOrderRepository.findAll).toHaveBeenCalledWith(
         expect.objectContaining({ status: 2 }),
       );
     });
 
     it('should return empty list when user has no orders', async () => {
       // Arrange
-      mockOrderQueryRepository.findAll.mockResolvedValue([[], 0]);
+      mockOrderRepository.findAll.mockResolvedValue([[], 0]);
 
       // Act
       const result = await service.findAll(1, {});
@@ -157,7 +147,7 @@ describe('OrderService', () => {
     it('should return order detail when user owns the order', async () => {
       // Arrange
       const order = makeOrder({ details: [makeDetail()] });
-      mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(order);
+      mockOrderRepository.findByIdAndUser.mockResolvedValue(order);
 
       // Act
       const result = await service.findById(1, 1);
@@ -169,7 +159,7 @@ describe('OrderService', () => {
 
     it('should throw NotFoundException when order does not belong to the user', async () => {
       // Arrange - another user's order, or order doesn't exist
-      mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(null);
+      mockOrderRepository.findByIdAndUser.mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.findById(99, 1)).rejects.toThrow(
@@ -186,10 +176,10 @@ describe('OrderService', () => {
         total: 150000,
         subtotals: new Map([[1, 150000]]),
       });
-      mockOrderCommandRepository.save.mockResolvedValue(makeOrder({ id: 1 }));
-      mockOrderCommandRepository.saveDetails.mockResolvedValue(undefined);
+      mockOrderRepository.save.mockResolvedValue(makeOrder({ id: 1 }));
+      mockOrderRepository.saveDetails.mockResolvedValue(undefined);
       const fullOrder = makeOrder({ details: [makeDetail()] });
-      mockOrderQueryRepository.findById.mockResolvedValue(fullOrder);
+      mockOrderRepository.findById.mockResolvedValue(fullOrder);
 
       // Act
       const result = await service.create(1, dto);
@@ -206,9 +196,9 @@ describe('OrderService', () => {
         total: 150000,
         subtotals: new Map([[1, 150000]]),
       });
-      mockOrderCommandRepository.save.mockResolvedValue(makeOrder());
-      mockOrderCommandRepository.saveDetails.mockResolvedValue(undefined);
-      mockOrderQueryRepository.findById.mockResolvedValue(makeOrder());
+      mockOrderRepository.save.mockResolvedValue(makeOrder());
+      mockOrderRepository.saveDetails.mockResolvedValue(undefined);
+      mockOrderRepository.findById.mockResolvedValue(makeOrder());
 
       // Act
       await service.create(1, dto);
@@ -224,14 +214,14 @@ describe('OrderService', () => {
         total: 150000,
         subtotals: new Map([[1, 150000]]),
       });
-      mockOrderCommandRepository.save.mockResolvedValue(makeOrder());
-      mockOrderQueryRepository.findById.mockResolvedValue(makeOrder());
+      mockOrderRepository.save.mockResolvedValue(makeOrder());
+      mockOrderRepository.findById.mockResolvedValue(makeOrder());
 
       // Act
       await service.create(1, dto);
 
       // Assert
-      expect(mockOrderCommandRepository.saveDetails).toHaveBeenCalledWith([
+      expect(mockOrderRepository.saveDetails).toHaveBeenCalledWith([
         expect.objectContaining({
           subtotal: 150000,
           discountPercent: 0,
@@ -247,8 +237,8 @@ describe('OrderService', () => {
         total: 150000,
         subtotals: new Map([[1, 150000]]),
       });
-      mockOrderCommandRepository.save.mockResolvedValue(makeOrder());
-      mockOrderQueryRepository.findById.mockResolvedValue(makeOrder());
+      mockOrderRepository.save.mockResolvedValue(makeOrder());
+      mockOrderRepository.findById.mockResolvedValue(makeOrder());
 
       // Act
       await service.create(1, dto);
@@ -271,7 +261,7 @@ describe('OrderService', () => {
       await expect(service.create(1, makeCreateDto())).rejects.toThrow(
         ConflictException,
       );
-      expect(mockOrderCommandRepository.save).not.toHaveBeenCalled();
+      expect(mockOrderRepository.save).not.toHaveBeenCalled();
     });
   });
 
@@ -279,10 +269,10 @@ describe('OrderService', () => {
     it('should cancel a pending order and return its stock', async () => {
       // Arrange
       const details = [makeDetail({ skuId: 1, quantity: 2 })];
-      mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(
+      mockOrderRepository.findByIdAndUser.mockResolvedValue(
         makeOrder({ details }),
       );
-      mockOrderQueryRepository.findById.mockResolvedValue(
+      mockOrderRepository.findById.mockResolvedValue(
         makeOrder({ orderStatus: OrderStatus.Cancelled }),
       );
 
@@ -294,7 +284,7 @@ describe('OrderService', () => {
       // Assert
       expect(result.order.orderStatus).toBe(OrderStatus.Cancelled);
       expect(mockStockReservation.release).toHaveBeenCalledWith(details);
-      expect(mockOrderCommandRepository.update).toHaveBeenCalledWith(1, {
+      expect(mockOrderRepository.update).toHaveBeenCalledWith(1, {
         orderStatus: OrderStatus.Cancelled,
       });
     });
@@ -303,19 +293,19 @@ describe('OrderService', () => {
       'should reject when customer tries to move an order to status %i',
       async (target) => {
         // Arrange
-        mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(makeOrder());
+        mockOrderRepository.findByIdAndUser.mockResolvedValue(makeOrder());
 
         // Act & Assert
         await expect(
           service.updateStatus(1, 1, { orderStatus: target }),
         ).rejects.toThrow(BadRequestException);
-        expect(mockOrderCommandRepository.update).not.toHaveBeenCalled();
+        expect(mockOrderRepository.update).not.toHaveBeenCalled();
       },
     );
 
     it('should reject cancelling an order that has already shipped', async () => {
       // Arrange
-      mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(
+      mockOrderRepository.findByIdAndUser.mockResolvedValue(
         makeOrder({ orderStatus: OrderStatus.Shipped }),
       );
 
@@ -328,7 +318,7 @@ describe('OrderService', () => {
 
     it('should throw NotFoundException when order does not exist or does not belong to the user', async () => {
       // Arrange
-      mockOrderQueryRepository.findByIdAndUser.mockResolvedValue(null);
+      mockOrderRepository.findByIdAndUser.mockResolvedValue(null);
 
       // Act & Assert
       await expect(

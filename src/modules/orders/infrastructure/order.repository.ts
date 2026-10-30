@@ -5,15 +5,12 @@ import { applyPagination } from '../../../common/utils/pagination';
 import { OrderDetailEntity } from '../domain/order-detail.entity';
 import { OrderEntity } from '../domain/order.entity';
 import type {
-  IOrderQueryRepository,
-  IOrderCommandRepository,
+  IOrderRepository,
   OrderFilterQuery,
 } from '../application/interfaces/order-repository.interface';
 
 @Injectable()
-export class OrderRepository
-  implements IOrderQueryRepository, IOrderCommandRepository
-{
+export class OrderRepository implements IOrderRepository, IOrderRepository {
   constructor(
     @InjectRepository(OrderEntity)
     private readonly repository: Repository<OrderEntity>,

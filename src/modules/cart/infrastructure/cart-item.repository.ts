@@ -2,14 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { CartItemEntity } from '../domain/cart-item.entity';
-import type {
-  ICartItemQueryRepository,
-  ICartItemCommandRepository,
-} from '../application/interfaces/cart-item-repository.interface';
+import type { ICartItemRepository } from '../application/interfaces/cart-item-repository.interface';
 
 @Injectable()
 export class CartItemRepository
-  implements ICartItemQueryRepository, ICartItemCommandRepository
+  implements ICartItemRepository, ICartItemRepository
 {
   constructor(
     @InjectRepository(CartItemEntity)

@@ -1,27 +1,21 @@
 import { Test } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { SkuSyncService } from './sku-sync.service';
-import {
-  PRODUCT_SKU_QUERY_REPOSITORY,
-  PRODUCT_SKU_COMMAND_REPOSITORY,
-} from './interfaces/product-sku-repository.interface';
-import { OPTION_VALUE_QUERY_REPOSITORY } from '../../options/application/interfaces/option-value-repository.interface';
+import { PRODUCT_SKU_REPOSITORY } from './interfaces/product-sku-repository.interface';
+import { OPTION_VALUE_REPOSITORY } from '../../options/application/interfaces/option-value-repository.interface';
 import type { UpdateProductDto } from './dto/update-product.dto';
 
 type SkuInput = NonNullable<UpdateProductDto['skus']>;
 
-const mockSkuQueryRepo = {
+const mockSkuRepo = {
   findByProductId: jest.fn(),
-};
-
-const mockSkuCommandRepo = {
   saveMany: jest.fn(),
   updateMany: jest.fn(),
   softRemoveByIds: jest.fn(),
   syncSkuValues: jest.fn(),
 };
 
-const mockOptionValueQueryRepo = {
+const mockOptionValueRepo = {
   findByIds: jest.fn(),
 };
 
@@ -32,14 +26,10 @@ describe('SkuSyncService', () => {
     const module = await Test.createTestingModule({
       providers: [
         SkuSyncService,
-        { provide: PRODUCT_SKU_QUERY_REPOSITORY, useValue: mockSkuQueryRepo },
+        { provide: PRODUCT_SKU_REPOSITORY, useValue: mockSkuRepo },
         {
-          provide: PRODUCT_SKU_COMMAND_REPOSITORY,
-          useValue: mockSkuCommandRepo,
-        },
-        {
-          provide: OPTION_VALUE_QUERY_REPOSITORY,
-          useValue: mockOptionValueQueryRepo,
+          provide: OPTION_VALUE_REPOSITORY,
+          useValue: mockOptionValueRepo,
         },
       ],
     }).compile();
@@ -55,7 +45,7 @@ describe('SkuSyncService', () => {
 
     it('should throw when option value IDs are invalid', async () => {
       const skus = [{ price: 100, optionValueIds: [1, 2] }] as SkuInput;
-      mockOptionValueQueryRepo.findByIds.mockResolvedValue([{ id: 1 }]);
+      mockOptionValueRepo.findByIds.mockResolvedValue([{ id: 1 }]);
 
       await expect(service.validate(skus)).rejects.toThrow(BadRequestException);
     });
@@ -64,7 +54,7 @@ describe('SkuSyncService', () => {
       const skus = [
         { id: 5, price: 100, optionValueIds: [10, 20] },
       ] as SkuInput;
-      mockOptionValueQueryRepo.findByIds.mockResolvedValue([{ id: 10 }]);
+      mockOptionValueRepo.findByIds.mockResolvedValue([{ id: 10 }]);
 
       await expect(service.validate(skus)).rejects.toThrow(BadRequestException);
     });
@@ -72,26 +62,23 @@ describe('SkuSyncService', () => {
 
   describe('sync', () => {
     it('should soft delete removed SKUs', async () => {
-      mockSkuQueryRepo.findByProductId.mockResolvedValue([
-        { id: 1 },
-        { id: 2 },
-      ]);
-      mockSkuCommandRepo.updateMany.mockResolvedValue([]);
+      mockSkuRepo.findByProductId.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+      mockSkuRepo.updateMany.mockResolvedValue([]);
 
       await service.sync(1, [{ id: 1, price: 100 }] as SkuInput);
 
-      expect(mockSkuCommandRepo.softRemoveByIds).toHaveBeenCalledWith([2]);
+      expect(mockSkuRepo.softRemoveByIds).toHaveBeenCalledWith([2]);
     });
 
     it('should bulk update existing SKUs', async () => {
-      mockSkuQueryRepo.findByProductId.mockResolvedValue([{ id: 5 }]);
-      mockSkuCommandRepo.updateMany.mockResolvedValue([]);
+      mockSkuRepo.findByProductId.mockResolvedValue([{ id: 5 }]);
+      mockSkuRepo.updateMany.mockResolvedValue([]);
 
       await service.sync(1, [
         { id: 5, price: 300, stock: 20, skuCode: 'S1' },
       ] as SkuInput);
 
-      expect(mockSkuCommandRepo.updateMany).toHaveBeenCalledWith([
+      expect(mockSkuRepo.updateMany).toHaveBeenCalledWith([
         {
           id: 5,
           price: 300,
@@ -103,14 +90,14 @@ describe('SkuSyncService', () => {
     });
 
     it('should bulk create new SKUs', async () => {
-      mockSkuQueryRepo.findByProductId.mockResolvedValue([]);
-      mockSkuCommandRepo.saveMany.mockResolvedValue([]);
+      mockSkuRepo.findByProductId.mockResolvedValue([]);
+      mockSkuRepo.saveMany.mockResolvedValue([]);
 
       await service.sync(1, [
         { price: 100, stock: 10, skuCode: 'NEW', optionValueIds: [1] },
       ] as SkuInput);
 
-      expect(mockSkuCommandRepo.saveMany).toHaveBeenCalledWith([
+      expect(mockSkuRepo.saveMany).toHaveBeenCalledWith([
         {
           productId: 1,
           price: 100,
@@ -123,9 +110,9 @@ describe('SkuSyncService', () => {
     });
 
     it('should sync skuValues when updating with optionValueIds', async () => {
-      mockSkuQueryRepo.findByProductId.mockResolvedValue([{ id: 5 }]);
-      mockSkuCommandRepo.updateMany.mockResolvedValue(undefined);
-      mockSkuCommandRepo.syncSkuValues.mockResolvedValue(undefined);
+      mockSkuRepo.findByProductId.mockResolvedValue([{ id: 5 }]);
+      mockSkuRepo.updateMany.mockResolvedValue(undefined);
+      mockSkuRepo.syncSkuValues.mockResolvedValue(undefined);
 
       await service.sync(1, [
         {
@@ -137,21 +124,21 @@ describe('SkuSyncService', () => {
         },
       ] as SkuInput);
 
-      expect(mockSkuCommandRepo.syncSkuValues).toHaveBeenCalledWith([
+      expect(mockSkuRepo.syncSkuValues).toHaveBeenCalledWith([
         { skuId: 5, optionValueIds: [10, 20] },
       ]);
     });
 
     it('should not sync skuValues when updating without optionValueIds', async () => {
-      mockSkuQueryRepo.findByProductId.mockResolvedValue([{ id: 5 }]);
-      mockSkuCommandRepo.updateMany.mockResolvedValue(undefined);
-      mockSkuCommandRepo.syncSkuValues.mockResolvedValue(undefined);
+      mockSkuRepo.findByProductId.mockResolvedValue([{ id: 5 }]);
+      mockSkuRepo.updateMany.mockResolvedValue(undefined);
+      mockSkuRepo.syncSkuValues.mockResolvedValue(undefined);
 
       await service.sync(1, [
         { id: 5, price: 300, stock: 20, skuCode: 'S1' },
       ] as SkuInput);
 
-      expect(mockSkuCommandRepo.syncSkuValues).toHaveBeenCalledWith([]);
+      expect(mockSkuRepo.syncSkuValues).toHaveBeenCalledWith([]);
     });
   });
 });

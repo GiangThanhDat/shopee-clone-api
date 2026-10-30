@@ -6,13 +6,9 @@ import {
 } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 import { buildPaginationMeta } from '../../../common/utils/pagination';
-import type {
-  IOrderQueryRepository,
-  IOrderCommandRepository,
-} from './interfaces/order-repository.interface';
 import {
-  ORDER_QUERY_REPOSITORY,
-  ORDER_COMMAND_REPOSITORY,
+  ORDER_REPOSITORY,
+  type IOrderRepository,
 } from './interfaces/order-repository.interface';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderFilterDto } from './dto/order-filter.dto';
@@ -25,10 +21,8 @@ import { OrderStatus, canCustomerTransition } from '../domain/order-status';
 @Injectable()
 export class OrderService {
   constructor(
-    @Inject(ORDER_QUERY_REPOSITORY)
-    private readonly orderQueryRepository: IOrderQueryRepository,
-    @Inject(ORDER_COMMAND_REPOSITORY)
-    private readonly orderCommandRepository: IOrderCommandRepository,
+    @Inject(ORDER_REPOSITORY)
+    private readonly orderRepository: IOrderRepository,
     private readonly priceVerifier: OrderPriceVerifier,
     private readonly stockReservation: OrderStockReservation,
   ) {}
@@ -36,7 +30,7 @@ export class OrderService {
   async findAll(userId: number, filterDto: OrderFilterDto) {
     const page = filterDto.page ?? 1;
     const limit = filterDto.limit ?? 10;
-    const [orders, totalItems] = await this.orderQueryRepository.findAll({
+    const [orders, totalItems] = await this.orderRepository.findAll({
       userId,
       page,
       limit,
@@ -47,7 +41,7 @@ export class OrderService {
   }
 
   async findById(id: number, userId: number) {
-    const order = await this.orderQueryRepository.findByIdAndUser(id, userId);
+    const order = await this.orderRepository.findByIdAndUser(id, userId);
     if (!order) {
       throw new NotFoundException(`Order ${id} not found`);
     }
@@ -58,7 +52,7 @@ export class OrderService {
   async create(userId: number, dto: CreateOrderDto) {
     const { total, subtotals } = await this.priceVerifier.verify(dto);
     await this.stockReservation.reserve(dto.items);
-    const order = await this.orderCommandRepository.save({
+    const order = await this.orderRepository.save({
       userId,
       orderCode: Date.now(),
       totalAmount: total,
@@ -75,7 +69,7 @@ export class OrderService {
     const { order } = await this.findById(id, userId);
     this.assertCustomerTransition(order.orderStatus, dto.orderStatus);
     await this.releaseStockOnCancel(order, dto.orderStatus);
-    await this.orderCommandRepository.update(id, {
+    await this.orderRepository.update(id, {
       orderStatus: dto.orderStatus,
     });
     return this.reload(id);
@@ -100,7 +94,7 @@ export class OrderService {
   }
 
   private async reload(id: number): Promise<{ order: OrderEntity }> {
-    const order = await this.orderQueryRepository.findById(id);
+    const order = await this.orderRepository.findById(id);
     if (!order) {
       throw new NotFoundException(`Order ${id} not found`);
     }
@@ -123,6 +117,6 @@ export class OrderService {
       shippingFee: 0,
       subtotal: subtotals.get(item.skuId) ?? 0,
     }));
-    await this.orderCommandRepository.saveDetails(details);
+    await this.orderRepository.saveDetails(details);
   }
 }

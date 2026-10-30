@@ -1,14 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type {
-  IProductDetailQueryRepository,
-  IProductDetailCommandRepository,
+import {
+  PRODUCT_DETAIL_REPOSITORY,
+  type IProductDetailRepository,
 } from './interfaces/product-detail-repository.interface';
 import {
-  PRODUCT_DETAIL_QUERY_REPOSITORY,
-  PRODUCT_DETAIL_COMMAND_REPOSITORY,
-} from './interfaces/product-detail-repository.interface';
-import type { IProductSpecCommandRepository } from './interfaces/product-spec-repository.interface';
-import { PRODUCT_SPEC_COMMAND_REPOSITORY } from './interfaces/product-spec-repository.interface';
+  PRODUCT_SPEC_REPOSITORY,
+  type IProductSpecRepository,
+} from './interfaces/product-spec-repository.interface';
 import type { UpdateProductDto } from './dto/update-product.dto';
 import { findIdsToRemove } from './sync-utils';
 
@@ -17,26 +15,23 @@ type DetailInput = NonNullable<UpdateProductDto['details']>[number];
 @Injectable()
 export class DetailSyncService {
   constructor(
-    @Inject(PRODUCT_DETAIL_QUERY_REPOSITORY)
-    private readonly detailQueryRepository: IProductDetailQueryRepository,
-    @Inject(PRODUCT_DETAIL_COMMAND_REPOSITORY)
-    private readonly detailCommandRepository: IProductDetailCommandRepository,
-    @Inject(PRODUCT_SPEC_COMMAND_REPOSITORY)
-    private readonly specCommandRepository: IProductSpecCommandRepository,
+    @Inject(PRODUCT_DETAIL_REPOSITORY)
+    private readonly detailRepository: IProductDetailRepository,
+    @Inject(PRODUCT_SPEC_REPOSITORY)
+    private readonly specRepository: IProductSpecRepository,
   ) {}
 
   async sync(
     productId: number,
     incoming: NonNullable<UpdateProductDto['details']>,
   ): Promise<void> {
-    const existing =
-      await this.detailQueryRepository.findByProductId(productId);
+    const existing = await this.detailRepository.findByProductId(productId);
     const idsToRemove = findIdsToRemove(existing, incoming);
 
     const toUpdate = incoming.filter((d) => d.id);
     const toCreate = incoming.filter((d) => !d.id);
 
-    await this.detailCommandRepository.softRemoveByIds(idsToRemove);
+    await this.detailRepository.softRemoveByIds(idsToRemove);
 
     const specsToResolve = [...toUpdate, ...toCreate].filter((d) => !d.fieldId);
     const resolvedSpecs = await this.resolveSpecs(specsToResolve);
@@ -55,7 +50,7 @@ export class DetailSyncService {
       name: d.specName,
       value: d.specValue,
     }));
-    const specs = await this.specCommandRepository.findOrCreateMany(specInputs);
+    const specs = await this.specRepository.findOrCreateMany(specInputs);
 
     const specMap = new Map<string, number>();
     for (const spec of specs) {
@@ -82,12 +77,12 @@ export class DetailSyncService {
     if (items.length === 0) {
       return;
     }
-    await this.detailCommandRepository.updateMany(
+    await this.detailRepository.updateMany(
       this.buildDetailUpdates(items, resolvedSpecs),
     );
     const specUpdates = this.buildSpecUpdates(items);
     if (specUpdates.length > 0) {
-      await this.specCommandRepository.updateMany(specUpdates);
+      await this.specRepository.updateMany(specUpdates);
     }
   }
 
@@ -123,6 +118,6 @@ export class DetailSyncService {
       productId,
       fieldId: this.getFieldId(d, resolvedSpecs),
     }));
-    await this.detailCommandRepository.saveMany(mapped);
+    await this.detailRepository.saveMany(mapped);
   }
 }

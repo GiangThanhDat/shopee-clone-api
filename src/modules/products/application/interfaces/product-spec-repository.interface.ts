@@ -1,11 +1,8 @@
 import { ProductSpecEntity } from '../../domain/product-spec.entity';
 
-export const PRODUCT_SPEC_COMMAND_REPOSITORY = Symbol(
-  'PRODUCT_SPEC_COMMAND_REPOSITORY',
-);
+export const PRODUCT_SPEC_REPOSITORY = Symbol('PRODUCT_SPEC_REPOSITORY');
 
-// All spec operations are upserts — no pure query interface needed
-export interface IProductSpecCommandRepository {
+export interface IProductSpecRepository {
   findOrCreate(name: string, value: string): Promise<ProductSpecEntity>;
   findOrCreateMany(
     specs: { name: string; value: string }[],

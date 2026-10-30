@@ -1,19 +1,11 @@
 import { DeepPartial } from 'typeorm';
 import { ProductDetailEntity } from '../../domain/product-detail.entity';
 
-export const PRODUCT_DETAIL_QUERY_REPOSITORY = Symbol(
-  'PRODUCT_DETAIL_QUERY_REPOSITORY',
-);
-export const PRODUCT_DETAIL_COMMAND_REPOSITORY = Symbol(
-  'PRODUCT_DETAIL_COMMAND_REPOSITORY',
-);
+export const PRODUCT_DETAIL_REPOSITORY = Symbol('PRODUCT_DETAIL_REPOSITORY');
 
-export interface IProductDetailQueryRepository {
+export interface IProductDetailRepository {
   findByProductId(productId: number): Promise<ProductDetailEntity[]>;
   findById(id: number): Promise<ProductDetailEntity | null>;
-}
-
-export interface IProductDetailCommandRepository {
   save(detail: DeepPartial<ProductDetailEntity>): Promise<ProductDetailEntity>;
   saveMany(
     details: DeepPartial<ProductDetailEntity>[],
