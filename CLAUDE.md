@@ -215,7 +215,6 @@ The codebase does not yet meet every rule above. Do not assume these exist; fix 
 - No migrations yet: `src/database/` does not exist
 - Money columns use `double precision`; several numeric columns use `bigint` without a transformer
 - Refresh tokens are returned in the response body (not an httpOnly cookie) and are not stored, so they cannot be revoked
-- Token lifetimes are hardcoded (`15m` in `AuthModule`, `1h` and `7d` in `AuthService`); `JWT_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` are never read. `'default-secret'` is used as a fallback JWT secret
 - `orderCode` uses `Date.now()` and can collide
 - The jest config key is misspelled `coverageThresholds`, so coverage targets are not enforced; there is no CI pipeline yet
 - CORS is fully open; no helmet or rate limiting

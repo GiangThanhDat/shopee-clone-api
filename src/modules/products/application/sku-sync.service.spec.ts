@@ -61,6 +61,18 @@ describe('SkuSyncService', () => {
   });
 
   describe('sync', () => {
+    it('should reject sync and write nothing when a SKU id belongs to another product', async () => {
+      // Arrange - SKU 77 exists but belongs to a different product
+      mockSkuRepo.findByProductId.mockResolvedValue([{ id: 1 }]);
+
+      // Act & Assert
+      await expect(
+        service.sync(1, [{ id: 77, price: 1, stock: 999 }] as SkuInput),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockSkuRepo.updateMany).not.toHaveBeenCalled();
+      expect(mockSkuRepo.softRemoveByIds).not.toHaveBeenCalled();
+    });
+
     it('should soft delete removed SKUs', async () => {
       mockSkuRepo.findByProductId.mockResolvedValue([{ id: 1 }, { id: 2 }]);
       mockSkuRepo.updateMany.mockResolvedValue([]);
