@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
@@ -68,10 +69,15 @@ export class OrderService {
   async updateStatus(id: number, userId: number, dto: UpdateOrderStatusDto) {
     const { order } = await this.findById(id, userId);
     this.assertCustomerTransition(order.orderStatus, dto.orderStatus);
+    const changed = await this.orderRepository.changeStatus(
+      id,
+      order.orderStatus,
+      dto.orderStatus,
+    );
+    if (!changed) {
+      throw new ConflictException(`Order ${id} was changed by another request`);
+    }
     await this.releaseStockOnCancel(order, dto.orderStatus);
-    await this.orderRepository.update(id, {
-      orderStatus: dto.orderStatus,
-    });
     return this.reload(id);
   }
 

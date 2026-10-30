@@ -68,7 +68,7 @@ const mockOrderRepository = {
   findById: jest.fn(),
   findByIdAndUser: jest.fn(),
   save: jest.fn(),
-  update: jest.fn(),
+  changeStatus: jest.fn(),
   saveDetails: jest.fn(),
 };
 
@@ -275,6 +275,7 @@ describe('OrderService', () => {
       mockOrderRepository.findById.mockResolvedValue(
         makeOrder({ orderStatus: OrderStatus.Cancelled }),
       );
+      mockOrderRepository.changeStatus.mockResolvedValue(true);
 
       // Act
       const result = await service.updateStatus(1, 1, {
@@ -284,9 +285,25 @@ describe('OrderService', () => {
       // Assert
       expect(result.order.orderStatus).toBe(OrderStatus.Cancelled);
       expect(mockStockReservation.release).toHaveBeenCalledWith(details);
-      expect(mockOrderRepository.update).toHaveBeenCalledWith(1, {
-        orderStatus: OrderStatus.Cancelled,
-      });
+      expect(mockOrderRepository.changeStatus).toHaveBeenCalledWith(
+        1,
+        OrderStatus.Pending,
+        OrderStatus.Cancelled,
+      );
+    });
+
+    it('should not release stock when another request already changed the order status', async () => {
+      // Arrange - both requests read Pending, but the other one updated first
+      mockOrderRepository.findByIdAndUser.mockResolvedValue(
+        makeOrder({ details: [makeDetail()] }),
+      );
+      mockOrderRepository.changeStatus.mockResolvedValue(false);
+
+      // Act & Assert
+      await expect(
+        service.updateStatus(1, 1, { orderStatus: OrderStatus.Cancelled }),
+      ).rejects.toThrow(ConflictException);
+      expect(mockStockReservation.release).not.toHaveBeenCalled();
     });
 
     it.each([OrderStatus.Paid, OrderStatus.Shipped, OrderStatus.Completed])(
@@ -299,7 +316,7 @@ describe('OrderService', () => {
         await expect(
           service.updateStatus(1, 1, { orderStatus: target }),
         ).rejects.toThrow(BadRequestException);
-        expect(mockOrderRepository.update).not.toHaveBeenCalled();
+        expect(mockOrderRepository.changeStatus).not.toHaveBeenCalled();
       },
     );
 
