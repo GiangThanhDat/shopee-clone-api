@@ -44,8 +44,9 @@ export class OrderPriceVerifier {
   ): Promise<Map<number, ProductSkuEntity>> {
     const skus = await this.skuRepository.findByIds(skuIds);
     const skuMap = new Map<number, ProductSkuEntity>();
+    // bigint columns come back from Postgres as strings, while the client sends numbers
     for (const sku of skus) {
-      skuMap.set(sku.id, sku);
+      skuMap.set(Number(sku.id), sku);
     }
     return skuMap;
   }
@@ -73,7 +74,7 @@ export class OrderPriceVerifier {
       throw new NotFoundException(`SKU ${item.skuId} not found`);
     }
     const itemPrice = Money.of(item.price);
-    const skuPrice = Money.of(sku.price);
+    const skuPrice = Money.of(Number(sku.price));
     if (!itemPrice.equals(skuPrice)) {
       throw new BadRequestException(
         `Price mismatch for SKU ${item.skuId}: expected ${sku.price} but received ${item.price}`,
