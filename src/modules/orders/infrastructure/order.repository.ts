@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { applyPagination } from '../../../common/utils/pagination';
 import { OrderDetailEntity } from '../domain/order-detail.entity';
 import { OrderEntity } from '../domain/order.entity';
+import { OrderStatus } from '../domain/order-status';
 import type {
   IOrderRepository,
   OrderFilterQuery,
@@ -52,12 +53,17 @@ export class OrderRepository implements IOrderRepository {
     return this.repository.save(entity);
   }
 
-  async update(
+  // Conditional UPDATE is atomic, so two concurrent cancels cannot both succeed and release stock twice
+  async changeStatus(
     id: number,
-    order: Partial<OrderEntity>,
-  ): Promise<OrderEntity | null> {
-    await this.repository.update(id, order);
-    return this.findById(id);
+    from: OrderStatus,
+    to: OrderStatus,
+  ): Promise<boolean> {
+    const result = await this.repository.update(
+      { id, orderStatus: from },
+      { orderStatus: to },
+    );
+    return result.affected === 1;
   }
 
   async saveDetails(details: Partial<OrderDetailEntity>[]): Promise<void> {
