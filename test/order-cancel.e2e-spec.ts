@@ -9,6 +9,7 @@ import { AppModule } from '../src/app.module';
 import { GlobalExceptionFilter } from '../src/common/filters/http-exception.filter';
 import { TransformResponseInterceptor } from '../src/common/interceptors/transform-response.interceptor';
 import { globalValidationPipe } from '../src/common/pipes/validation.pipe';
+import { ApiResponseShape } from '../src/common/interfaces/api-response.interface';
 import { ProductSkuEntity } from '../src/modules/products/domain/product-sku.entity';
 
 describe('Order cancellation (e2e)', () => {
@@ -44,7 +45,10 @@ describe('Order cancellation (e2e)', () => {
         password: 'StrongP@ss1',
       })
       .expect(201);
-    accessToken = registered.body.data.auth.accessToken;
+    const registeredBody = registered.body as ApiResponseShape<{
+      auth: { accessToken: string };
+    }>;
+    accessToken = registeredBody.data.auth.accessToken;
   });
 
   afterAll(async () => {
@@ -68,7 +72,10 @@ describe('Order cancellation (e2e)', () => {
         ],
       })
       .expect(201);
-    return Number(response.body.data.product.skus[0].id);
+    const body = response.body as ApiResponseShape<{
+      product: { skus: { id: number }[] };
+    }>;
+    return Number(body.data.product.skus[0].id);
   }
 
   async function readStock(skuId: number): Promise<number> {
@@ -90,7 +97,8 @@ describe('Order cancellation (e2e)', () => {
         items: [{ skuId, price: 100000, quantity: 2 }],
       })
       .expect(201);
-    const orderId = order.body.data.order.id;
+    const orderId = (order.body as ApiResponseShape<{ order: { id: number } }>)
+      .data.order.id;
     expect(await readStock(skuId)).toBe(8);
 
     // Act
