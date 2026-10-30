@@ -49,6 +49,11 @@ export class ProductSpecRepository implements IProductSpecRepository {
     if (specs.length === 0) {
       return;
     }
-    await this.repository.save(specs);
+    // save() matches rows by id and misses them because bigint ids come back as strings, then INSERTs duplicates
+    await Promise.all(
+      specs.map(({ id, ...fields }) =>
+        this.repository.update(Number(id), fields),
+      ),
+    );
   }
 }
