@@ -20,4 +20,7 @@ if (missingVariables.length > 0) {
 }
 
 // e2e tests rebuild the schema, so they must never point at the dev database
+if (process.env.DB_NAME_TEST === process.env.DB_NAME) {
+  throw new Error('DB_NAME_TEST must differ from DB_NAME');
+}
 process.env.DB_NAME = process.env.DB_NAME_TEST;
