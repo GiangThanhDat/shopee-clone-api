@@ -4,17 +4,13 @@ import { DeepPartial, In, Repository } from 'typeorm';
 import { ProductSkuEntity } from '../domain/product-sku.entity';
 import { SkuValueEntity } from '../domain/sku-value.entity';
 import type {
-  IProductSkuQueryRepository,
-  IProductSkuCommandRepository,
+  IProductSkuRepository,
   IProductSkuStockRepository,
 } from '../application/interfaces/product-sku-repository.interface';
 
 @Injectable()
 export class ProductSkuRepository
-  implements
-    IProductSkuQueryRepository,
-    IProductSkuCommandRepository,
-    IProductSkuStockRepository
+  implements IProductSkuRepository, IProductSkuStockRepository
 {
   constructor(
     @InjectRepository(ProductSkuEntity)

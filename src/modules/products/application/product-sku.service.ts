@@ -4,37 +4,33 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type {
-  IProductSkuQueryRepository,
-  IProductSkuCommandRepository,
+import {
+  PRODUCT_SKU_REPOSITORY,
+  type IProductSkuRepository,
 } from './interfaces/product-sku-repository.interface';
 import {
-  PRODUCT_SKU_QUERY_REPOSITORY,
-  PRODUCT_SKU_COMMAND_REPOSITORY,
-} from './interfaces/product-sku-repository.interface';
-import type { IOptionValueQueryRepository } from '../../options/application/interfaces/option-value-repository.interface';
-import { OPTION_VALUE_QUERY_REPOSITORY } from '../../options/application/interfaces/option-value-repository.interface';
+  OPTION_VALUE_REPOSITORY,
+  type IOptionValueRepository,
+} from '../../options/application/interfaces/option-value-repository.interface';
 import { CreateProductSkuDto } from './dto/create-product-sku.dto';
 import { UpdateProductSkuDto } from './dto/update-product-sku.dto';
 
 @Injectable()
 export class ProductSkuService {
   constructor(
-    @Inject(PRODUCT_SKU_QUERY_REPOSITORY)
-    private readonly skuQueryRepository: IProductSkuQueryRepository,
-    @Inject(PRODUCT_SKU_COMMAND_REPOSITORY)
-    private readonly skuCommandRepository: IProductSkuCommandRepository,
-    @Inject(OPTION_VALUE_QUERY_REPOSITORY)
-    private readonly valueQueryRepository: IOptionValueQueryRepository,
+    @Inject(PRODUCT_SKU_REPOSITORY)
+    private readonly skuRepository: IProductSkuRepository,
+    @Inject(OPTION_VALUE_REPOSITORY)
+    private readonly valueRepository: IOptionValueRepository,
   ) {}
 
   async findByProductId(productId: number) {
-    const skus = await this.skuQueryRepository.findByProductId(productId);
+    const skus = await this.skuRepository.findByProductId(productId);
     return { skus };
   }
 
   async findById(skuId: number) {
-    const sku = await this.skuQueryRepository.findById(skuId);
+    const sku = await this.skuRepository.findById(skuId);
     if (!sku) {
       throw new NotFoundException(`SKU ${skuId} not found`);
     }
@@ -46,7 +42,7 @@ export class ProductSkuService {
     const skuValues = dto.optionValueIds.map((id) => ({
       optionValueId: id,
     }));
-    const sku = await this.skuCommandRepository.saveWithValues(
+    const sku = await this.skuRepository.saveWithValues(
       {
         productId,
         price: dto.price,
@@ -61,18 +57,18 @@ export class ProductSkuService {
 
   async updateSku(skuId: number, dto: UpdateProductSkuDto) {
     const { sku: existing } = await this.findById(skuId);
-    const sku = await this.skuCommandRepository.update(existing.id, dto);
+    const sku = await this.skuRepository.update(existing.id, dto);
     return { sku };
   }
 
   async removeSku(skuId: number) {
     const { sku } = await this.findById(skuId);
-    await this.skuCommandRepository.remove(skuId);
+    await this.skuRepository.remove(skuId);
     return { sku };
   }
 
   private async validateOptionValues(ids: number[]): Promise<void> {
-    const values = await this.valueQueryRepository.findByIds(ids);
+    const values = await this.valueRepository.findByIds(ids);
     if (values.length !== ids.length) {
       throw new BadRequestException('Some option value IDs are invalid');
     }

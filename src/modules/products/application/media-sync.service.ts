@@ -1,28 +1,24 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type {
-  IProductMediaQueryRepository,
-  IProductMediaCommandRepository,
+import {
+  PRODUCT_MEDIA_REPOSITORY,
+  type IProductMediaRepository,
 } from './interfaces/product-media-repository.interface';
 import {
-  PRODUCT_MEDIA_QUERY_REPOSITORY,
-  PRODUCT_MEDIA_COMMAND_REPOSITORY,
-} from './interfaces/product-media-repository.interface';
-import type { IMediaCommandRepository } from '../../media/application/interfaces/media-repository.interface';
-import { MEDIA_COMMAND_REPOSITORY } from '../../media/application/interfaces/media-repository.interface';
+  MEDIA_REPOSITORY,
+  type IMediaRepository,
+} from '../../media/application/interfaces/media-repository.interface';
 import type { UpdateProductDto } from './dto/update-product.dto';
-import { findIdsToRemove } from './sync-utils';
+import { findIdsToRemove } from '../../../common/utils/sync';
 
 type MediaInput = NonNullable<UpdateProductDto['media']>[number];
 
 @Injectable()
 export class MediaSyncService {
   constructor(
-    @Inject(PRODUCT_MEDIA_QUERY_REPOSITORY)
-    private readonly productMediaQueryRepository: IProductMediaQueryRepository,
-    @Inject(PRODUCT_MEDIA_COMMAND_REPOSITORY)
-    private readonly productMediaCommandRepository: IProductMediaCommandRepository,
-    @Inject(MEDIA_COMMAND_REPOSITORY)
-    private readonly mediaCommandRepository: IMediaCommandRepository,
+    @Inject(PRODUCT_MEDIA_REPOSITORY)
+    private readonly productMediaRepository: IProductMediaRepository,
+    @Inject(MEDIA_REPOSITORY)
+    private readonly mediaRepository: IMediaRepository,
   ) {}
 
   async sync(
@@ -30,13 +26,13 @@ export class MediaSyncService {
     incoming: NonNullable<UpdateProductDto['media']>,
   ): Promise<void> {
     const existing =
-      await this.productMediaQueryRepository.findByProductId(productId);
+      await this.productMediaRepository.findByProductId(productId);
     const idsToRemove = findIdsToRemove(existing, incoming);
 
     const toUpdate = incoming.filter((m) => m.id);
     const toCreate = incoming.filter((m) => !m.id);
 
-    await this.productMediaCommandRepository.softRemoveByIds(idsToRemove);
+    await this.productMediaRepository.softRemoveByIds(idsToRemove);
     await this.bulkUpdate(toUpdate);
     await this.bulkCreate(productId, toCreate);
   }
@@ -66,15 +62,15 @@ export class MediaSyncService {
       size: m.size,
       fileName: m.fileName,
     }));
-    await this.productMediaCommandRepository.updateMany(productMediaUpdates);
-    await this.mediaCommandRepository.updateMany(mediaUpdates);
+    await this.productMediaRepository.updateMany(productMediaUpdates);
+    await this.mediaRepository.updateMany(mediaUpdates);
   }
 
   private async createAndLinkMediaBatch(items: MediaInput[]): Promise<void> {
     if (items.length === 0) {
       return;
     }
-    const newMedias = await this.mediaCommandRepository.saveMany(
+    const newMedias = await this.mediaRepository.saveMany(
       items.map((m) => ({
         url: m.url,
         size: m.size,
@@ -85,7 +81,7 @@ export class MediaSyncService {
       id: Number(m.id),
       mediaId: newMedias[index].id,
     }));
-    await this.productMediaCommandRepository.updateMany(linkUpdates);
+    await this.productMediaRepository.updateMany(linkUpdates);
   }
 
   private async bulkCreate(
@@ -105,6 +101,6 @@ export class MediaSyncService {
         fileName: m.fileName,
       },
     }));
-    await this.productMediaCommandRepository.saveMany(mapped);
+    await this.productMediaRepository.saveMany(mapped);
   }
 }

@@ -3,14 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductsModule } from '../products/products.module';
 import { CartEntity } from './domain/cart.entity';
 import { CartItemEntity } from './domain/cart-item.entity';
-import {
-  CART_QUERY_REPOSITORY,
-  CART_COMMAND_REPOSITORY,
-} from './application/interfaces/cart-repository.interface';
-import {
-  CART_ITEM_QUERY_REPOSITORY,
-  CART_ITEM_COMMAND_REPOSITORY,
-} from './application/interfaces/cart-item-repository.interface';
+import { CART_REPOSITORY } from './application/interfaces/cart-repository.interface';
+import { CART_ITEM_REPOSITORY } from './application/interfaces/cart-item-repository.interface';
 import { CartRepository } from './infrastructure/cart.repository';
 import { CartItemRepository } from './infrastructure/cart-item.repository';
 import { CartService } from './application/cart.service';
@@ -26,10 +20,8 @@ import { CartItemController } from './controllers/cart-item.controller';
   ],
   controllers: [CartController, CartItemController],
   providers: [
-    { provide: CART_QUERY_REPOSITORY, useClass: CartRepository },
-    { provide: CART_COMMAND_REPOSITORY, useClass: CartRepository },
-    { provide: CART_ITEM_QUERY_REPOSITORY, useClass: CartItemRepository },
-    { provide: CART_ITEM_COMMAND_REPOSITORY, useClass: CartItemRepository },
+    { provide: CART_REPOSITORY, useClass: CartRepository },
+    { provide: CART_ITEM_REPOSITORY, useClass: CartItemRepository },
     CartService,
     CartItemService,
     CartItemSyncService,

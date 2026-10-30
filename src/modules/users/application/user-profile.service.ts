@@ -2,22 +2,16 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { UserEntity } from '../domain/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UserProfileResponse } from './dto/user-profile-response.dto';
-import type {
-  IUsersQueryRepository,
-  IUsersCommandRepository,
-} from './interfaces/users-repository.interface';
 import {
-  USERS_QUERY_REPOSITORY,
-  USERS_COMMAND_REPOSITORY,
+  USER_REPOSITORY,
+  type IUserRepository,
 } from './interfaces/users-repository.interface';
 
 @Injectable()
 export class UserProfileService {
   constructor(
-    @Inject(USERS_QUERY_REPOSITORY)
-    private readonly usersQueryRepository: IUsersQueryRepository,
-    @Inject(USERS_COMMAND_REPOSITORY)
-    private readonly usersCommandRepository: IUsersCommandRepository,
+    @Inject(USER_REPOSITORY)
+    private readonly userRepository: IUserRepository,
   ) {}
 
   async getProfile(userId: number): Promise<{ profile: UserProfileResponse }> {
@@ -30,7 +24,7 @@ export class UserProfileService {
     dto: UpdateProfileDto,
   ): Promise<{ profile: UserProfileResponse }> {
     await this.findUserOrFail(userId);
-    const updated = await this.usersCommandRepository.update(userId, dto);
+    const updated = await this.userRepository.update(userId, dto);
     if (!updated) {
       throw new NotFoundException('User not found');
     }
@@ -38,7 +32,7 @@ export class UserProfileService {
   }
 
   private async findUserOrFail(userId: number): Promise<UserEntity> {
-    const user = await this.usersQueryRepository.findById(userId);
+    const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }

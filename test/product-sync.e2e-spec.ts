@@ -20,21 +20,12 @@ import { MediaRepository } from '../src/modules/media/infrastructure/media.repos
 import { SkuSyncService } from '../src/modules/products/application/sku-sync.service';
 import { MediaSyncService } from '../src/modules/products/application/media-sync.service';
 import { DetailSyncService } from '../src/modules/products/application/detail-sync.service';
-import {
-  PRODUCT_SKU_QUERY_REPOSITORY,
-  PRODUCT_SKU_COMMAND_REPOSITORY,
-} from '../src/modules/products/application/interfaces/product-sku-repository.interface';
-import {
-  PRODUCT_MEDIA_QUERY_REPOSITORY,
-  PRODUCT_MEDIA_COMMAND_REPOSITORY,
-} from '../src/modules/products/application/interfaces/product-media-repository.interface';
-import {
-  PRODUCT_DETAIL_QUERY_REPOSITORY,
-  PRODUCT_DETAIL_COMMAND_REPOSITORY,
-} from '../src/modules/products/application/interfaces/product-detail-repository.interface';
-import { PRODUCT_SPEC_COMMAND_REPOSITORY } from '../src/modules/products/application/interfaces/product-spec-repository.interface';
-import { MEDIA_COMMAND_REPOSITORY } from '../src/modules/media/application/interfaces/media-repository.interface';
-import { OPTION_VALUE_QUERY_REPOSITORY } from '../src/modules/options/application/interfaces/option-value-repository.interface';
+import { PRODUCT_SKU_REPOSITORY } from '../src/modules/products/application/interfaces/product-sku-repository.interface';
+import { PRODUCT_MEDIA_REPOSITORY } from '../src/modules/products/application/interfaces/product-media-repository.interface';
+import { PRODUCT_DETAIL_REPOSITORY } from '../src/modules/products/application/interfaces/product-detail-repository.interface';
+import { PRODUCT_SPEC_REPOSITORY } from '../src/modules/products/application/interfaces/product-spec-repository.interface';
+import { MEDIA_REPOSITORY } from '../src/modules/media/application/interfaces/media-repository.interface';
+import { OPTION_VALUE_REPOSITORY } from '../src/modules/options/application/interfaces/option-value-repository.interface';
 import { OptionValueRepository } from '../src/modules/options/infrastructure/option-value.repository';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -121,11 +112,7 @@ describe('SkuSyncService (integration)', () => {
             ),
         },
         {
-          provide: PRODUCT_SKU_QUERY_REPOSITORY,
-          useExisting: ProductSkuRepository,
-        },
-        {
-          provide: PRODUCT_SKU_COMMAND_REPOSITORY,
+          provide: PRODUCT_SKU_REPOSITORY,
           useExisting: ProductSkuRepository,
         },
         {
@@ -136,7 +123,7 @@ describe('SkuSyncService (integration)', () => {
             ),
         },
         {
-          provide: OPTION_VALUE_QUERY_REPOSITORY,
+          provide: OPTION_VALUE_REPOSITORY,
           useExisting: OptionValueRepository,
         },
         {
@@ -307,11 +294,7 @@ describe('MediaSyncService (integration)', () => {
             ),
         },
         {
-          provide: PRODUCT_MEDIA_QUERY_REPOSITORY,
-          useExisting: ProductMediaRepository,
-        },
-        {
-          provide: PRODUCT_MEDIA_COMMAND_REPOSITORY,
+          provide: PRODUCT_MEDIA_REPOSITORY,
           useExisting: ProductMediaRepository,
         },
         {
@@ -319,7 +302,7 @@ describe('MediaSyncService (integration)', () => {
           useFactory: () =>
             new MediaRepository(dataSource.getRepository(MediaEntity)),
         },
-        { provide: MEDIA_COMMAND_REPOSITORY, useExisting: MediaRepository },
+        { provide: MEDIA_REPOSITORY, useExisting: MediaRepository },
       ],
     }).compile();
 
@@ -424,11 +407,7 @@ describe('DetailSyncService (integration)', () => {
             ),
         },
         {
-          provide: PRODUCT_DETAIL_QUERY_REPOSITORY,
-          useExisting: ProductDetailRepository,
-        },
-        {
-          provide: PRODUCT_DETAIL_COMMAND_REPOSITORY,
+          provide: PRODUCT_DETAIL_REPOSITORY,
           useExisting: ProductDetailRepository,
         },
         {
@@ -439,7 +418,7 @@ describe('DetailSyncService (integration)', () => {
             ),
         },
         {
-          provide: PRODUCT_SPEC_COMMAND_REPOSITORY,
+          provide: PRODUCT_SPEC_REPOSITORY,
           useExisting: ProductSpecRepository,
         },
       ],

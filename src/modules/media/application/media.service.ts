@@ -1,30 +1,24 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type {
-  IMediaQueryRepository,
-  IMediaCommandRepository,
-} from './interfaces/media-repository.interface';
 import {
-  MEDIA_QUERY_REPOSITORY,
-  MEDIA_COMMAND_REPOSITORY,
+  MEDIA_REPOSITORY,
+  type IMediaRepository,
 } from './interfaces/media-repository.interface';
 import { CreateMediaDto } from './dto/create-media.dto';
 
 @Injectable()
 export class MediaService {
   constructor(
-    @Inject(MEDIA_QUERY_REPOSITORY)
-    private readonly mediaQueryRepository: IMediaQueryRepository,
-    @Inject(MEDIA_COMMAND_REPOSITORY)
-    private readonly mediaCommandRepository: IMediaCommandRepository,
+    @Inject(MEDIA_REPOSITORY)
+    private readonly mediaRepository: IMediaRepository,
   ) {}
 
   async findAll() {
-    const mediaList = await this.mediaQueryRepository.findAll();
+    const mediaList = await this.mediaRepository.findAll();
     return { mediaList };
   }
 
   async findById(mediaId: number) {
-    const media = await this.mediaQueryRepository.findById(mediaId);
+    const media = await this.mediaRepository.findById(mediaId);
     if (!media) {
       throw new NotFoundException(`Media ${mediaId} not found`);
     }
@@ -32,13 +26,13 @@ export class MediaService {
   }
 
   async create(dto: CreateMediaDto) {
-    const media = await this.mediaCommandRepository.save(dto);
+    const media = await this.mediaRepository.save(dto);
     return { media };
   }
 
   async remove(mediaId: number) {
     const { media } = await this.findById(mediaId);
-    await this.mediaCommandRepository.remove(mediaId);
+    await this.mediaRepository.remove(mediaId);
     return { media };
   }
 }

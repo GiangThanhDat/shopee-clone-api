@@ -5,8 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
-  PRODUCT_SKU_QUERY_REPOSITORY,
-  type IProductSkuQueryRepository,
+  PRODUCT_SKU_REPOSITORY,
+  type IProductSkuRepository,
 } from '../../products/application/interfaces/product-sku-repository.interface';
 import { ProductSkuEntity } from '../../products/domain/product-sku.entity';
 import { Money } from '../../../common/value-objects/money.vo';
@@ -20,8 +20,8 @@ export interface VerifiedOrderResult {
 @Injectable()
 export class OrderPriceVerifier {
   constructor(
-    @Inject(PRODUCT_SKU_QUERY_REPOSITORY)
-    private readonly skuRepository: IProductSkuQueryRepository,
+    @Inject(PRODUCT_SKU_REPOSITORY)
+    private readonly skuRepository: IProductSkuRepository,
   ) {}
 
   async verify(dto: CreateOrderDto): Promise<VerifiedOrderResult> {

@@ -2,15 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CartEntity } from '../domain/cart.entity';
-import type {
-  ICartQueryRepository,
-  ICartCommandRepository,
-} from '../application/interfaces/cart-repository.interface';
+import type { ICartRepository } from '../application/interfaces/cart-repository.interface';
 
 @Injectable()
-export class CartRepository
-  implements ICartQueryRepository, ICartCommandRepository
-{
+export class CartRepository implements ICartRepository {
   constructor(
     @InjectRepository(CartEntity)
     private readonly repository: Repository<CartEntity>,

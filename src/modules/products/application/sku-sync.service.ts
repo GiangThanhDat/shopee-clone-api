@@ -1,28 +1,24 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import type {
-  IProductSkuQueryRepository,
-  IProductSkuCommandRepository,
+import {
+  PRODUCT_SKU_REPOSITORY,
+  type IProductSkuRepository,
 } from './interfaces/product-sku-repository.interface';
 import {
-  PRODUCT_SKU_QUERY_REPOSITORY,
-  PRODUCT_SKU_COMMAND_REPOSITORY,
-} from './interfaces/product-sku-repository.interface';
-import type { IOptionValueQueryRepository } from '../../options/application/interfaces/option-value-repository.interface';
-import { OPTION_VALUE_QUERY_REPOSITORY } from '../../options/application/interfaces/option-value-repository.interface';
+  OPTION_VALUE_REPOSITORY,
+  type IOptionValueRepository,
+} from '../../options/application/interfaces/option-value-repository.interface';
 import type { UpdateProductDto } from './dto/update-product.dto';
-import { findIdsToRemove } from './sync-utils';
+import { findIdsToRemove } from '../../../common/utils/sync';
 
 type SkuInput = NonNullable<UpdateProductDto['skus']>[number];
 
 @Injectable()
 export class SkuSyncService {
   constructor(
-    @Inject(PRODUCT_SKU_QUERY_REPOSITORY)
-    private readonly skuQueryRepository: IProductSkuQueryRepository,
-    @Inject(PRODUCT_SKU_COMMAND_REPOSITORY)
-    private readonly skuCommandRepository: IProductSkuCommandRepository,
-    @Inject(OPTION_VALUE_QUERY_REPOSITORY)
-    private readonly optionValueQueryRepository: IOptionValueQueryRepository,
+    @Inject(PRODUCT_SKU_REPOSITORY)
+    private readonly skuRepository: IProductSkuRepository,
+    @Inject(OPTION_VALUE_REPOSITORY)
+    private readonly optionValueRepository: IOptionValueRepository,
   ) {}
 
   async validate(skus?: UpdateProductDto['skus']): Promise<void> {
@@ -34,7 +30,7 @@ export class SkuSyncService {
       return;
     }
     const uniqueIds = [...new Set(allIds)];
-    const found = await this.optionValueQueryRepository.findByIds(uniqueIds);
+    const found = await this.optionValueRepository.findByIds(uniqueIds);
     if (found.length !== uniqueIds.length) {
       throw new BadRequestException('Some option value IDs are invalid');
     }
@@ -44,13 +40,13 @@ export class SkuSyncService {
     productId: number,
     incoming: NonNullable<UpdateProductDto['skus']>,
   ): Promise<void> {
-    const existing = await this.skuQueryRepository.findByProductId(productId);
+    const existing = await this.skuRepository.findByProductId(productId);
     const idsToRemove = findIdsToRemove(existing, incoming);
 
     const toUpdate = incoming.filter((s) => s.id);
     const toCreate = incoming.filter((s) => !s.id);
 
-    await this.skuCommandRepository.softRemoveByIds(idsToRemove);
+    await this.skuRepository.softRemoveByIds(idsToRemove);
     await this.bulkUpdate(toUpdate);
     await this.bulkCreate(productId, toCreate);
   }
@@ -75,8 +71,8 @@ export class SkuSyncService {
         optionValueIds: s.optionValueIds,
       }));
 
-    await this.skuCommandRepository.updateMany(mapped);
-    await this.skuCommandRepository.syncSkuValues(skuValueEntries);
+    await this.skuRepository.updateMany(mapped);
+    await this.skuRepository.syncSkuValues(skuValueEntries);
   }
 
   private async bulkCreate(
@@ -96,6 +92,6 @@ export class SkuSyncService {
         optionValueId: id,
       })),
     }));
-    await this.skuCommandRepository.saveMany(mapped);
+    await this.skuRepository.saveMany(mapped);
   }
 }

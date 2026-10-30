@@ -212,7 +212,6 @@ docker-compose down
 
 The codebase does not yet meet every rule above. Do not assume these exist; fix them in dedicated PRs.
 
-- Repositories are still split into Query/Command interfaces; they are being merged back to one interface per aggregate
 - No migrations yet: `src/database/` does not exist
 - Money columns use `double precision`; several numeric columns use `bigint` without a transformer
 - Refresh tokens are returned in the response body (not an httpOnly cookie) and are not stored, so they cannot be revoked

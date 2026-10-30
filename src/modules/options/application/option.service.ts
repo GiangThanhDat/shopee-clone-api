@@ -1,20 +1,12 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { OptionEntity } from '../domain/option.entity';
-import type {
-  IOptionQueryRepository,
-  IOptionCommandRepository,
+import {
+  OPTION_REPOSITORY,
+  type IOptionRepository,
 } from './interfaces/option-repository.interface';
 import {
-  OPTION_QUERY_REPOSITORY,
-  OPTION_COMMAND_REPOSITORY,
-} from './interfaces/option-repository.interface';
-import type {
-  IOptionValueQueryRepository,
-  IOptionValueCommandRepository,
-} from './interfaces/option-value-repository.interface';
-import {
-  OPTION_VALUE_QUERY_REPOSITORY,
-  OPTION_VALUE_COMMAND_REPOSITORY,
+  OPTION_VALUE_REPOSITORY,
+  type IOptionValueRepository,
 } from './interfaces/option-value-repository.interface';
 import { CreateOptionDto } from './dto/create-option.dto';
 import { UpdateOptionDto } from './dto/update-option.dto';
@@ -24,23 +16,19 @@ import { UpdateOptionValueDto } from './dto/update-option-value.dto';
 @Injectable()
 export class OptionService {
   constructor(
-    @Inject(OPTION_QUERY_REPOSITORY)
-    private readonly optionQueryRepository: IOptionQueryRepository,
-    @Inject(OPTION_COMMAND_REPOSITORY)
-    private readonly optionCommandRepository: IOptionCommandRepository,
-    @Inject(OPTION_VALUE_QUERY_REPOSITORY)
-    private readonly valueQueryRepository: IOptionValueQueryRepository,
-    @Inject(OPTION_VALUE_COMMAND_REPOSITORY)
-    private readonly valueCommandRepository: IOptionValueCommandRepository,
+    @Inject(OPTION_REPOSITORY)
+    private readonly optionRepository: IOptionRepository,
+    @Inject(OPTION_VALUE_REPOSITORY)
+    private readonly valueRepository: IOptionValueRepository,
   ) {}
 
   async findAll() {
-    const options = await this.optionQueryRepository.findAll();
+    const options = await this.optionRepository.findAll();
     return { options };
   }
 
   async findById(optionId: number) {
-    const option = await this.optionQueryRepository.findById(optionId);
+    const option = await this.optionRepository.findById(optionId);
     if (!option) {
       throw new NotFoundException(`Option ${optionId} not found`);
     }
@@ -49,7 +37,7 @@ export class OptionService {
 
   async createOption(dto: CreateOptionDto) {
     const values = dto.values as unknown as OptionEntity['values'];
-    const option = await this.optionCommandRepository.save({
+    const option = await this.optionRepository.save({
       name: dto.name,
       values,
     });
@@ -60,14 +48,14 @@ export class OptionService {
     const { option: existing } = await this.findById(optionId);
 
     if (dto.name) {
-      await this.optionCommandRepository.update(optionId, { name: dto.name });
+      await this.optionRepository.update(optionId, { name: dto.name });
     }
 
     if (dto.values) {
       await this.syncValues(existing, dto.values);
     }
 
-    const option = await this.optionQueryRepository.findById(optionId);
+    const option = await this.optionRepository.findById(optionId);
     return { option };
   }
 
@@ -81,16 +69,16 @@ export class OptionService {
       .map((v) => Number(v.id));
     const idsToRemove = existingIds.filter((id) => !incomingIds.includes(id));
 
-    await this.valueCommandRepository.softRemoveByIds(idsToRemove);
+    await this.valueRepository.softRemoveByIds(idsToRemove);
     for (const v of incomingValues) {
       if (v.id) {
-        await this.valueCommandRepository.update(Number(v.id), {
+        await this.valueRepository.update(Number(v.id), {
           value: v.value,
           imageUrl: v.imageUrl,
         });
         continue;
       }
-      await this.valueCommandRepository.save({
+      await this.valueRepository.save({
         value: v.value,
         imageUrl: v.imageUrl,
         optionId: Number(existing.id),
@@ -100,13 +88,13 @@ export class OptionService {
 
   async removeOption(optionId: number) {
     const { option } = await this.findById(optionId);
-    await this.optionCommandRepository.remove(optionId);
+    await this.optionRepository.remove(optionId);
     return { option };
   }
 
   async createValue(optionId: number, dto: CreateOptionValueDto) {
     await this.findById(optionId);
-    const value = await this.valueCommandRepository.save({
+    const value = await this.valueRepository.save({
       optionId,
       ...dto,
     });
@@ -114,7 +102,7 @@ export class OptionService {
   }
 
   async findValueById(valueId: number) {
-    const value = await this.valueQueryRepository.findById(valueId);
+    const value = await this.valueRepository.findById(valueId);
     if (!value) {
       throw new NotFoundException(`Option value ${valueId} not found`);
     }
@@ -123,13 +111,13 @@ export class OptionService {
 
   async updateValue(valueId: number, dto: UpdateOptionValueDto) {
     await this.findValueById(valueId);
-    const value = await this.valueCommandRepository.update(valueId, dto);
+    const value = await this.valueRepository.update(valueId, dto);
     return { value };
   }
 
   async removeValue(valueId: number) {
     const { value } = await this.findValueById(valueId);
-    await this.valueCommandRepository.remove(valueId);
+    await this.valueRepository.remove(valueId);
     return { value };
   }
 }

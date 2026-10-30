@@ -2,15 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OptionEntity } from '../domain/option.entity';
-import type {
-  IOptionQueryRepository,
-  IOptionCommandRepository,
-} from '../application/interfaces/option-repository.interface';
+import type { IOptionRepository } from '../application/interfaces/option-repository.interface';
 
 @Injectable()
-export class OptionRepository
-  implements IOptionQueryRepository, IOptionCommandRepository
-{
+export class OptionRepository implements IOptionRepository {
   constructor(
     @InjectRepository(OptionEntity)
     private readonly repository: Repository<OptionEntity>,
