@@ -65,10 +65,8 @@ export class AuthService {
 
   private verifyRefreshToken(token: string): { sub: number; email: string } {
     try {
-      const secret = this.configService.get<string>(
-        'JWT_REFRESH_SECRET',
-        'default-refresh-secret',
-      );
+      const secret =
+        this.configService.getOrThrow<string>('JWT_REFRESH_SECRET');
       return this.jwtService.verify<{ sub: number; email: string }>(token, {
         secret,
       });
@@ -122,17 +120,17 @@ export class AuthService {
   }
 
   private generateAccessToken(userId: number, email: string): string {
-    return this.jwtService.sign({ sub: userId, email }, { expiresIn: '1h' });
+    return this.jwtService.sign({ sub: userId, email });
   }
 
   private generateRefreshToken(userId: number, email: string): string {
-    const secret = this.configService.get<string>(
-      'JWT_REFRESH_SECRET',
-      'default-refresh-secret',
-    );
+    const secret = this.configService.getOrThrow<string>('JWT_REFRESH_SECRET');
     return this.jwtService.sign(
       { sub: userId, email },
-      { secret, expiresIn: '7d' },
+      {
+        secret,
+        expiresIn: this.configService.get('JWT_REFRESH_EXPIRES_IN', '7d'),
+      },
     );
   }
 }
