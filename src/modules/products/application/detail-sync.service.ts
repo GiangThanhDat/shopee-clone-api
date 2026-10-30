@@ -8,7 +8,7 @@ import {
   type IProductSpecRepository,
 } from './interfaces/product-spec-repository.interface';
 import type { UpdateProductDto } from './dto/update-product.dto';
-import { findIdsToRemove } from './sync-utils';
+import { findIdsToRemove } from '../../../common/utils/sync';
 
 type DetailInput = NonNullable<UpdateProductDto['details']>[number];
 

@@ -8,7 +8,7 @@ import {
   type IOptionValueRepository,
 } from '../../options/application/interfaces/option-value-repository.interface';
 import type { UpdateProductDto } from './dto/update-product.dto';
-import { findIdsToRemove } from './sync-utils';
+import { findIdsToRemove } from '../../../common/utils/sync';
 
 type SkuInput = NonNullable<UpdateProductDto['skus']>[number];
 

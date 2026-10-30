@@ -8,7 +8,7 @@ import {
   type IMediaRepository,
 } from '../../media/application/interfaces/media-repository.interface';
 import type { UpdateProductDto } from './dto/update-product.dto';
-import { findIdsToRemove } from './sync-utils';
+import { findIdsToRemove } from '../../../common/utils/sync';
 
 type MediaInput = NonNullable<UpdateProductDto['media']>[number];
 

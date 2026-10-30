@@ -8,7 +8,7 @@ import {
   type IProductSkuRepository,
 } from '../../products/application/interfaces/product-sku-repository.interface';
 import type { UpdateCartItemDto } from './dto/update-cart.dto';
-import { findIdsToRemove } from '../../products/application/sync-utils';
+import { findIdsToRemove } from '../../../common/utils/sync';
 
 @Injectable()
 export class CartItemSyncService {
