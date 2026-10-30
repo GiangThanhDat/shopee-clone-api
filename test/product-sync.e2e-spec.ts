@@ -54,13 +54,15 @@ beforeAll(async () => {
 
   dataSource = new DataSource({
     type: 'postgres',
-    host: 'localhost',
-    port: 5432,
-    username: 'postgres',
-    password: 'thanhdat',
-    database: 'shopee_clone',
+    host: process.env.DB_HOST ?? 'localhost',
+    port: Number(process.env.DB_PORT ?? 5432),
+    username: process.env.DB_USERNAME ?? 'postgres',
+    password: process.env.DB_PASSWORD ?? 'postgres',
+    database: process.env.DB_NAME,
     entities,
-    synchronize: false,
+    // Safe only because this is the dedicated test database
+    synchronize: true,
+    dropSchema: true,
     logging: ['query'],
   });
 
