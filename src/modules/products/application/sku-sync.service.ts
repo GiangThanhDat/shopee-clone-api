@@ -8,7 +8,7 @@ import {
   type IOptionValueRepository,
 } from '../../options/application/interfaces/option-value-repository.interface';
 import type { UpdateProductDto } from './dto/update-product.dto';
-import { findIdsToRemove } from '../../../common/utils/sync';
+import { findIdsToRemove, rejectForeignIds } from '../../../common/utils/sync';
 
 type SkuInput = NonNullable<UpdateProductDto['skus']>[number];
 
@@ -41,6 +41,7 @@ export class SkuSyncService {
     incoming: NonNullable<UpdateProductDto['skus']>,
   ): Promise<void> {
     const existing = await this.skuRepository.findByProductId(productId);
+    rejectForeignIds(existing, incoming);
     const idsToRemove = findIdsToRemove(existing, incoming);
 
     const toUpdate = incoming.filter((s) => s.id);

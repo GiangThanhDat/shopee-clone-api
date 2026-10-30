@@ -8,7 +8,7 @@ import {
   type IMediaRepository,
 } from '../../media/application/interfaces/media-repository.interface';
 import type { UpdateProductDto } from './dto/update-product.dto';
-import { findIdsToRemove } from '../../../common/utils/sync';
+import { findIdsToRemove, rejectForeignIds } from '../../../common/utils/sync';
 
 type MediaInput = NonNullable<UpdateProductDto['media']>[number];
 
@@ -27,6 +27,7 @@ export class MediaSyncService {
   ): Promise<void> {
     const existing =
       await this.productMediaRepository.findByProductId(productId);
+    rejectForeignIds(existing, incoming);
     const idsToRemove = findIdsToRemove(existing, incoming);
 
     const toUpdate = incoming.filter((m) => m.id);

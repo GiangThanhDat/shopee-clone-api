@@ -8,7 +8,7 @@ import {
   type IProductSpecRepository,
 } from './interfaces/product-spec-repository.interface';
 import type { UpdateProductDto } from './dto/update-product.dto';
-import { findIdsToRemove } from '../../../common/utils/sync';
+import { findIdsToRemove, rejectForeignIds } from '../../../common/utils/sync';
 
 type DetailInput = NonNullable<UpdateProductDto['details']>[number];
 
@@ -26,6 +26,7 @@ export class DetailSyncService {
     incoming: NonNullable<UpdateProductDto['details']>,
   ): Promise<void> {
     const existing = await this.detailRepository.findByProductId(productId);
+    rejectForeignIds(existing, incoming);
     const idsToRemove = findIdsToRemove(existing, incoming);
 
     const toUpdate = incoming.filter((d) => d.id);

@@ -8,7 +8,7 @@ import {
   type IProductSkuRepository,
 } from '../../products/application/interfaces/product-sku-repository.interface';
 import type { UpdateCartItemDto } from './dto/update-cart.dto';
-import { findIdsToRemove } from '../../../common/utils/sync';
+import { findIdsToRemove, rejectForeignIds } from '../../../common/utils/sync';
 
 @Injectable()
 export class CartItemSyncService {
@@ -33,6 +33,7 @@ export class CartItemSyncService {
 
   async sync(cartId: number, incoming: UpdateCartItemDto[]): Promise<void> {
     const existing = await this.cartItemRepository.findByCartId(cartId);
+    rejectForeignIds(existing, incoming);
     const idsToRemove = findIdsToRemove(existing, incoming);
 
     const toUpdate = incoming.filter((i) => i.id);
