@@ -11,7 +11,7 @@ import {
 export class UserProfileService {
   constructor(
     @Inject(USER_REPOSITORY)
-    private readonly usersRepository: IUserRepository,
+    private readonly userRepository: IUserRepository,
   ) {}
 
   async getProfile(userId: number): Promise<{ profile: UserProfileResponse }> {
@@ -24,7 +24,7 @@ export class UserProfileService {
     dto: UpdateProfileDto,
   ): Promise<{ profile: UserProfileResponse }> {
     await this.findUserOrFail(userId);
-    const updated = await this.usersRepository.update(userId, dto);
+    const updated = await this.userRepository.update(userId, dto);
     if (!updated) {
       throw new NotFoundException('User not found');
     }
@@ -32,7 +32,7 @@ export class UserProfileService {
   }
 
   private async findUserOrFail(userId: number): Promise<UserEntity> {
-    const user = await this.usersRepository.findById(userId);
+    const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }

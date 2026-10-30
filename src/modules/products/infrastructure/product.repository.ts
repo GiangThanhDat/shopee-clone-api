@@ -9,9 +9,7 @@ import {
 } from '../application/interfaces/product-repository.interface';
 
 @Injectable()
-export class ProductRepository
-  implements IProductRepository, IProductRepository
-{
+export class ProductRepository implements IProductRepository {
   constructor(
     @InjectRepository(ProductEntity)
     private readonly repository: Repository<ProductEntity>,

@@ -116,10 +116,6 @@ describe('SkuSyncService (integration)', () => {
           useExisting: ProductSkuRepository,
         },
         {
-          provide: PRODUCT_SKU_REPOSITORY,
-          useExisting: ProductSkuRepository,
-        },
-        {
           provide: OptionValueRepository,
           useFactory: () =>
             new OptionValueRepository(
@@ -302,10 +298,6 @@ describe('MediaSyncService (integration)', () => {
           useExisting: ProductMediaRepository,
         },
         {
-          provide: PRODUCT_MEDIA_REPOSITORY,
-          useExisting: ProductMediaRepository,
-        },
-        {
           provide: MediaRepository,
           useFactory: () =>
             new MediaRepository(dataSource.getRepository(MediaEntity)),
@@ -413,10 +405,6 @@ describe('DetailSyncService (integration)', () => {
             new ProductDetailRepository(
               dataSource.getRepository(ProductDetailEntity),
             ),
-        },
-        {
-          provide: PRODUCT_DETAIL_REPOSITORY,
-          useExisting: ProductDetailRepository,
         },
         {
           provide: PRODUCT_DETAIL_REPOSITORY,

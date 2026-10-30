@@ -10,10 +10,7 @@ import type {
 
 @Injectable()
 export class ProductSkuRepository
-  implements
-    IProductSkuRepository,
-    IProductSkuRepository,
-    IProductSkuStockRepository
+  implements IProductSkuRepository, IProductSkuStockRepository
 {
   constructor(
     @InjectRepository(ProductSkuEntity)

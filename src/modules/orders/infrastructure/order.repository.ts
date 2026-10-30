@@ -10,7 +10,7 @@ import type {
 } from '../application/interfaces/order-repository.interface';
 
 @Injectable()
-export class OrderRepository implements IOrderRepository, IOrderRepository {
+export class OrderRepository implements IOrderRepository {
   constructor(
     @InjectRepository(OrderEntity)
     private readonly repository: Repository<OrderEntity>,

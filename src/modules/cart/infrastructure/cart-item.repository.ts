@@ -5,9 +5,7 @@ import { CartItemEntity } from '../domain/cart-item.entity';
 import type { ICartItemRepository } from '../application/interfaces/cart-item-repository.interface';
 
 @Injectable()
-export class CartItemRepository
-  implements ICartItemRepository, ICartItemRepository
-{
+export class CartItemRepository implements ICartItemRepository {
   constructor(
     @InjectRepository(CartItemEntity)
     private readonly repository: Repository<CartItemEntity>,

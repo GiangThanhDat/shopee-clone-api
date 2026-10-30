@@ -5,9 +5,7 @@ import { ProductDetailEntity } from '../domain/product-detail.entity';
 import type { IProductDetailRepository } from '../application/interfaces/product-detail-repository.interface';
 
 @Injectable()
-export class ProductDetailRepository
-  implements IProductDetailRepository, IProductDetailRepository
-{
+export class ProductDetailRepository implements IProductDetailRepository {
   constructor(
     @InjectRepository(ProductDetailEntity)
     private readonly repository: Repository<ProductDetailEntity>,

@@ -13,6 +13,6 @@ import { UserProfileController } from './user-profile.controller';
     { provide: USER_REPOSITORY, useClass: UsersRepository },
     UserProfileService,
   ],
-  exports: [USER_REPOSITORY, USER_REPOSITORY],
+  exports: [USER_REPOSITORY],
 })
 export class UsersModule {}

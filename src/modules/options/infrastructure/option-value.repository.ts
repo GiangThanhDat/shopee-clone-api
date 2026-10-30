@@ -5,9 +5,7 @@ import { OptionValueEntity } from '../domain/option-value.entity';
 import type { IOptionValueRepository } from '../application/interfaces/option-value-repository.interface';
 
 @Injectable()
-export class OptionValueRepository
-  implements IOptionValueRepository, IOptionValueRepository
-{
+export class OptionValueRepository implements IOptionValueRepository {
   constructor(
     @InjectRepository(OptionValueEntity)
     private readonly repository: Repository<OptionValueEntity>,

@@ -13,6 +13,6 @@ import { MediaController } from './controllers/media.controller';
     { provide: MEDIA_REPOSITORY, useClass: MediaRepository },
     MediaService,
   ],
-  exports: [TypeOrmModule, MEDIA_REPOSITORY, MEDIA_REPOSITORY],
+  exports: [TypeOrmModule, MEDIA_REPOSITORY],
 })
 export class MediaModule {}

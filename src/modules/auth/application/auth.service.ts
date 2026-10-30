@@ -24,7 +24,7 @@ export class AuthService {
 
   constructor(
     @Inject(USER_REPOSITORY)
-    private readonly usersRepository: IUserRepository,
+    private readonly userRepository: IUserRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -36,7 +36,7 @@ export class AuthService {
       this.ensureUsernameNotTaken(dto.username),
       bcrypt.hash(dto.password, this.bcryptRounds),
     ]);
-    const user = await this.usersRepository.save({
+    const user = await this.userRepository.save({
       ...dto,
       email: email.toString(),
       passwordHash,
@@ -46,7 +46,7 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const email = Email.of(dto.email);
-    const user = await this.usersRepository.findByEmail(email.toString());
+    const user = await this.userRepository.findByEmail(email.toString());
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -56,7 +56,7 @@ export class AuthService {
 
   async refreshToken(token: string): Promise<RefreshTokenResponseDto> {
     const payload = this.verifyRefreshToken(token);
-    const user = await this.usersRepository.findById(payload.sub);
+    const user = await this.userRepository.findById(payload.sub);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
@@ -78,14 +78,14 @@ export class AuthService {
   }
 
   private async ensureEmailNotTaken(email: string): Promise<void> {
-    const existing = await this.usersRepository.findByEmail(email);
+    const existing = await this.userRepository.findByEmail(email);
     if (existing) {
       throw new ConflictException('Email already in use');
     }
   }
 
   private async ensureUsernameNotTaken(username: string): Promise<void> {
-    const existing = await this.usersRepository.findByUsername(username);
+    const existing = await this.userRepository.findByUsername(username);
     if (existing) {
       throw new ConflictException('Username already in use');
     }

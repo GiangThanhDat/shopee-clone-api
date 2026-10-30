@@ -5,9 +5,7 @@ import { ProductMediaEntity } from '../domain/product-media.entity';
 import type { IProductMediaRepository } from '../application/interfaces/product-media-repository.interface';
 
 @Injectable()
-export class ProductMediaRepository
-  implements IProductMediaRepository, IProductMediaRepository
-{
+export class ProductMediaRepository implements IProductMediaRepository {
   constructor(
     @InjectRepository(ProductMediaEntity)
     private readonly repository: Repository<ProductMediaEntity>,

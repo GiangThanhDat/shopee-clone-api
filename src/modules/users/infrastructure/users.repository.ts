@@ -5,7 +5,7 @@ import { UserEntity } from '../domain/user.entity';
 import type { IUserRepository } from '../application/interfaces/users-repository.interface';
 
 @Injectable()
-export class UsersRepository implements IUserRepository, IUserRepository {
+export class UsersRepository implements IUserRepository {
   constructor(
     @InjectRepository(UserEntity)
     private readonly repository: Repository<UserEntity>,
