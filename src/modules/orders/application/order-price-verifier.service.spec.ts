@@ -86,6 +86,23 @@ describe('OrderPriceVerifier', () => {
       expect(result.subtotals.get(1)).toBe(450000);
     });
 
+    it('should accept the order when Postgres returns bigint id and price as strings', async () => {
+      // Arrange
+      const dto = makeDto({
+        totalAmount: 300000,
+        items: [{ skuId: 1, price: 150000, quantity: 2 }],
+      });
+      mockSkuRepository.findByIds.mockResolvedValue([
+        { id: '1', price: '150000' } as unknown as ProductSkuEntity,
+      ]);
+
+      // Act
+      const result = await verifier.verify(dto);
+
+      // Assert
+      expect(result.total).toBe(300000);
+    });
+
     it('should reject order when the same SKU appears more than once', async () => {
       // Arrange
       const dto = makeDto({
