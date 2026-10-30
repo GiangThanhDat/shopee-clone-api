@@ -85,7 +85,12 @@ export class ProductSkuRepository
     if (skus.length === 0) {
       return;
     }
-    await this.repository.save(skus);
+    // save() matches rows by id and misses them because bigint ids come back as strings, then INSERTs duplicates
+    await Promise.all(
+      skus.map(({ id, ...fields }) =>
+        this.repository.update(Number(id), fields),
+      ),
+    );
   }
 
   async remove(id: number): Promise<void> {
